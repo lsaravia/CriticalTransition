@@ -21,6 +21,8 @@ neuBin64<- "~/Dropbox/cpp/CaNew/Neutral/ipsNeutralP64"
 
 
 require(pander)
+require(plyr)
+
 panderOptions('table.split.table',Inf)
 options("scipen"=100, "digits"=4)
 ```
@@ -32,538 +34,185 @@ options("scipen"=100, "digits"=4)
 
 * check criteria for steady state H? see @Keymer1998 Shannon entropy of the system remain bounded to very small fluctuations around a fixed value
 
-Now I will simulate the model to Time=1500 with a full set of parameters 
-Replacement = 0,0.001,0.01,0.1,1 and 30 repetitions 
+Now I will simulate the model to Time=3000 with a full set of parameters 
+Differnt ReplacementRate and 20 repetitions 
 
-The first thing is to generate the parameters to simulate
+## Analizing time series there are 4 regimes with respect to ReplacementRate=Repl
 
-```{r gensimul30_LogSerParms, eval=T,echo=F,message=F,warning=F}
+### Conclusion for 10 simulations (previous run)
+
+1) 0 >= Repl > 0.001 
+H is stabilized in a value andd have stochastic oscilations
+there are 3 levels H=0.5,1.0,1.5 like quantic levels???????????????
+
+2) 0.003 >= Repl > 0.02
+An oscilating regime begins but it is not completely established
+
+3) 0.02 >= repl > 0.1
+
+Oscilations in H 
+
+4) 0.1 >= Repl 1
+
+Dominance there are oscilations until time 1000 but after that complete dominance:
+long transient behaviour.
+Transient is shorter when 1 is approached.
+
+# Analizing mean H & Richness (Time=2900-3000)
+
+The existence of the 4 regimes can be seen but more simulations are needed.
+
+H: The change in regime is seen at Repl=0.02
+Richness: clear change at Repl=0.02
+
+
+```{r gensimul100_64_U30, eval=F,echo=F,message=F,warning=F}
 setwd("Simul")
 
-# Ver Neutral_Model_BCI.Rmd 
+# Ver Neutral_Model_BCI.Rmd por parametros
 #
 m =  0.0001596079
 alfa=2.038974
 side <- 100
 nsp <- 64
-ReplRate <- 0.01   # c(0,0.001,0.01,0.05,0.1,1)
-CT <- data.frame(MetaNsp=numeric(0),Side=numeric(0),Disp=numeric(0),Migr=numeric(0),Repl=numeric(0),TMaxH=numeric(0),MaxH=numeric(0),TMaxRich=numeric(0),MaxRich=numeric(0))
+nSimul <- 30
+ReplRate <- c(0,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.009,0.01,0.015,0.02,0.025,0.03,0.05,0.07,0.1,0.3,0.6,1)
 
 # loop con do paralell 
-# ELIMINAR CALCULODQ************************************ 
-CT <- rbind(CT,simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate,T,2000,3))
 
-
-# TMax 350 Repl 0.01 H 0.729 Rich 8
-
-```
-
-
-```{r simul30_LogSerParms, eval=F,echo=F,message=F,warning=F}
-setwd("Simul")
-
-# simul_NeutralPlotTime(8,256,T,500,"L")
-
-ps <- data.frame(nsp=c(8,64,256),si=rep(c(512,256),each=3))
 require(doParallel)
 cn <-detectCores()
 cl <- makeCluster(cn)
 registerDoParallel(cl)
 
-simul <- foreach(i=1:nrow(ps),.combine='rbind') %dopar%
+CT <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
 {
-    simulNeutral_1Time(ps$nsp[i],ps$si[i],500,"L",30,F)
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,3000,nSimul,"S")
 }
 stopCluster(cl)
 
-setwd(oldcd)
-rm(ps,cn,cl)
-save.image()
-
+rm(cn,cl)
 ```
 
-## Calculate power of SAD DqSAD DqSRS using q=[-24,24]
 
-Mortality=0.2
-Dispersal=0.04
-Colonization=0.001
-
-```{r power_LogSerParms, eval=F,echo=F,message=F,warning=F}
+```{r plotsimul100_64_U30, eval=F,error=F,echo=F,message=F,warning=F}
 setwd("Simul")
-
-# Testing
+# plots of simulations
 #
-#simul <- data.frame()
-#sim1 <- rbind(simul,simulNeutral_1Time(65,256,100,"L",3))
-#sim1 <- data.frame(nsp=65,side=256,time=100,meta="L",spMeta=87,rep=3)
-#cc <- powerNeutral_1Time(simul[4,])
+#CT <- data.frame()
 
-mm <- 0.2
-dd <- 0.04
-co <- 0.001
-
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
-require(foreach)
-
-cc <- foreach(i=1:nrow(simul)) %dopar%
-{
-    powerNeutral_1Time(simul[i,],mm, dd, co) # Mortality,Dispersal,Colonization
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,3000,nSimul)
 }
-pow_ADq24 <- data.frame()
-comp_ADq24<- data.frame()
-
-
-for(i in 1:nrow(simul)) {
-  pow_ADq24 <- rbind(pow_ADq24, cc[[i]]$pow_AD)
-	comp_ADq24<- rbind(comp_ADq24,cc[[i]]$comp_AD)
-}
-
-rm(cc)
-
-stopCluster(cl)
 
 setwd(oldcd)
-save.image()
-```
 
-
-DqSAD have higher power but also a very high type I error rate.
-DqSRS have lower power and a lower type I error.
-SAD have low power with a small number of species and a low type I error rate.
-
-
-The power of the AD or KS test Depends on the number of points used so for SAD the number of species compared change the number of points used for the test, but for DqSRS and DqSAD the number of points is always q=35 thus so we could calculate more dimensions to raise the power of the test.
-
-
-# Test usign glm which factors influence power
-
-```{r testAD_factors, eval=F,echo=F,message=T,warning=T}
-require(plyr)
-hh <-function(x) {
-  t <- nrow(x)
-  s <- nrow(x[x$p.value<0.05,])
-  data.frame(count=s,power=s/t,n=t)
-}
-# Calculate power
-c1 <- with(comp_ADq24,comp_ADq24[MrtR1==MrtR2 & DspD1==DspD2 & ClnR1==ClnR2 & RplR2!=RplR1,])
-c1$DifR <- with(c1,abs(RplR2-RplR1))
-c2 <- ddply(c1,.(NumSp,Side,Type,DifR),hh)
-#require(dplyr)
-#c2 <- tbl_df(c1)
-#c3 <- c2 %>% 
-#  group_by(NumSp,Side,Type,MrtR1,DspD1,DifR) %>% 
-#  filter(p.value<0.05) %>% 
-#  summarize(tot=n()) %>% 
-#  summarize(pgt5=n()) 
-model1 <-glm(count~NumSp*Side*Type*DifR,poisson,data=c2)
-summary(model1)
-plot(model1)
-
-# HAVE TO USE BINOMIAL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
-
-
-```
-
-
-# Use the information dimension t-test 
-
-Fractal dimensions have several problems of estimation (Halley) so we use information dimension with sd estimated by the regression
-
-```{r infoDim_Ttest, eval=F,echo=F,message=T,warning=T}
-setwd("Simul")
-#sim1 <- data.frame(nsp=65,side=256,time=100,meta="L",spMeta=87,rep=3)
-# 256 = 7 points for Dq
-#
-#cc <- powerNeutral_1T_D1(sim1,7,1)
-
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
-require(foreach)
-
-cc <- foreach(i=1:nrow(simul)) %dopar%
-{
-    powerNeutral_1T_D1(simul[i,],log2(simul$side)-1,1,0.2,0.04,0.001)
-}
-pow_TD1 <- data.frame()
-comp_TD1<- data.frame()
-
-for(i in 1:nrow(simul)) {
-  pow_TD1 <- rbind(pow_TD1, cc[[i]]$pow_AD)
-  comp_TD1<- rbind(comp_TD1,cc[[i]]$comp_AD)
-}
-rm(cc)
-
-stopCluster(cl)
-
-setwd(oldcd)
-save.image()
-
-
-```
-Calculate Power using compareGrowthCurves and q=-24,24
-
-```{r power_GCtest, eval=F,echo=F,message=T,warning=T}
-setwd("Simul")
-# sim1 <- data.frame(nsp=65,side=256,time=100,meta="L",spMeta=87,rep=3)
-#
-#cc <- powerNeutral_1T_GC(simul[1,],3,0,0,0.001)
-
-# Error en
-# [1] "0.2_0.04_0.0001_1_1 4 0.2_0.04_0.0001_0.1_0 3"
-
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
-require(foreach)
-
-cc <- foreach(i=1:nrow(simul)) %dopar%
-{
-    powerNeutral_1T_GC(simul[i,],3,0.2,0.04,0.001)
-}
-pow_GC1 <- data.frame()
-comp_GC1<- data.frame()
-
-for(i in 1:nrow(simul)) {
-
-  pow_GC1 <- rbind(pow_GC1, cc[[i]]$pow_AD)
-  comp_GC1<- rbind(comp_GC1,cc[[i]]$comp_AD)
-  }
-
-stopCluster(cl)
-
-setwd(oldcd)
-rm(cc)
-save.image()
-```
-
-
-
-More simulations to do comparisons with GC
-
-```{r more_simul512_LogSerParms, eval=F,echo=F,message=F,warning=F}
-setwd("Simul")
-
-ps <- data.frame(nsp=c(8,64,256),si=rep(c(512,256),each=3))
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
-
-simul <- foreach(i=1:nrow(ps),.combine='rbind') %dopar%
-{
-    simulNeutral_1Time(ps$nsp[i],ps$si[i],500,"L",20,F)
-}
-stopCluster(cl)
-
-setwd(oldcd)
-rm(ps,cn,cl)
-save.image()
-```
-
-
-Compare using the GC with q<=10
-
-```{r power_GCq10test, eval=F,echo=F,message=T,warning=T}
-setwd("Simul")
-
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
-require(foreach)
-
-#] "0.2_0.04_0.001_1_1 3 0.2_0.04_0.001_1_3 3"
-# Error: valor ausente donde TRUE/FALSE es necesario
-
-cc <- foreach(i=1:nrow(simul)) %dopar%
-{
-    powerNeutral_1T_GC(simul[i,],3,0.2,0.04,0.001,10)
-}
-pow_GCq10 <- data.frame()
-comp_GCq10<- data.frame()
-
-for(i in 1:nrow(simul)) {
-
-  pow_GCq10 <- rbind(pow_GCq10, cc[[i]]$pow_AD)
-  comp_GCq10<- rbind(comp_GCq10,cc[[i]]$comp_AD)
-  }
-
-stopCluster(cl)
-
-setwd(oldcd)
-rm(cc)
-save.image()
-
-```
-
-The power of compareGrowthCurves is much much greater using the range -10 10 than -24 24, and type I error is lower!!
-
-Lets try with ANderson-Darling test!
-
-```{r power_ADq10test, eval=F,echo=F,message=T,warning=T}
-setwd("Simul")
-
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
-require(foreach)
-
-cc <- foreach(i=1:nrow(simul)) %dopar%
-{
-    powerNeutral_1Time(simul[i,],0.2,0.04,0.001,10)
-}
-pow_ADq10 <- data.frame()
-comp_ADq10<- data.frame()
-
-for(i in 1:nrow(simul)) {
-
-  pow_ADq10 <- rbind(pow_ADq10, cc[[i]]$pow_AD)
-  comp_ADq10<- rbind(comp_ADq10,cc[[i]]$comp_AD)
-  }
-
-stopCluster(cl)
-
-setwd(oldcd)
-rm(cc)
-save.image()
-
-```
-
-# Make plots of power! using q=[-24,24]
-
-
-```{r power_PlotAD, eval=F,echo=F,message=T,warning=T}
+# Calculate averages by simulations 
 
 require(dplyr)
-#pow_ADq24 <- with(pow_AD,pow_AD[MrtR==0.2 & DspD==0.04 & ClnR==0.001,])
+require(ggplot2)
+mct <- group_by(CT,Repl) %>% summarize(meanRich = mean(meanRich),meanH=mean(meanH),
+                                       TMaxH=mean(TMaxH),TMaxRich=mean(TMaxRich),
+                                       MaxH=mean(MaxH),MaxRich=mean(MaxRich),
+                                       meanEven=mean(meanEven))
 
-# Select only the subset I will use
-#
-#pow_ADq24 <- filter(pow_AD,MrtR==0.2 & DspD==0.04 & ClnR==0.001) %>%
-#  mutate(spMeta = ceiling(as.numeric(NumSp)*1.33)) 
- 
-plotPow_MeanSp_side(pow_ADq24)
+# Plots of all simulations and averages H & Richness
 
-ggsave("powADq24_MeanSp_Side.png", width=6,height=6,units="in",dpi=600)
+plot_simul_timeRH(CT,mct)
 
-require(pander)
-pandoc.table(select(pow_ADq24,Side,spMeta,MeanSp, c(5:9)),style="grid",split.tables=Inf)
-
-
-pow_ADq24 <- pow_ADq24 %>% mutate(NumSp=as.numeric(NumSp),MeanSp=as.numeric(MeanSp),Side=as.numeric(Side))
-
-comp_ADq24 <- comp_AD %>% filter(MrtR1==0.2 & DspD1==0.04 & ClnR1==0.001) %>% 
-  left_join(unique(pow_ADq24[,1:3]),by=c("Side","NumSp"))
-
-plotPow_MeanSp_difR(comp_ADq24)
-
-ggsave("powADq24_DifReplacement.png", width=6,height=6,units="in",dpi=600)
-
-
-
-# Calculate TypeI error in fuction of replacement rate
-#c1 <- with(comp_ADq24,comp_ADq24[MrtR1==MrtR2 & DspD1==DspD2 & ClnR1==ClnR2 & RplR2==RplR1,])
-#c3 <- ddply(c1,.(NumSp,Type,RplR2),hh)
-#names(c3)[4]<-"typeI"
-#g <- ggplot(c3,aes(x=RplR2,y=typeI)) + geom_point(shape=19,aes(colour=as.factor(Type))) + facet_grid( NumSp ~ .)
-#g+theme_bw()
-
-#rm(c1,c2,c3)
-
-```
-## Plot power of D1 
-
-```{r power_PlotD1T, eval=F,echo=F,message=T,warning=T}
-
-require(dplyr)
-
-#pow_TD1$spMeta <- ceiling(as.numeric(pow_TD1$NumSp)*1.33)
-
-pow_TD1 <- pow_TD1 %>% select(-MeanSp) %>% 
-  mutate(spMeta=ceiling(as.numeric(NumSp)*1.33),power=as.numeric(power),typeI=as.numeric(typeI)) %>% 
-  left_join(unique(pow_ADq10[,1:3]),by=c("Side","NumSp"))
-require(pander)
-pandoc.table(  select(pow_TD1,Side,spMeta,MeanSp,c(4:8)),style="grid",split.tables=Inf)
-
-plotPow_MeanSp_side(pow_TD1)
-
-ggsave("powTD1_MeanSp_Side.png", width=6,height=6,units="in",dpi=600)
-
-# Calculate power in fuction of replacement rate difference
-# Falta cambiar NumSp por 
-#comp_TD1$spMeta <- ceiling(as.numeric(comp_TD1$NumSp)*1.33)
-
-
-pow_TD1 <- pow_TD1 %>% mutate(NumSp=as.numeric(NumSp),MeanSp=as.numeric(MeanSp),Side=as.numeric(Side))
-
-comp_TD1 <- comp_TD1 %>% filter(MrtR1==0.2 & DspD1==0.04 & ClnR1==0.001) %>% 
-  left_join(unique(pow_ADq10[,1:3]),by=c("Side","NumSp"))
-
-
-plotPow_MeanSp_difR(comp_TD1)
-ggsave("powTD1_DifReplacement.png", width=6,height=6,units="in",dpi=600)
-
-
+save.image()
 
 ```
 
-The power of D1 in combination with a T-test is relatively low with a maximun of 0.6 for  
+Calculate Bray-curtis dissimilarity, Kullback-Leiber divergences and Kolmogorov-Smirnov distances between communities with differen Replacement
 
 
-```{r power_PlotGC, eval=F,echo=F,message=T,warning=T}
+```{r calcDist100_64_U30, eval=F,error=F,echo=F,message=F,warning=F}
+setwd("Simul")
 
-#pow_GC1 <-merge(pow_GC1,unique(pow_ADq10[,1:3]),by.x=c(1,2),by.y=c(1,2),all.y=F)[,c(1:2,10,4:9)]
-#names(pow_GC1)[3]<- "MeanSp"
-require(dplyr)
+bdist <- data.frame()
+tdist <- data.frame()
 
-pow_GC1 <- pow_GC1 %>% select(-MeanSp) %>% 
-  mutate(spMeta=ceiling(as.numeric(NumSp)*1.33),power=as.numeric(power),typeI=as.numeric(typeI)) %>% 
-  left_join(unique(pow_ADq24[,1:3]),by=c("Side","NumSp")) %>%
-  select(Side,spMeta,MeanSp,c(4:8))
+for(i in 1:length(ReplRate))
+  {
+  kk <- calc_CommunityDist(nsp,side,alfa,m,ReplRate[c(1,i)],nSimul)
 
-require(pander)
-pandoc.table(pow_GC1,style="grid",split.tables=Inf)
+#  bdist <- rbind(bdist,data.frame(Repl=ReplRate[i],bray=mean(kk$bray),sdBray=sd(kk$bray),ks=mean(kk$ks),sdKs=sd(kk$ks),KL=mean(kk$KL),sdKL=sd(kk$KL)))
+  
+  tdist <- rbind(kk,tdist)
+}
+
+bdist <- group_by(tdist,ReplacementRate,ReplacementRate.1) %>% summarise(meanBray=mean(bray),medBray=median(bray),meanKS=mean(ks),medKS=median(ks),meanKL=mean(KL),medKL=median(KL)) %>% rename(Repl=ReplacementRate.1) 
+
+tdist <- select(tdist, -X1,-Rep,-Rep.1, -ReplacementRate) %>% rename(Repl=ReplacementRate.1) %>% mutate(MetaNsp=nsp,Side=side,Disp=alfa,Migr=m) 
+tdist <- tdist[,c(6:9,1:5)]
+
+require(ggplot2)
+
+ggplot(tdist, aes(x=Repl, y=bray)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=median,geom="line",colour="red")
+
+ggplot(tdist, aes(x=Repl, y=KL)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=median,geom="line",colour="red")
+
+ggplot(bdist, aes(x=Repl, y=meanKS)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + geom_point(aes(x=Repl,y=medKS),colour="red")
+
+ggplot(bdist, aes(x=Repl, y=meanBray)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + geom_point(aes(x=Repl,y=medBray),colour="red")
+
+ggplot(bdist, aes(x=Repl, y=meanKL)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))+ geom_point(aes(x=Repl,y=medKL),colour="red")
 
 
-plotPow_MeanSp_side(pow_GC1)
+# Hacer relativo al valor de bray curtist intra neutral
+setwd(oldcd)
 
-ggsave("powGC_spMeta_Side.png", width=6,height=6,units="in",dpi=600)
-
-plotPow_MeanSp_difR(comp_GC1)
-
-ggsave("powGC_DifReplacement.png", width=6,height=6,units="in",dpi=600)
-
+rm(kk)
+save.image()
 ```
 
 
-```{r power_PlotADq10, eval=F,echo=F,message=T,warning=T}
+Now have to plot/calculate fractal dimensions and samples of RAD for each Replacemente rate
 
-
-#pow_GC1 <-merge(pow_GC1,unique(pow_ADq10[,1:3]),by.x=c(1,2),by.y=c(1,2),all.y=F)[,c(1:2,10,4:9)]
-#names(pow_GC1)[3]<- "MeanSp"
-
-plotPow_MeanSp_side(pow_ADq10)
-
-ggsave("powADq10_MeanSp_Side.png", width=6,height=6,units="in",dpi=600)
-
-
-require(plyr)
-require(dplyr)
-# DONE! in .RData
-#
-#pow_ADq10 <- pow_ADq10 %>% mutate(NumSp=as.numeric(NumSp),MeanSp=as.numeric(MeanSp),Side=as.numeric(Side))
-#
-#
-#comp_ADq10 <- comp_ADq10 %>% filter(MrtR1==0.2 & DspD1==0.04 & ClnR1==0.001) %>% 
-#  left_join(unique(pow_ADq10[,1:3]),by=c("Side","NumSp"))
-
-p1 <- plotPow_MeanSp_difR(comp_ADq10)
-ggsave("powADq10_DifR_256.png", width=6,height=6,units="in",dpi=600)
-
-p2 <- plotPow_MeanSp_difR(comp_ADq10,512)
-ggsave("powADq10_DifR_512.png", width=6,height=6,units="in",dpi=600)
-
-p1 <- rbind(p1,p2)
-p1 <- select(p1,Side,spMeta,Type:n) %>% arrange(Side,spMeta,Type,DifR) 
-write.table(format(p1,digits=2), file = "Dq1.dat", sep = "  ", row.names = F,quote = F)
-
-rm(p1,p2)
-
-require(pander)
-pandoc.table( mutate(pow_ADq10 ,spMeta=ceiling(as.numeric(NumSp)*1.33),power=as.numeric(power),typeI=as.numeric(typeI)) %>% select(Side,spMeta,MeanSp,c(5:9))
-,style="grid",split.tables=Inf,round=4)
-```
-
-## Simulations to plot spatial patterns with different replacement Rate
-
-```{r neutral_SpSimPlot256, eval=F,echo=F,message=T,warning=T}
+```{r calcFrac100_64_U30, eval=T,error=F,echo=F,message=F,warning=F}
 setwd("Simul")
 
 
-# meta = 64, side=250, time=500
-sad64 <- simul_NeutralSAD(64,256,500)
+mDq <- calc_CommunityDq(nsp,side,alfa,m,ReplRate,nSimul)
 
-# Plot of the spatial pattern for Neutral model with Logseries SAD with 8,64,256 species and side=512/256
+require(ggplot2)
+
+
+ggplot(mDq, aes(x=Repl, y=D1)) + geom_point(size=1) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=median,geom="line",colour="red")
+
+ggplot(mDq, aes(x=Repl, y=D0)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + stat_summary(fun.y=median,geom="line",colour="blue")
+
+ggplot(CT, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + stat_summary(fun.y=median,geom="line",colour="blue")
+
+
+
+ggplot(mct, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) 
+ggsave("meanH_Repl_64_100.png", width=6,height=6,units="in",dpi=600)
+
+
+ggplot(bdist, aes(x=Repl, y=meanKL)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) 
+ggsave("meanKL_Repl_64_100.png", width=6,height=6,units="in",dpi=600)
+
+# reorganize to match names of CT data.frame
 #
-#g <- plotNeutral_SpatPat(64,256,500,"L",c(0.1,1))
-g <- plotNeutral_SpatPat(64,256,500,"L",c(0,0.01,0.1,1))
-g
+mDq <- select(mDq, -MortalityRate) %>% rename(MetaNsp=Nsp,Disp=DispersalDistance,Migr=ColonizationRate,Repl=ReplacementRate)
+mDq <- ungroup(mDq)
+mDq <- mDq[,c(8,9,2:7)]
+
+# make averages
+
+mDqA <- group_by(mDq, Repl) %>% summarise(meanD0=mean(D0), meanD1=mean(D1))
 
 
-setwd("..")
-ggsave("spat_NeuLog64_256.png", width=8,height=6,units="in",dpi=600)
+ggplot(mDqA, aes(x=Repl, y=meanD1)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) 
+ggsave("meanD1_Repl_64_100.png", width=6,height=6,units="in",dpi=600)
 
 
-# Plot Dq for simulations in txt files (NULL)
-#
-
-setwd("Simul")
-plotNeutral_Dq(64,256,500,"L",NULL) # Null use previous simulations 
-setwd("..")
-ggsave("Dq_NeuLog64_256.png", width=8,height=4,units="in",dpi=600)
-
-setwd("Simul")
-plotNeutral_Dq(8,256,500,"L",NULL) # Null use previous simulations 
-setwd("..")
-ggsave("Dq_NeuLog8_256.png", width=8,height=4,units="in",dpi=600)
-
-setwd("Simul")
-plotNeutral_Dq(256,256,500,"L",NULL) # Null use previous simulations 
-setwd("..")
-ggsave("Dq_NeuLog256_256.png", width=8,height=4,units="in",dpi=600)
-
-# Plot simulations for all metacommunities 
-#
-setwd("Simul")
-plotNeutral_Dq(0,256,500,"L",NULL) # Null use previous simulations 
-setwd("..")
-ggsave("Dq_NeuLog_NumSp_256.png", width=8,height=8,units="in",dpi=600)
-
-setwd("Simul")
-plotNeutral_Dq(0,512,500,"L",NULL) # Null use previous simulations 
-setwd("..")
-ggsave("Dq_NeuLog_NumSp_512.png", width=8,height=8,units="in",dpi=600)
+ggplot(mDqA, aes(x=Repl, y=meanD0)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) 
+ggsave("meanD0_Repl_64_100.png", width=6,height=6,units="in",dpi=600)
 
 
-### Plot Average SAD!
-setwd("Simul")
-detach("package:dplyr", unload=TRUE)
-den <- plotNeutral_SAD(0,256)
-
-setwd("..")
-ggsave("RAD_NeuLog_spMeta_256.png", width=8,height=6,units="in",dpi=600)
-
-
-# Create table with R2 of neutral models Dq
-#
-
-setwd("Simul")
-Dqq <- R2Neutral_Dq(256)
-Dqq <- rbind(Dqq,R2Neutral_Dq(512))
-
-Dqq <- arrange(Dqq,DqType,Side,spMeta,ReplacementRate,Freq60,Freq90) %>% select(DqType,Side,spMeta,meanSp,ReplacementRate,Freq60,Freq90)
-
-
-setwd("..")
-
-#write.table(format(Dqq,digits=2), file = "Dq1.dat", sep = "  ", row.names = F,quote = F)
-
-require(pander)
-pandoc.table(format(Dqq,digits=2),style="grid",split.tables=Inf)
-
-# Table with mean number of species by replacement rate
-#
-Dqq <- select(Dqq,Side,spMeta,ReplacementRate,meanSp)
-
-#write.table(format(Dqq,digits=2), file = "Dq1.dat", sep = "  ", row.names = F,quote = F)
-pandoc.table(format(Dqq,digits=2),style="grid",split.tables=Inf)
-
-rm(Dqq,Dqq1)
+setwd(oldcd)
+save.image()
 ```

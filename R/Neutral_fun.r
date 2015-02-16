@@ -138,42 +138,6 @@ pairwiseAD_Dif <- function(denl,vv,parms){
 
 
 
-# pairwise KS test for Dq of all combinations parameters 
-# 
-# dql: data frame with Dq and in columns 1:4 of dql parameter
-# numq: number of repetitions for each parameter combination, if >1 selects one of
-# de repetitions to do the comparison.
-#
-pairKS_Dq <- function(dql,numq=1){
-  
-  require(plyr)
-
-  parms <- unique(dql[,1:4])
-  combo <- combn(nrow(parms),2)
-
-  if( numq>1){
-    dql <- ddply(dql,.(MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate),
-    function(x) { n <- nrow(x)/35
-                  rp <- rep( 1:n,each=35)
-                  return(x[rp==sample(n,1),])}
-                  )
-  }
-  
-  mks <-adply(combo,2, function(x) {
-    p1 <- parms[x[1],]
-    p2 <- parms[x[2],]
-    d1 <- merge(dql,p1)
-    d2 <- merge(dql,p2)
-    ks <- ks.test(d1$Dq,d2$Dq)
-    out <-data.frame(p1,p2,stat=ks$statistic,p.value=ks$p.value,stringsAsFactors=F)
-    ln <-length(names(p1))*2
-    names(out)[1:(ln)]<-c(paste0(abbreviate(names(p1)),1),paste0(abbreviate(names(p1)),2))
-    return(out)      
-  })
-  mks$p.adjust <- p.adjust(mks$p.value, method="hommel")
-  return(mks)
-}
-
 
 
 # Read simulation output and change from wide to long format NO TIME
@@ -197,13 +161,16 @@ meltDensityOut_NT <- function(fname,num_sp){
 }
 
 # Read simulation output and set variable names in wide format 
+# Adds a variable Rep if there are several repeated simulations
 #
-readWideDensityOut <- function(fname,num_sp){
-  if(!grepl("Density.txt",fname)) fname <- paste0(bname,"Density.txt")
+readWideDensityOut <- function(fname){
+  if(!grepl("Density.txt",fname)) fname <- paste0(fname,"Density.txt")
   den <- read.delim(fname)
   names(den)[1:5]<-c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate")
-  if( max(den$Time) < nrows(den) ){
-    den$Sim <- rep()
+  names(den)[7] <- unlist(strsplit(names(den)[7],".",fixed=T))[1]
+  eTime <- (max(den$Time)/(den$Time[3]-den$Time[2]))+1
+  if(  eTime < nrow(den) ){
+    den$Rep <- rep( 1:(nrow(den)/eTime),each=eTime)
   }
   return(den)
 }
@@ -283,8 +250,6 @@ plotDq_ReplaceR <- function(Dqf,MortR,DispD,ColonR,tit="")
 
 }
 
-sel_ReplaceR <- function(Dqf,MortR,DispD,ColonR,RepR) with(Dqf,Dqf[MortalityRate==MortR & DispersalDistance==DispD 
-                                                                   & ColonizationRate==ColonR & ReplacementRate==RepR , ])
 # Plot Dq by factor "grp" shows SD from data.frame
 #
 plotDq <- function(Dq1,grp) 
@@ -297,131 +262,7 @@ plotDq <- function(Dq1,grp)
 
 
 
-compMethod_DqKS_Time <- function(bName,Time,spMeta) 
-{
-  # Read all simulations and change to long format
-  fname <- paste0(bName,"T",Time,"mfOrd.txt")
-  Dq1 <- readNeutral_calcDq(fname)
 
-  # Subset for testing 
-  #
-  #Dq1 <- with(Dq1,Dq1[MortalityRate==.2 & DispersalDistance==0.04 & ColonizationRate==0.001, ])
-  
-  # Testing pairwise differences
-  #
-  mKS <- pairKS_Dq(Dq1,35)
-  mKS <- mKS[,2:12]
-  mKS$method <- "SRSKS"
-  compM <- data.frame(time=Time,notdif=propNotDiffSAD(mKS),method="SRSKS")
-
-  # Read all simulations and change to long format
-  fname <- paste0(bName,"T",Time,"mfSAD.txt")
-  Dq1 <- readNeutral_calcDq(fname)
-  # Subset for testing 
-  #
-  #Dq1 <- with(Dq1,Dq1[MortalityRate==.2 & DispersalDistance==0.04 & ColonizationRate==0.001, ])
-
-  # Testing pairwise differences
-  #
-  mK1 <- pairKS_Dq(Dq1,35)
-  mK1 <- mK1[,2:12]
-  mK1$method <- "DqSADKS"
-  # Add to data.frame with proportions
-  #
-  compM <- rbind(compM, data.frame(time=Time,notdif=propNotDiffSAD(mK1),method="DqSADKS"))
-
-  mKS <- rbind(mKS,mK1)
-  mKS$time <- Time
-
-  return(list("compM"=compM,"mPval"=mKS))
-}
-
-
-compMethods_Time <- function(bName,Time,spMeta) 
-{
-  # Read all simulations and change to long format
-  fname <- paste0(bName,"T",Time,"Density.txt")
-
-  den1 <- meltDensityOut_NT(fname,spMeta)
-
-  # Select a subset to test the procedure !
-  #
-  #den1 <- den1[den1$MortalityRate==.2 & den1$DispersalDistance==0.04 & den1$ColonizationRate==0.001, ]
-  
-  # have to make averages
-  require(plyr)
-  den2 <- ddply(den1,.(MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Species),summarise,den=mean(value))
-
-  names(den2)[6] <- "value" # the functions use this field name
-
-
-
-  # Test pairwise diferences in SAD
-  #
-  mKS <- pairKS_SAD(den2)
-
-  # Build data.frame with proportions
-  #
-
-  compM <- data.frame(time=Time,notdif=propNotDiffSAD(mKS),method="SAD")
-
-  # Leer Dq SRS
-  #
-  fname <- paste0(bName,"T",Time,"mfOrd.txt")
-  Dq1 <- readNeutral_calcDq(fname)
-
-  # Subset for testing
-  #Dq1 <- with(Dq1,Dq1[MortalityRate==.2 & DispersalDistance==0.04 & ColonizationRate==0.001, ])
-
-  # Testing pairwise differences
-  #
-  c2 <- compDq_frame(Dq1,35)
-
-  # Add to data.frame with proportions
-  #
-  compM <- rbind(compM, data.frame(time=Time,notdif=propNotDiffSRS(c2),method="SRS"))
-
-  # Build Data frame with complete set of p-values
-  #
-  c2$method <- "SRS"
-  c3 <- c2                    
-
-  #
-  # Leer Dq SAD
-  #
-  fname <- paste0(bName,"T",Time,"mfSAD.txt")
-  Dq1 <- readNeutral_calcDq(fname)
-
-  # Subset for testing
-  #Dq1 <- with(Dq1,Dq1[MortalityRate==.2 & DispersalDistance==0.04 & ColonizationRate==0.001, ])
-
-  # Testing pairwise differences
-  #
-  c2 <- compDq_frame(Dq1,35)
-
-  # Add to data.frame with proportions
-  #
-  compM <- rbind(compM, data.frame(time=Time,notdif=propNotDiffSRS(c2),method="DqSAD"))
-
-  # Add to Data frame with complete set of p-values
-  #
-  c2$method <- "DqSAD"
-  c3 <- rbind(c3,c2)                    
-
-  # Change to match different data.frames
-  #
-  cc3 <- cbind(ldply(strsplit(as.character(c3$Group1),"_")),ldply(strsplit(as.character(c3$Group2),"_")))
-  nn3 <- abbreviate(names(Dq1)[1:4])
-  names(cc3) <- c(paste0(nn3,1),paste0(nn3,2))
-  cc3 <- cbind(cc3,c3)[,c(1:8,11:14)]
-  names(cc3)[9:11] <-c("stat","p.value","p.adjust")
-  mKS <- mKS[,2:12]
-  mKS$method <- "SAD"
-  c3 <- rbind(cc3,mKS)
-  c3$time <- Time
-  
-  return(list("compM"=compM,"mPval"=c3))
-}
 
 # Read a sed file in a matrix
 #
@@ -443,38 +284,6 @@ read_sed2xy <- function(fname)
 }
 
 
-# Function to plot Dq fit from t* files generated by mfSBA 
-# 
-# fname: file name of the t.inputFile
-# qname: file name of the q sed file used
-#
-plotDqFit <- function(fname,qname)
-{
-  zq <- read.table(fname, sep="\t",header=T)
-  cna <- read_sed(qname)
-  q <-t(cna)
-  zq0 <- reshape(zq, timevar="q",times=q,v.names=c("logTr"),
-                 varying=list(3:length(names(zq))),
-                 direction="long")
-  library(lattice)
-  zq1 <- subset(zq0, q==1 | q==2 | q==3 | q==4 | q==5 | q==0 | q==-1 | q==-2 | q==-3 | q==-4 | q==-5 )
-
-#  oname <- paste("lsaravia_figS_W",sem,"_",wnro,".tif",sep="")
-#  tiff(oname, width=4.86,height=4.86,units="in",res=600,compression=c("lzw"))
-  
-  trellis.par.set(superpose.symbol=list(pch=c(0,1,2,3,4,5,6,8,15,16,17)))
-  trellis.par.set(superpose.symbol=list(cex=c(rep(0.6,11))))
-  trellis.par.set(superpose.line=list(lty=3))
-  
-  #show.settings()
-  if(names(zq1)[2]=="LogBox") names(zq1)[2]<-"Log.Box"
-  print(xyplot(logTr~Log.Box , data =zq1, groups=q, type=c("r","p"), scales=list(tck=-1), 
-               #main=list(wtitle,cex=0.9),
-               auto.key=list(space = "right",title=expression(italic("q")),cex.title=.7, points=TRUE,cex=.7),
-               ylab=expression(italic(paste("log ",  Z[q](epsilon) ))) , xlab=expression(italic(paste("log ",epsilon)))  
-  ))
-#  dev.off()    
-}
 
 # Read information of the fit of Dq (Zq) from t.file and q file
 # Return a data.frame in long format
@@ -589,41 +398,6 @@ calcDq_multiSBA <- function(fname,parms,pathBin="",recalc=FALSE)
   return(pp[,c("q","Dq","SD.Dq","R.Dq")])
 }
 
-# Plot a sed file
-#
-# fname: file name
-# gname: graph title 
-# dX: range in columns to plot
-# col: vector of colors to make the color palette
-# shf: shift in the vector of colors 
-#
-plot_sed_image <- function(fname,gname,dX=0,col=0,shf=0)
-  {
-  require(lattice)
-  require(RColorBrewer)
-  if(class(fname)=="matrix") {
-      per <- fname
-    } else {
-      per <-data.matrix(read.table(fname, skip=2,header=F))
-    }
-  
-  if(length(dX)>1) per <- per[,dX]
-  mp = max(per)
-  if(mp<50) {
-    mp = 50
-    seqat = seq( min(per),max(per),(max(per)-min(per))/50)
-  }
-  else
-  {
-    seqat = seq( min(per),mp,5)
-  }
-  if(length(col)==1) col.l <- colorRampPalette(c('white', 'green', 'purple', 'yellow', 'brown'))(mp) 
-  else col.l <- colorRampPalette(col)(mp) 
-  if( shf>0) col.l = col.l[shf:mp]
-  print(levelplot(per, scales = list(draw = FALSE),xlab =NULL, ylab = NULL,col.regions=col.l,
-            useRaster=T,at=seqat,
-            main=list( gname,cex=1)))
-  }
 
 # Generate a banded image with nSp species and side = side
 #
@@ -699,141 +473,6 @@ genFisherSAD <- function(nsp,side,f=1.33)
 }
 
   
-# Generate a Fisher logseries SAD with a regular spatial distribution
-# randomize it and calculates SRS and DqSAD multifractal estimations
-#
-compMethods_FisherSAD <- function(nsp,side,gen=T,graph=T) {
-
-  if(!exists("mfBin")) stop("Variable mfBin not set (mfSBA binary)")
-
-  fname <- paste0("fisher",nsp,"_",side,".sed")
-  if(file.exists(fname) & gen==F)
-  {
-    spa <- read_sed(fname)
-  } else {
-    spa <- genFisherSAD_image(nsp,side)$m
-    save_matrix_as_sed(spa,fname)
-  }
-
-  sad1 <- data.frame(table(spa),Type="SAD",Side=side,NumSp=nsp,SAD="Logseries")
-
-  if(graph) plot_sed_image(spa,paste("Regular Fisher",nsp),0,nsp,0)
-
-  Dq1<- calcDq_multiSBA(fname,"q.sed 2 1024 20 S",mfBin,T)
-  Dq1$Type <- "SRS"
-
-  # Randomize the spatial distribution
-  #
-  spa <- matrix(sample(spa),nrow=side)
-  fname1 <- paste0("fisher",nsp,"_",side,"rnz.sed")
-
-  save_matrix_as_sed(spa,fname1)
-  if(graph) plot_sed_image(spa,paste("Rnz Fisher",nsp),0,nsp,0)
-
-  Dq2<- calcDq_multiSBA(fname1,"q.sed 2 1024 20 S",mfBin,T)
-  Dq2$Type <- "rnzSRS"
-  Dq1<- rbind(Dq1,Dq2)
-  if(graph) {
-    plotDq(Dq1,"Type")
-    bin <- range(Dq1$R.Dq)
-    bin <- (bin[2]-bin[1])/10
-    print(ggplot(Dq1, aes(x=R.Dq,fill=Type)) + geom_histogram(alpha=0.2,binwidth = bin))
-  }
-  # Now calculate DqSAD
-
-  Dq3<- calcDq_multiSBA(fname,"q.sed 2 1024 20 E",mfBin,T)
-  Dq3$Type <- "DqSAD"
-  #Dq3<- rbind(Dq3,Dq2)
-
-  Dq2<- calcDq_multiSBA(fname1,"q.sed 2 1024 20 E",mfBin,T)
-  Dq2$Type <- "rnzDqSAD"
-  Dq3<- rbind(Dq3,Dq2)
-  if(graph) {
-    plotDq(Dq3,"Type")
-
-    plotDqFit(paste0("t.", fname1),"q.sed")
-    bin <- range(Dq3$R.Dq)
-    bin <- (bin[2]-bin[1])/10
-    print(ggplot(Dq3, aes(x=R.Dq,fill=Type)) + geom_histogram(alpha=0.2,binwidth = bin))
-  }
-  
-  #require(pander)
-  #pandoc.table(Dq3[Dq3$R.Dq<0.6,],caption="R2<0.6")
-  
-  Dqt <- rbind(Dq1,Dq3)
-  Dqt$Side <-side
-  Dqt$NumSp <-nsp
-  Dqt$SAD <- "Logseries"
-
-  return(list("Dq"=Dqt,"SAD"=sad1))
-}
-
-# Generate a unniform SAD (all spp wiht the same density) with a regular spatial distribution
-# randomize it and calculates SRS and DqSAD multifractal estimations
-#
-compMethods_UniformSAD <- function(nsp,side,graph=T) {
-
-  if(!exists("mfBin")) stop("Variable mfBin not set (mfSBA binary)")
-
-  spa <- genUniformSAD_image(nsp,side,T)
-  
-  if(graph) {
-    plot_sed_image(spa,paste("Uniform sp:",nsp," side:",side),0,nsp,0)
-  }
-
-  fname <- paste0("unif",nsp,"_",side,".sed")
-  save_matrix_as_sed(spa,fname)
-  sad1 <- data.frame(table(spa),Type="SAD",Side=side,NumSp=nsp,SAD="Uniform")
-
-
-  Dq1<- calcDq_multiSBA(fname,"q.sed 2 1024 20 S",mfBin,T)
-  Dq1$Type <- "DqSRS"
-
-  spa <- matrix(sample(spa),nrow=side)
-
-  fname1 <- paste0("unif",nsp,"_",side,"rnz.sed")
-  save_matrix_as_sed(spa,fname1)
-
-  Dq2<- calcDq_multiSBA(fname1,"q.sed 2 1024 20 S",mfBin,T)
-  Dq2$Type <- "rnzSRS"
-  Dq1<- rbind(Dq1,Dq2)
-  
-  if(graph) {  
-    plotDq(Dq1,"Type")
-
-    bin <- range(Dq1$R.Dq)
-    bin <- (bin[2]-bin[1])/10
-    print(ggplot(Dq1, aes(x=R.Dq,fill=Type)) + geom_histogram(alpha=0.2,binwidth = bin))
-
-    plot_sed_image(spa,paste("Uniform Rnz sp:",nsp," side:",side),0,nsp,0)
-  }
-
-  Dq2<- calcDq_multiSBA(fname,"q.sed 2 1024 20 E",mfBin,T)
-  Dq2$Type <- "DqSAD"
-  Dq3<- Dq2
-
-  Dq2<- calcDq_multiSBA(fname1,"q.sed 2 1024 20 E",mfBin,T)
-  Dq2$Type <- "rnzDqSAD"
-  Dq3<- rbind(Dq3,Dq2)
-  if(graph) {  
-
-    plotDq(Dq3,"Type")
-
-    plotDqFit(paste0("t.", fname1),"q.sed")
-
-    bin <- range(Dq3$R.Dq)
-    bin <- (bin[2]-bin[1])/10
-    print(ggplot(Dq3, aes(x=R.Dq,fill=Type)) + geom_histogram(alpha=0.2,binwidth = bin,position="identity"))
-    #print(ggplot(Dq3, aes(x=R.Dq,fill=Type)) + geom_histogram(alpha=0.2,binwidth = 0.1))
-  }
-  
-  Dqt <- rbind(Dq1,Dq3)
-  Dqt$Side <-side
-  Dqt$NumSp <-nsp
-  Dqt$SAD <- "Uniform"
-
-  return(list("Dq"=Dqt,"SAD"=sad1))
-}
 
 # Generate a Neutral model with Fisher logseries metacommunity SAD 
 # randomize it and calculates SRS and DqSAD multifractal estimations
@@ -953,125 +592,147 @@ compMethods_NeutralSAD <- function(nsp,side,simul=T,graph=T,meta="L") {
   return(list("Dq"=Dqt,"SAD"=sad1))
 }
 
-
-
-# Reads Generated Logseries & NEutral SAD compare using KS and compare Dq also using KS.test
+# Calculates fractal infomation dimension and species area relationship
 #
-compKS_NeutralLogseries <- function(Dq1,nsp,side) {
-
-  fname <- paste0("neuFish",nsp,"-0500.sed")
-  
-  spa <- read_sed(fname)
-
-  ff <- data.frame(table(spa),Type="SAD",Side=side,NumSp=nsp,SAD="Neutral")
-
-  fname <- paste0("neuFish",nsp,"_",side,".sed")
-
-  spa <- read_sed(fname)
-
-  ff <- rbind(ff,data.frame(table(spa),Type="SAD",Side=side,NumSp=nsp,SAD="Logseries"))
-
-  compSP <- pairwiseKS_SAD(ff,"Freq",ff[,3:6])
-
-
-  den3 <- calcRankSAD_by(ff,"Freq",3:6)
-  print(ggplot(den3,aes(x=Rank,y=log(Freq),colour=SAD)) + geom_line())
-
-  ff <- with(Dq1,Dq1[Side==side & NumSp==nsp & SAD!="Uniform" & Type=="SRS",])
-  ff <- rbind(ff,with(Dq1,Dq1[Side==side & NumSp==nsp & SAD=="Logseries" & Type=="rnzSRS" ,]))
-
-  #ff <- with(ff,ff[q<=10 & q>=-10,])
-  #unique(ff$q)
-  compSP <- rbind(compSP,pairwiseKS_SAD(ff,"Dq",ff[5:8]))
-  plotDq(ff,"SAD")
-
-  
-  ff <- with(Dq1,Dq1[Side==side & NumSp==nsp & Type=="DqSAD",])
-  ff <- rbind(ff,with(Dq1,Dq1[Side==side & NumSp==nsp & SAD=="Logseries" & Type=="rnzDqSAD" ,]))
-
-  plotDq(ff,"SAD")
-
-  compSP <- rbind(compSP,pairwiseKS_SAD(ff,"Dq",ff[5:8]))
-
-  }
-
-# Simulate 10 Logseries & NEutral SAD compare using KS and compare Dq using permutations
 #
-comp_NeutralLogseries <- function(nsp,side,simul=10) {
-  require(ggplot2)
+calc_CommunityDq <- function(nsp,side,disp,migr,repl,sims=10,meta="U"){
+  require(plyr)
+  require(dplyr)
 
-  Dqq <- data.frame()
-  SadF <- data.frame()
-
-  for(i in 1:simul){
-    cc <- compMethods_FisherSAD(nsp,side,T,F)
-    cc$Dq$rep <-i
-    cc$SAD$rep <-i  
-    Dqq <- rbind(Dqq,cc$Dq)
-    SadF <-rbind(SadF,cc$SAD)
-  }
-
-  #Dqq <- Dqq[Dqq$SAD!="Neutral",]
-  #SadF <- SadF[SadF$SAD!="Neutral",]
-
-  for(i in 1:simul){
-    cc <- compMethods_NeutralSAD(nsp,side,T,F)
-    cc$Dq$rep <-i
-    cc$SAD$rep <-i  
-    Dqq <- rbind(Dqq,cc$Dq)
-    SadF <-rbind(SadF,cc$SAD)
+  Dq <- ldply(repl,function(r){
+    if(toupper(meta)=="L") {
+      bname <- paste0("neuFish",nsp,"_",side,"R", r)
+    } else {
+      bname <- paste0("neuUnif",nsp,"_",side,"R", r)
     }
+    fname <- paste0(bname,"mfOrd.txt")
+    Dq1 <- readNeutral_calcDq(fname)
+    Dq1$DqType <- "DqSRS"
+    fname <- paste0(bname,"mfSAD.txt")
+    Dq2 <- readNeutral_calcDq(fname)
+    Dq2$DqType <- "DqSAD"
+  
+    return(rbind(Dq1,Dq2))
+  
+  })
+  time <- unique(Dq$Time)
+  iT <- max(time) - (time[3]-time[2])*10
+  mDq1 <- Dq %>% group_by(ReplacementRate) %>% filter(Time>=iT, DqType=="DqSRS", q==1 ) %>% mutate(Rep=ntile(ReplacementRate,sims)) %>%
+    group_by(MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep ) %>% summarise(D1=mean(Dq))
+  
+  mDq0 <- Dq %>% group_by(ReplacementRate) %>% filter(Time>=iT, DqType=="DqSAD", q==0 ) %>% mutate(Rep=ntile(ReplacementRate,sims))  %>%
+    group_by(MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep ) %>% summarise(D0=mean(Dq))
+  
+  mDq <- inner_join(mDq1,mDq0,by=c("MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate","Rep")) %>% 
+    mutate( Nsp=nsp, Side=side)
+  
+  return(mDq)
+}
 
-  # have to make averages
+# Calculates Bray-Curtis dissimilarity
+#             Kullback - Leiber divergence
+#             Kolmogorov-smirnov distance
+#
+calc_CommunityDist <- function(nsp,side,disp,migr,repl,sims=10,meta="U"){
   require(plyr)
-  sad1 <- ddply(SadF,c(3,4,5,6,1),summarise,den=mean(Freq))
+  require(dplyr)
+  if(repl[1]==repl[2]) repl <- repl[1]
+  den <- ldply(repl,function(r){
+    if(toupper(meta)=="L") {
+      bname <- paste0("neuFish",nsp,"_",side,"R", r)
+    } else {
+      bname <- paste0("neuUnif",nsp,"_",side,"R", r)
+    }
+    readWideDensityOut(bname)
+    
+  })
 
-  comp <- pairwiseKS_SAD(sad1,"den",sad1[,1:4])
-  den3 <- calcRankSAD_by(sad1,"den",1:4)
-  print(ggplot(den3,aes(x=Rank,y=log(den),colour=SAD)) + geom_line() + ggtitle(comp$p.value))
+iT <- max(den$Time) - (den$Time[3]-den$Time[2])*10
+d1 <- den %>% group_by(ReplacementRate,Rep) %>% filter(Time>=iT)  %>% select(starts_with("X")) %>% 
+              summarise_each(funs(mean)) %>%
+              ungroup()
 
+#d1 <- den %>% group_by(ReplacementRate,Rep) %>% filter(Time==max(Time))  %>% select(starts_with("X")) %>% ungroup()
+nc <-d1  %>% group_by(ReplacementRate) %>% summarise(n=n())
+re <- nc$n[1]
 
-  return(list("Dq"=Dqq,"SAD"=SadF))
-  }
+parms <- unique(d1[,1:2])
+combo <- combn(nrow(parms),2)
+if(length(repl)>1){
+  combo <- combo[,combo[2,]>re]
+  combo <- combo[,combo[1,]<=re]
+}
+nc <- ncol(d1)
 
-splitFields_comp <-function(comp) {
-  require(plyr)
-  c1 <- ldply(with(comp,strsplit(Group1,"_")))
-  c2 <- ldply(with(comp,strsplit(Group2,"_")))
-  names(c1) <- c("Type1","Side1","NmSp1","SAD1" )
-  names(c2) <- c("Type2","Side2","NmSp2","SAD2" )
-  comp <- cbind(c2,comp)
-  comp <- cbind(c1,comp)
-  comp <- comp[,-(9:10)]
-  return(comp)
+mks <-adply(combo,2, function(x) {
+          p1 <- parms[x[1],]
+          p2 <- parms[x[2],]
+#          s1 <- merge(d1,p1)
+#          s2 <- merge(d1,p2)
+          s1 <- d1[x[1],]
+          s2 <- d1[x[2],]
+          k <- ks.test(as.numeric(s1[,3:nc]),as.numeric(s2[,3:nc]))
+          out <-data.frame(p1,p2,bray=brayCurtis(s1[,3:nc],s2[,3:nc]),
+                           KL=KLDiv(s1[,3:nc],s2[,3:nc]),
+                           ks=k$statistic,ks.p=k$p.value,stringsAsFactors=F)
+        })
+}
+
+# Kullback - Leiber divergence
+#
+KLDiv <- function(freqs1, freqs2)
+{
+  freqs1 = freqs1/sum(freqs1)
+  freqs2 = freqs2/sum(freqs2)
+  freqs1 <- freqs1[freqs2>0]
+  freqs2 <- freqs2[freqs2>0]
+  
+  if (any(!(freqs2 > 0))) 
+    warning("Vanishing value(s) in argument freqs2!")
+  LR = ifelse(freqs1>0,log(freqs1/freqs2),0)
+  
+  KL = sum(freqs1 * LR)
+  return(KL)
+}
+
+# Bray-Curtis dissimilarity
+#
+brayCurtis <- function (x, y) 
+{
+  bray <- 1 - sum(abs(x - y))/sum(x + y)
+  return(bray)
 }
 
 
-
 # Simulate a time series of the neutral/hierarchical model
-#
-# meta: L logseries metacommunity 
-#       U uniform 
 #
 # disp: dispersal parameter
 # migr: migration rate
 # repl: replacement rate
 # mortality fixed to 0.2
 #
-simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,meta="U") {
+# simul: T=make simulations F=make plots
+# sims:  Number of repetitions
+# mf: calculate multifractal spectrum
+# meta: U= uniform metacommunity
+#       L= logseries metacommunity
+#
+simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,mf="N",meta="U") {
   if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
+
+  if(toupper(meta)=="L") {
+    prob <- genFisherSAD(nsp,side)
+    neuParm <- paste0("fishP",nsp,"_",side,"R", repl)
+    bname <- paste0("neuFish",nsp,"_",side,"R", repl)
+  } else {
+    prob <- rep(1/nsp,nsp)  
+    neuParm <- paste0("unifP",nsp,"_",side,"R", repl)
+    bname <- paste0("neuUnif",nsp,"_",side,"R", repl)
+  }
+  pname <- paste0("pomacR",repl,".lin")
 
   if(simul){
 
-    if(toupper(meta)=="L") {
-      prob <- genFisherSAD(nsp,side)
-      neuParm <- paste0("fishP",nsp,"_",side,"R", repl)
-      bname <- paste0("neuFish",nsp,"_",side,"R", repl)
-    } else {
-      prob <- rep(1/nsp,nsp)  
-      neuParm <- paste0("unifP",nsp,"_",side,"R", repl)
-      bname <- paste0("neuUnif",nsp,"_",side,"R", repl)
-    }
     genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,repl)
 
     # Delete old simulations
@@ -1085,14 +746,17 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
     par[par$V1=="modType",]$V2 <- 4 # Hierarchical saturated
     par[par$V1=="sa",]$V2 <- "N" # Save a snapshot of the model
     par[par$V1=="baseName",]$V2 <- bname# Time = 100 
+    par[par$V1=="mfDim",]$V2 <- mf
     par[par$V1=="minBox",]$V2 <- 2
     par[par$V1=="pomac",]$V2 <- 1 # 0:one set of parms 
                                   # 1:several simulations with pomac.lin parameters 
+    par[par$V1=="pomacFile",]$V2 <- pname # 0:one set of parms 
+    par[par$V1=="minProp",]$V2 <- 0
     
-    parfname <- paste0("sim",nsp,"_",side,".par")
+    parfname <- paste0("sim",nsp,"_",side,"R", repl,".par")
     write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
 
-    genPomacParms("pomac",1,c(0.2),disp,migr,repl,sims)
+    genPomacParms(pname,1,c(0.2),disp,migr,repl,sims)
   
     # copy pomExp.lin to pomac.lin
     #system("cp pomExp.lin pomac.lin")
@@ -1103,27 +767,84 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
       system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
     }
   }
-  fname <- paste0(bname,"Density.txt")
-  den <- read.delim(fname)
-  names(den)[1:5]<-c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate")
-  require(ggplot2)
-
-  print(gp <- ggplot(den, aes(x=Time, y=H)) +
-      geom_line() + theme_bw() +  ggtitle(paste(side,repl)))
-
-  print(gp <- ggplot(den, aes(x=Time, y=Richness)) +
-      geom_line() + theme_bw() + ggtitle(paste(side,repl))) 
-  require(dplyr)
-  den <- den %>% group_by()
-  th <- with(den, den[H==max(H),])
-  tr <-with(den, den[Richness==max(Richness),])
-  tm <-
-  return(data.frame(MetaNsp=nsp,Side=side,Disp=disp,Migr=migr,Repl=repl,
-             TMaxH=th$Time,MaxH=th$H,TMaxRich=tr$Time,MaxRich=tr$Richness))
+  den <-readWideDensityOut(bname)
   
-  #return(den[,c(names(den)[1:5],"Time","H","Richness")])
+  require(plyr)
+  require(dplyr)
+  
+  if(!simul) {
+    require(ggplot2)
+    if(sims>10)  
+      den1 <- filter(den,Rep %in%  sample(1:sims,10)) 
+    
+    print(ggplot(den1, aes(x=Time, y=H,color=factor(Rep))) +
+        geom_line() + theme_bw() +  ggtitle(paste(side,repl)))
+
+    print(ggplot(den1, aes(x=Time, y=Richness,color=factor(Rep))) +
+        geom_line() + theme_bw() + ggtitle(paste(side,repl))) 
+  }
+ 
+
+  th <-function(x,tt,...){
+    tt[which.max(x)]
+  }
+  
+  d1 <- den %>% group_by(Rep) %>% summarize(MaxH=max(H),TMaxH=th(H,Time),
+                  MaxRich=max(Richness),TMaxRich=th(Richness,Time))
+  
+  lInt <- max(den$Time)/(den$Time[3]-den$Time[2])/10
+  
+  d2 <- den %>%  group_by(Rep) %>% mutate(nt=ntile(Rep,lInt)) %>%  group_by(Rep,nt) %>% summarize(meanH=mean(H),sdH=sd(H),meanRich=mean(Richness),sdRich=sd(Richness)) %>% 
+    mutate(nt=nt*100)
+
+  if(!simul) {
+    if(sims>10)  
+      d3 <- filter(d2,Rep %in%  sample(1:sims,10)) 
+    
+    print(ggplot(d3, aes(x=nt, y=meanH, color=factor(Rep))) +
+              geom_errorbar(aes(ymin=meanH-sdH, ymax=meanH+sdH), width=.1,colour="gray") +
+              geom_line() + theme_bw() + ggtitle(paste(side,repl)))
+
+    print(ggplot(d3, aes(x=nt, y=meanRich, color=factor(Rep))) +
+              geom_errorbar(aes(ymin=meanRich-sdRich, ymax=meanRich+sdRich), width=.1,colour="gray") +
+              geom_line() + theme_bw() + ggtitle(paste(side,repl)))
+  }
+
+  d2 <- d2 %>%  group_by(Rep) %>% summarise_each(funs(last))
+
+  return(data.frame(MetaNsp=nsp,Side=side,Disp=disp,Migr=migr,Repl=repl,
+             TMaxH=d1$TMaxH,MaxH=d1$MaxH,TMaxRich=d1$TMaxRich,MaxRich=d1$MaxRich,
+             meanH=d2$meanH,sdH=d2$sdH,meanRich=d2$meanRich,sdRich=d2$sdRich,
+             meanEven=d2$meanH/log(d2$meanRich)))
+  
 }
 
+# Plot average H and Richnes of neutral simulations (Time=2900-3000) 
+# 
+plot_simul_timeRH <- function(CT,mct)
+{
+  require(ggplot2)
+  print(ggplot(CT, aes(x=Repl, y=meanRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))) 
+  print(ggplot(CT, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  print(ggplot(CT, aes(x=Repl, y=meanEven)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  
+  print(ggplot(mct, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  print(ggplot(mct, aes(x=Repl, y=meanRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))) 
+  print(ggplot(mct, aes(x=Repl, y=meanEven)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))) 
+  
+  print(ggplot(CT, aes(x=Repl, y=MaxH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  print(ggplot(CT, aes(x=Repl, y=MaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+
+  print(ggplot(mct, aes(x=Repl, y=MaxH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  print(ggplot(mct, aes(x=Repl, y=MaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+
+  print(ggplot(CT, aes(x=Repl, y=TMaxH)) + geom_point() + theme_bw() +scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  print(ggplot(CT, aes(x=Repl, y=TMaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+
+  print(ggplot(mct, aes(x=Repl, y=TMaxH)) + geom_point() + theme_bw() +scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  print(ggplot(mct, aes(x=Repl, y=TMaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+
+}
 
 
 # Simulations of the model with output of one time 
