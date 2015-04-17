@@ -61,7 +61,7 @@ calcRankSAD_by  <- function(den,vv,cols)
   hh <- function(x) { 
   x1 <- x[x[[vv]]>0,]
   x1$parms <- paste(unique(x[,cols]),collapse="_")
-  x1$Rank <- nrow(x1) - rank(x1[[vv]],ties.method="min") +1
+  x1$Rank <- nrow(x1) - rank(x1[[vv]],ties.method="random") +1
   return(x1)
   }
   ddply(den, cols,hh )
@@ -143,7 +143,9 @@ pairwiseAD_Dif <- function(denl,vv,parms){
 # Read simulation output and change from wide to long format NO TIME
 #
 meltDensityOut_NT <- function(fname,num_sp){
-  den <- read.delim(fname)
+  if(!grepl("Density.txt",fname)) fname <- paste0(fname,"Density.txt")
+
+  den <- read.delim(fname,stringsAsFactors = F)
   names(den)[1:5]<-c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate")
   
   # from 7 to 473 there are species densities
@@ -165,16 +167,33 @@ meltDensityOut_NT <- function(fname,num_sp){
 #
 readWideDensityOut <- function(fname){
   if(!grepl("Density.txt",fname)) fname <- paste0(fname,"Density.txt")
-  den <- read.delim(fname)
+  den <- read.delim(fname,stringsAsFactors = F)
   names(den)[1:5]<-c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate")
   names(den)[7] <- unlist(strsplit(names(den)[7],".",fixed=T))[1]
-  eTime <- (max(den$Time)/(den$Time[3]-den$Time[2]))+1
+  if(nrow(den)<3)
+    eTime <-1
+  else
+    eTime <- (max(den$Time)/(den$Time[3]-den$Time[2]))+1
+  
   if(  eTime < nrow(den) ){
     den$Rep <- rep( 1:(nrow(den)/eTime),each=eTime)
   }
   return(den)
 }
 
+# Read simulation output and set variable names in wide format 
+# Asumme that are all repetitions of the same set of parameters and 
+#  Adds a variable Rep 
+#
+readClusterOut <- function(fname){
+  if(!grepl("CluSizes.txt",fname)) fname <- paste0(fname,"CluSizes.txt")
+  den <- read.delim(fname,stringsAsFactors = F)
+  names(den)[1:6]<-c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate","Time")
+  #  
+  #den$Rep <- c(1:nrow(den))
+  #
+  return(den)
+}
 
 
 # Calculates Dq from a data.frame read from the output of neutral model 
@@ -647,6 +666,8 @@ calc_CommunityDist <- function(nsp,side,disp,migr,repl,sims=10,meta="U"){
     
   })
 
+# Toma los ultimas 10 simulaciones para calcular
+#
 iT <- max(den$Time) - (den$Time[3]-den$Time[2])*10
 d1 <- den %>% group_by(ReplacementRate,Rep) %>% filter(Time>=iT)  %>% select(starts_with("X")) %>% 
               summarise_each(funs(mean)) %>%
@@ -677,6 +698,70 @@ mks <-adply(combo,2, function(x) {
                            ks=k$statistic,ks.p=k$p.value,stringsAsFactors=F)
         })
 }
+
+# Calculates Bray-Curtis dissimilarity
+#             Kullback - Leiber divergence
+#             Kolmogorov-smirnov distance
+#
+calc_CommunityDist_1T <- function(nsp,side,disp,migr,repl,time,sims=10,meta="U"){
+  require(plyr)
+  require(dplyr)
+  if(repl[1]==repl[2]) repl <- repl[1]
+  den <- ldply(repl,function(r){
+    if(toupper(meta)=="L") {
+      bname <- paste0("neuFish",nsp,"_",side,"R", r, "T", time)
+    } else {
+      bname <- paste0("neuUnif",nsp,"_",side,"R", r, "T", time)
+    }
+    readWideDensityOut(bname)
+    
+  })
+
+# Hace promedios de las densidades de las repeticiones para calcular
+#
+d1 <- den %>% group_by(ReplacementRate) %>% select(starts_with("X")) %>% 
+              summarise_each(funs(mean)) %>%
+              ungroup()
+
+#d1 <- den %>% group_by(ReplacementRate,Rep) %>% filter(Time==max(Time))  %>% select(starts_with("X")) %>% ungroup()
+nc <- d1 %>% group_by(ReplacementRate) %>% summarise(n=n())
+re <- nc$n[1]
+#re <-1
+# 
+# if(re>1) {
+#   parms <- unique(d1[,1:2])
+#   combo <- combn(nrow(parms),2)
+#   if(length(repl)>1){
+#     combo <- combo[,combo[2,]>re]
+#     combo <- combo[,combo[1,]<=re]
+#   }
+#   nc <- ncol(d1)
+#   ni <- 3                     # 2 first columns are parameters replacementRate Rep
+# } else {
+  parms <- unique(d1[,1])
+  combo <- combn(nrow(parms),2)
+  if(length(repl)>1){
+    combo <- combo[,combo[2,]>re]
+    combo <- combo[,combo[1,]<=re]
+  }
+  nc <- ncol(d1)
+  ni <- 2                     # 1 first column is parameter   
+#}
+
+mks <-adply(combo,2, function(x) {
+          p1 <- parms[x[1],]
+          p2 <- parms[x[2],]
+#          s1 <- merge(d1,p1)
+#          s2 <- merge(d1,p2)
+          s1 <- d1[x[1],]
+          s2 <- d1[x[2],]
+          k <- ks.test(as.numeric(s1[,ni:nc]),as.numeric(s2[,ni:nc]))
+          out <-data.frame(p1,p2,bray=brayCurtis(s1[,ni:nc],s2[,ni:nc]),
+                           KL=KLDiv(s1[,ni:nc],s2[,ni:nc]),
+                           ks=k$statistic,ks.p=k$p.value,stringsAsFactors=F)
+        })
+}
+
 
 # Kullback - Leiber divergence
 #
@@ -736,7 +821,10 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
     genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,repl)
 
     # Delete old simulations
-    system(paste0("rm ",bname,"*.txt"))
+    system(paste0("rm ",bname,"m*.txt")) # MultiFractal mf
+    system(paste0("rm ",bname,"D*.txt")) # Density
+    system(paste0("rm ",bname,"C*.txt")) # Clusters
+
 
     par <- read.table("sim.par",quote="",stringsAsFactors=F)
 
@@ -775,13 +863,13 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
   if(!simul) {
     require(ggplot2)
     if(sims>10)  
-      den1 <- filter(den,Rep %in%  sample(1:sims,10)) 
-    
-    print(ggplot(den1, aes(x=Time, y=H,color=factor(Rep))) +
+      den <- filter(den,Rep %in%  sample(1:sims,10)) 
+
+    print(ggplot(den, aes(x=Time, y=H,color=factor(Rep))) +
         geom_line() + theme_bw() +  ggtitle(paste(side,repl)))
 
-    print(ggplot(den1, aes(x=Time, y=Richness,color=factor(Rep))) +
-        geom_line() + theme_bw() + ggtitle(paste(side,repl))) 
+#     print(ggplot(den, aes(x=Time, y=Richness,color=factor(Rep))) +
+#         geom_line() + theme_bw() + ggtitle(paste(side,repl))) 
   }
  
 
@@ -800,6 +888,8 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
   if(!simul) {
     if(sims>10)  
       d3 <- filter(d2,Rep %in%  sample(1:sims,10)) 
+    else
+      d3 <- d2
     
     print(ggplot(d3, aes(x=nt, y=meanH, color=factor(Rep))) +
               geom_errorbar(aes(ymin=meanH-sdH, ymax=meanH+sdH), width=.1,colour="gray") +
@@ -812,7 +902,7 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
 
   d2 <- d2 %>%  group_by(Rep) %>% summarise_each(funs(last))
 
-  return(data.frame(MetaNsp=nsp,Side=side,Disp=disp,Migr=migr,Repl=repl,
+  return(data.frame(MetaNsp=nsp,Side=side,Disp=disp,Migr=migr,Repl=repl,MetaType=meta,
              TMaxH=d1$TMaxH,MaxH=d1$MaxH,TMaxRich=d1$TMaxRich,MaxRich=d1$MaxRich,
              meanH=d2$meanH,sdH=d2$sdH,meanRich=d2$meanRich,sdRich=d2$sdRich,
              meanEven=d2$meanH/log(d2$meanRich)))
@@ -824,103 +914,115 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
 plot_simul_timeRH <- function(CT,mct)
 {
   require(ggplot2)
-  print(ggplot(CT, aes(x=Repl, y=meanRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))) 
-  print(ggplot(CT, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
-  print(ggplot(CT, aes(x=Repl, y=meanEven)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  print(ggplot(CT, aes(x=Repl, y=meanRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(MetaType ~ . )) 
+  print(ggplot(CT, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
+  print(ggplot(CT, aes(x=Repl, y=meanEven)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
   
-  print(ggplot(mct, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
-  print(ggplot(mct, aes(x=Repl, y=meanRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))) 
-  print(ggplot(mct, aes(x=Repl, y=meanEven)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))) 
+  print(ggplot(mct, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
+  print(ggplot(mct, aes(x=Repl, y=meanRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . )) 
+  print(ggplot(mct, aes(x=Repl, y=meanEven)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . )) 
   
-  print(ggplot(CT, aes(x=Repl, y=MaxH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
-  print(ggplot(CT, aes(x=Repl, y=MaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  print(ggplot(CT, aes(x=Repl, y=MaxH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
+  print(ggplot(CT, aes(x=Repl, y=MaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
 
-  print(ggplot(mct, aes(x=Repl, y=MaxH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
-  print(ggplot(mct, aes(x=Repl, y=MaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  print(ggplot(mct, aes(x=Repl, y=MaxH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
+  print(ggplot(mct, aes(x=Repl, y=MaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
 
-  print(ggplot(CT, aes(x=Repl, y=TMaxH)) + geom_point() + theme_bw() +scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
-  print(ggplot(CT, aes(x=Repl, y=TMaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  print(ggplot(CT, aes(x=Repl, y=TMaxH)) + geom_point() + theme_bw() +scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
+  print(ggplot(CT, aes(x=Repl, y=TMaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
 
-  print(ggplot(mct, aes(x=Repl, y=TMaxH)) + geom_point() + theme_bw() +scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
-  print(ggplot(mct, aes(x=Repl, y=TMaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)))
+  print(ggplot(mct, aes(x=Repl, y=TMaxH)) + geom_point() + theme_bw() +scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
+  print(ggplot(mct, aes(x=Repl, y=TMaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
 
 }
 
 
 # Simulations of the model with output of one time 
+# if delo=T make new simulations and delete old ones
+#    delo=F read files generated by previous simulations
 #
-#
-simulNeutral_1Time<- function(nsp,side,time,meta="L",rep=10,delo=T)
+simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=10,simulate=T,mf="N",meta="U",delo=T) 
 {
 
   if(toupper(meta)=="L") {
     prob <- genFisherSAD(nsp,side)
-    neuParm <- paste0("fishE",nsp,"_",side)
-    bname <- paste0("neuFish",nsp,"_",side)
-    sadName <- "Neutral"
+    neuParm <- paste0("fishP",nsp,"_",side,"R", repl)
+    bname <- paste0("neuFish",nsp,"_",side,"R", repl)
   } else {
     prob <- rep(1/nsp,nsp)  
-    neuParm <- paste0("unifE",nsp,"_",side)
-    bname <- paste0("neuUnif",nsp,"_",side)
-    sadName <- "NeuUnif"
+    neuParm <- paste0("unifP",nsp,"_",side,"R", repl)
+    bname <- paste0("neuUnif",nsp,"_",side,"R", repl)
   }
-
-  # Parameters
-  #
-  # Mortality = 0.2 - 0.4
-  # Mean Dispersal distance 25  -> Exponential kernel parm  0.04
-  #                         2.5 -> 0.4
-  # Colonization = 0.001 -0.0001
-  # Replacement  = 0 - 1
-  spMeta <- length(prob)
-
-  # First generate de inp file with species and metacommunity parameters 
-  genNeutralParms(neuParm,side,prob,1,0.2,0.04,0.0001)
-
-  # Delete old simulations
-  if(delo)
-    system(paste0("rm ",bname,"*.txt"))
-
-
-  # we need the par file with the simulations parameters
-  par <- read.table("sim.par",quote="",stringsAsFactors=F)
-
-
-  # Number of time steps 
-  par[par$V1=="nEvals",]$V2 <- time
-  par[par$V1=="inter",]$V2 <- time # interval to measure Density and Diversity
-  par[par$V1=="init",]$V2 <- time  # Firs time of measurement = interval
-  par[par$V1=="modType",]$V2 <- 4 # Hierarchical saturated
-  par[par$V1=="sa",]$V2 <- "N" # Save a snapshot of the model
-  par[par$V1=="baseName",]$V2 <- paste0(bname ,"T", time ) 
-  par[par$V1=="pomac",]$V2 <- 1 # 0:one set of parms 
-                                # 1:several simulations with pomac.lin parameters 
-
-  parfname <- paste0("sim",nsp,"_",side,".par")
-  write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
-
-  # Then pomac.lin to simulate a range of parmeters and repetitions.
-  #
-  # Generates pomac.lin for multiple simulations exponential dispersal to compare hierarchical and neutral communities  
-  # and see when they have similar H and compare if they have similar SAD
-
-  #genPomacParms("pomExp",1,c(0.2),c(0.04),c(0.0001),c(0,0.001),3)
-
-  #genPomacParms("pomExp",1,c(0.2,0.4),c(0.04,0.4),c(0.001,0.0001),c(0,0.001,0.01,0.1,1),rep)
-  genPomacParms("pomExp",1,c(0.2,0.4),c(0.04,0.4),c(0.001),c(0,0.001,0.01,0.1,1),rep)
+  pname <- paste0("pomacR",repl,".lin")
+  bname <- paste0(bname ,"T", time )
   
-  # copy pomExp.lin to pomac.lin
-  system("cp pomExp.lin pomac.lin")
-  s <- system("uname -a",intern=T)
-  if(grepl("i686",s)) {
-    system(paste(neuBin,parfname,paste0(neuParm,".inp")))
-  } else {
-    system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+
+  # make simulations 
+  if(simulate)
+  {
+    # Delete old simulations
+    if(delo)
+      system(paste0("rm ",bname,"*.txt"))
+
+    genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,repl)
+
+    par <- read.table("sim.par",quote="",stringsAsFactors=F)
+
+    par[par$V1=="nEvals",]$V2 <- time
+    par[par$V1=="inter",]$V2 <- time          # interval to measure Density and Diversity
+    par[par$V1=="init",]$V2 <- time           # Firs time of measurement = interval
+    par[par$V1=="modType",]$V2 <- 4           # Hierarchical saturated
+    par[par$V1=="sa",]$V2 <- "N"              # Save a snapshot of the model
+    par[par$V1=="baseName",]$V2 <- bname      # Base name for output
+    par[par$V1=="mfDim",]$V2 <- mf
+    par[par$V1=="minBox",]$V2 <- 2
+    par[par$V1=="pomac",]$V2 <- 1             # 0:one set of parms 
+                                              # 1:several simulations with pomac.lin parameters 
+    par[par$V1=="pomacFile",]$V2 <- pname     # pomac file name 
+    par[par$V1=="minProp",]$V2 <- 0           # Calculate diversity for all species
+    par[par$V1=="clusters",]$V2 <- clus       # Calculate max cluster size
+      
+    parfname <- paste0("sim",nsp,"_",side,"R", repl,".par")
+    write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
+
+    genPomacParms(pname,1,c(0.2),disp,migr,repl,sims)
+
+    # copy pomExp.lin to pomac.lin
+    #system("cp pomExp.lin pomac.lin")
+    s <- system("uname -a",intern=T)
+    if(grepl("i686",s)) {
+      system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+    } else {
+      system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+    }
   }
-  return(data.frame(nsp,side,time,meta,spMeta,rep))
+
+  #den <- meltDensityOut_NT(bname,nsp)
+  require(plyr)
+  require(dplyr)
+  #den <-mutate(den, Species=substring(as.character(Species),2))
+  #den <- group_by(den, rep) %>% select(Species,value) %>% top_n(n=1) 
+  
+  den <-readWideDensityOut(bname)
+  den <-den[, c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate","Time", 
+                "Richness","H")]
+  clu <-readClusterOut(bname)
+  if(nrow(den)<nrow(clu))
+    clu <- clu[1:nrow(den),]
+  clu$Richness <- den$Richness 
+  clu$H <- den$H
+  clu <-rename(clu,MaxSpeciesAbund=TotalSpecies) %>%
+               mutate( MetaNsp=nsp, Side=side, MetaType=as.character(meta),MaxClusterProp = MaxClusterSize/(side*side),MaxClusterSpProp=MaxClusterSize/MaxSpeciesAbund,
+                SpanningClust=ifelse(SpanningSpecies>0,MaxClusterProp,0))
+
+  
+  clu <- clu[,c(14:16,1:13,17:19)]
+  return(clu)
 }
 
-
+# Simulates up to time and saves a snapshot of the model 
+#
+#
 simul_NeutralSAD <- function(nsp,side,time,meta="L",ReplRate=c(0,0.001,0.01,0.1,1)) {
   if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
   if(!require(untb))  stop("Untb package not installed")
@@ -997,71 +1099,6 @@ simul_NeutralSAD <- function(nsp,side,time,meta="L",ReplRate=c(0,0.001,0.01,0.1,
 
 
 
-
-
-plotPow_MeanSp_side <- function(pow){
-  require(ggplot2)
-  pow$MeanSp <- as.numeric(pow$MeanSp)
-  pow$power <- as.numeric(pow$power)
-  pow$typeI <- as.numeric(pow$typeI)
-
-  # Add number of species in the metacommunity
-  if( !("spMeta" %in% names(pow)))
-      pow$spMeta <- ceiling(as.numeric(pow$NumSp)*1.33)
-
-
-  g <- ggplot(pow,aes(x=MeanSp,y=power)) + geom_point(shape=19,aes(size=typeI,colour=Type)) + facet_grid(Side ~ . ) +
-    ylab(bquote("Rejection Rate of"~H[0]~"(" ~alpha~"= 0.05)")) +
-    xlab("Mean species number") +
-    scale_size_continuous(name="Type I error") +
-    scale_colour_discrete(name="") 
-  print(g+theme_bw())
-
-}
-
-plotPow_MeanSp_difR <- function(comp,side=256)
-{
-  require(ggplot2)
-  # Recalculate power from comp_AD
-  #
-  require(plyr)
-  hh <-function(x) {
-    t <- nrow(x)
-    s <- nrow(x[x$p.value<0.05,])
-    mean_sp <- round(mean(x$MeanSp),1)
-    data.frame(power=s/t,n=t,mean_sp)
-  }
-
-  # Calculate power in fuction of replacement rate difference
-  #comp$spMeta <- ceiling(as.numeric(comp$NumSp)*1.33)
-
-  c1 <- with(comp,comp[MrtR1==MrtR2 & DspD1==DspD2 & ClnR1==ClnR2 & RplR2!=RplR1 & Side==side,])
-  c1$DifR <- with(c1,abs(RplR2-RplR1))
-
-  c2 <- ddply(c1,.(Side,NumSp,Type,DifR),hh)
-  c2$spMeta <- ceiling(as.numeric(c2$NumSp)*1.33)
-
-  g <- ggplot(c2,aes(x=as.factor(DifR),y=power)) + 
-#    geom_point(shape=19,position = position_jitter(height = .01),aes(colour=as.factor(Type))) + 
-    geom_point(aes(shape=as.factor(Type),colour=factor(Type))) + 
-    facet_grid( spMeta ~ .) +
-    ylab(bquote("Rejection Rate of"~H[0]~"(" ~alpha~"= 0.05)")) +
-    xlab(bquote(Delta ~"Replacement")) +
-    scale_shape_manual(values=c(21,24,4,25,3,8),guide=guide_legend(title="")) 
-#    scale_size_continuous(name="Type I error") +
-#    scale_colour_discrete(name="") 
-  require(RColorBrewer)
-  mc <- brewer.pal(6, "Set1")
-  g <- g + scale_colour_manual(values=mc,guide=guide_legend(title="")) 
-
-
-  #print(g+ scale_x_log10(breaks=c(0.001,0.01,0.09,1))+theme_bw())
-  print(g+ theme_bw())
-
-#  require(pander)
-#  pandoc.table(c2,style="grid")
-  return(c2)
-}
 
 # Plot of multiespecies spatial pattern generated with diffent SAD
 # type: U=uniform SAD L=Logseries SAD
@@ -1189,55 +1226,7 @@ plotDq_Side_Sp <- function(Dqq,side,nsp,sad="Uniform"){
   }
 }
 
-plotR2Dq_Side_Sp <- function(Dqq,side,nsp,sad="Uniform")
-{
-  require(ggplot2)
-  require(dplyr)
-  if(nsp!=0 & side!=0) {
 
-    if(sad=="B")
-        Dq1<- filter(Dqq,Side==side,NumSp==nsp,SAD=="Uniform" | SAD=="Logseries")
-    else
-        Dq1<- filter(Dqq,SAD==sad,Side==side,NumSp==nsp)
-    
-    Dq1 <- mutate(Dq1,DqType=ifelse(grepl("SRS",Type),"DqSRS","DqSAD"), Type=ifelse(grepl("rnz",Type),"b) Randomized","a) Regular"))
-
-    library(RColorBrewer)
-    mc <- brewer.pal(3, "Set1")
-
-    if(sad=="B"){
-      bin <- range(Dq1$R.Dq)
-      bin <- (bin[2]-bin[1])/20
-      #       g <- ggplot(Dq1, aes(x=R.Dq,colour=SAD)) + geom_freqpoly(binwidth = bin) + 
-      #         theme_bw() + facet_grid(Type ~DqType) + scale_colour_grey() + 
-      #         scale_x_continuous(breaks=c(.5,.6,.7,.8,.9,1.0))
-      #         xlab(expression(R^2))
-      #       print(g)
-      g <- ggplot(Dq1, aes(x=R.Dq,fill=SAD)) + geom_histogram(binwidth = bin,position="dodge",colour="black") + 
-        theme_bw() + scale_fill_manual(values=mc) + 
-        facet_wrap(Type ~ DqType) + #+ facet_grid(Type ~DqType)
-        scale_x_continuous(breaks=c(.5,.6,.7,.8,.9,1.0)) + 
-        xlab(expression(R^2))
-    } else {
-    
-      bin <- range(Dq1$R.Dq)
-      bin <- (bin[2]-bin[1])/10
-      g <- ggplot(Dq1, aes(x=R.Dq)) + geom_histogram(binwidth = bin,colour="black",fill="grey") + 
-          theme_bw() + facet_grid(Type ~DqType) + 
-          xlab(expression(R^2))
-    }
-
-  } else {
-
-    Dq1<-filter(Dqq,SAD==sad)
-    bin <- range(Dq1$R.Dq)
-    bin <- (bin[2]-bin[1])/10
-
-    g <-ggplot(Dq1, aes(x=R.Dq,fill=Type)) + geom_histogram(binwidth = bin,position="dodge") + 
-       theme_bw() + facet_grid(Side~NumSp,labeller=label_both) + 
-      xlab(expression(R^2))
-  }
-}
 
 readDq_fit <- function(side,nsp,sad="U") {
   if(sad=="Uniform") {
@@ -1445,50 +1434,68 @@ R2Neutral_Dq<-function(side,time=500,meta="L")
 } 
 
 
-
-plotNeutral_SAD<-function(nsp,side,time=500,meta="L")
+# Plot RAD from simulations with only 1T output
+#  local=T : plots the average of local RAD
+#        F : plots metacommunity RAD
+#
+plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T)
 {
   require(ggplot2)
   require(plyr)
   require(dplyr)
   den<- data.frame()
   if(nsp!=0){
-    if(toupper(meta)=="L") {
-      bname <- paste0("neuFish",nsp,"_",side)
-    } else {
-      bname <- paste0("neuUnif",nsp,"_",side)
+    den1 <- data.frame()
+    for(r in repl){
+      if(toupper(meta)=="L") {
+        bname <- paste0("neuFish",nsp,"_",side,"R", r)
+      } else {
+        bname <- paste0("neuUnif",nsp,"_",side,"R", r)
+      }
+      fname <- paste0(bname ,"T", time, "Density.txt")
+
+      if(local) {
+        den <- meltDensityOut_NT(fname,nsp)
+        den <- calcRankSAD_by(den,"value",1:5)
+        den <- group_by(den,ReplacementRate,Rank) %>% summarize(Freq=mean(value),count=n()) 
+        den <- calcRankSAD_by(den,"Freq",1:1)
+      } else {
+        den <- group_by(den,ReplacementRate,Species) %>% summarize(Freq=mean(value),count=n()) 
+        den <- calcRankSAD_by(den,"Freq",1:1)
+      }
+      den1 <- rbind(den1,den)
     }
-    fname <- paste0(bname,"T",time,"Density.txt")
-    spMeta <- ceiling(as.numeric(nsp)*1.33)
-
-    den1 <- meltDensityOut_NT(fname,spMeta)
-
-    den <- filter(den1,MortalityRate==.2,DispersalDistance==0.4,ColonizationRate==0.001) 
-    den <- calcRankSAD_by(den,"value",1:5)
     
-    
-    den <- group_by(den,ReplacementRate,Rank) %>% summarize(Freq=mean(value),count=n()) 
-    
+    g <- ggplot(den1,aes(x=Rank,y=log(Freq),colour=factor(ReplacementRate))) +  theme_bw() + geom_point(size=1,shape=c(21))
+    library(RColorBrewer)
+    mc <- brewer.pal(6, "Set1")
+    g <- g + scale_colour_discrete(name=bquote("  "~rho))  + geom_line()
 
+
+
+#     g <- ggplot(den1,aes(x=Rank,y=log(Freq),colour=ReplacementRate)) +  theme_bw() + geom_point(size=1)
+#     mc <- c("#b35806","#e08214","#fdb863","#fee0b6","#f7f7f7","#d8daeb","#b2abd2","#8073ac","#542788")
+#     
+#     g <- g + scale_colour_gradientn(colours=mc, guide="legend",trans="log",name=bquote("  "~rho)) +  geom_line()
+    
   } else {
     for(nsp in c(8,64,256))
     {
       den <-rbind(den,plotNeutral_SAD_aux(nsp,side))
     }
-    den <- mutate(den, metaLbl =paste0("Metacommunity sp.",spMeta))
+  
+    den <- mutate(den, metaLbl =paste0("Metacommunity sp.",nsp))
     ml <- unique(den$metaLbl)
     den$metaLbl <- factor(den$metaLbl,levels=c(ml[1],ml[2], ml[3]))
     g <- ggplot(den,aes(x=Rank,y=log(Freq),shape=factor(ReplacementRate),colour=factor(ReplacementRate))) +  theme_bw() + geom_point(size=1)
     library(RColorBrewer)
     mc <- brewer.pal(6, "Set1")
-    g <- g + scale_colour_manual(values=mc,guide=guide_legend(title="Replacement")) 
+    g <- g + scale_colour_manual(values=mc,name=bquote("  "~rho)) 
 
-    g <- g + scale_shape_manual(values=c(21,24,4,25,3,8),guide=guide_legend(title="Replacement")) +
+    g <- g + scale_shape_manual(values=c(21,24,4,25,3,8),name=bquote("  "~rho)) +
       geom_smooth(se=F,span = 0.70) 
     g <- g + facet_wrap(~ metaLbl, scales="free",ncol=2)
-    
   }
-  
   print(g)
   return(den)
 }

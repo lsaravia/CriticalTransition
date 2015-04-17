@@ -129,3 +129,49 @@ changes with no apparent trend over time.
 Non-convergent: we say that the system did
 not converge if after 10 500 generations we do
 not find any of the above mentioned attractors.
+
+---------
+
+@Gravel2006
+
+A community solely driven by competition will have a
+deterministic succession, while a neutral community will
+have the maximum stochasticity among replicated succes-
+sions because of the neutral drift (Clark & McLachlan 2003).
+We used this proxy to assess ÔneutralityÕ when we tested the
+different predictions presented above.
+
+The index was calculated after 500 time steps. This is not a sufficient
+run length to reach a truly stable species composition, but
+preliminary simulations showed that index differences
+among scenarios were similar when the run length was
+longer than 500 time steps
+
+-----------------------
+@Kefi2011
+
+The percolation probability was
+estimated using 500 · 500 lattices. The system is considered to be percolated when it has
+at least one patch that spans from one edge of the system to the opposite edge. The
+location of the percolation point is defined as the parameter value at which the percolation
+probability is 0.5 (see the Results for further details about the percolation point).
+The patch size distributions were obtained as follows. Simulations were run for
+10 000 time units. The first 3000 transient time steps were discarded. Thereafter, patch
+size data were recorded every 40 snapshots, to minimize any temporal correlation
+among successive snapshots. Data from 175 such snapshots were used to plot the patch
+size distribution.
+
+# discussion
+Our results suggest that tracking changes in patch size distributions
+associated with knowledge on the connectedness of the system (and more specifically
+on the presence or absence of spanning clusters) might provide qualitative information
+regarding the level of stress exerted on the ecosystem.
+
+Additionally, the patch size distribution can provide some information about
+underlying ecological mechanisms. We showed that systems with the same cover (but
+different underlying ecological mechanism) can be described by different distributions
+(Fig. 2; Appendix S3). Considering a real ecosystem and knowing its fractional cover,
+the patch size distribution can be compared with the patch size distribution generated
+by a null model for the same fractional cover. An excess in large patches compared with
+the null model would mean that local interactions might be at play, as a mechanism
+promoting longer spatial correlations than expected otherwise.
