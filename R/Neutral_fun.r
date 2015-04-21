@@ -1438,7 +1438,7 @@ R2Neutral_Dq<-function(side,time=500,meta="L")
 #  local=T : plots the average of local RAD
 #        F : plots metacommunity RAD
 #
-plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T)
+plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T,cpal="")
 {
   require(ggplot2)
   require(plyr)
@@ -1467,9 +1467,12 @@ plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T)
     }
     
     g <- ggplot(den1,aes(x=Rank,y=log(Freq),colour=factor(ReplacementRate))) +  theme_bw() + geom_point(size=1,shape=c(21))
-    library(RColorBrewer)
-    mc <- brewer.pal(6, "Set1")
-    g <- g + scale_colour_discrete(name=bquote("  "~rho))  + geom_line()
+    #library(RColorBrewer)
+    #mc <- brewer.pal(6, "Set1")
+    if(cpal=="")
+      g <- g + scale_colour_discrete(name=bquote("  "~rho))  + geom_line()
+    else
+      g <- g + scale_colour_manual(values=cpal,name=bquote("  "~rho))  + geom_line()
 
 
 
@@ -1497,7 +1500,7 @@ plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T)
     g <- g + facet_wrap(~ metaLbl, scales="free",ncol=2)
   }
   print(g)
-  return(den)
+  return(den1)
 }
 
 plotNeutral_SAD_aux<-function(nsp,side,time=500,meta="L")
