@@ -802,7 +802,7 @@ brayCurtis <- function (x, y)
 # meta: U= uniform metacommunity
 #       L= logseries metacommunity
 #
-simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,mf="N",meta="U") {
+simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,mf="N",meta="U",clus="S") {
   if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
 
   if(toupper(meta)=="L") {
@@ -840,6 +840,8 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
                                   # 1:several simulations with pomac.lin parameters 
     par[par$V1=="pomacFile",]$V2 <- pname # 0:one set of parms 
     par[par$V1=="minProp",]$V2 <- 0
+    par[par$V1=="clusters",]$V2 <- clus       # Calculate max cluster size
+   
     
     parfname <- paste0("sim",nsp,"_",side,"R", repl,".par")
     write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
@@ -891,9 +893,9 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
     else
       d3 <- d2
     
-    print(ggplot(d3, aes(x=nt, y=meanH, color=factor(Rep))) +
-              geom_errorbar(aes(ymin=meanH-sdH, ymax=meanH+sdH), width=.1,colour="gray") +
-              geom_line() + theme_bw() + ggtitle(paste(side,repl)))
+#    print(ggplot(d3, aes(x=nt, y=meanH, color=factor(Rep))) +
+#              geom_errorbar(aes(ymin=meanH-sdH, ymax=meanH+sdH), width=.1,colour="gray") +
+#              geom_line() + theme_bw() + ggtitle(paste(side,repl)))
 
     print(ggplot(d3, aes(x=nt, y=meanRich, color=factor(Rep))) +
               geom_errorbar(aes(ymin=meanRich-sdRich, ymax=meanRich+sdRich), width=.1,colour="gray") +
@@ -914,25 +916,25 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
 plot_simul_timeRH <- function(CT,mct)
 {
   require(ggplot2)
-  print(ggplot(CT, aes(x=Repl, y=meanRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(MetaType ~ . )) 
-  print(ggplot(CT, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
-  print(ggplot(CT, aes(x=Repl, y=meanEven)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
+  print(ggplot(CT, aes(x=Repl, y=meanRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(MetaType ~ Side )) 
+  print(ggplot(CT, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side ))
+  print(ggplot(CT, aes(x=Repl, y=meanEven)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side ))
   
-  print(ggplot(mct, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
-  print(ggplot(mct, aes(x=Repl, y=meanRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . )) 
-  print(ggplot(mct, aes(x=Repl, y=meanEven)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . )) 
+  print(ggplot(mct, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side ))
+  print(ggplot(mct, aes(x=Repl, y=meanRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side )) 
+  print(ggplot(mct, aes(x=Repl, y=meanEven)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side )) 
   
-  print(ggplot(CT, aes(x=Repl, y=MaxH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
-  print(ggplot(CT, aes(x=Repl, y=MaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
+  print(ggplot(CT, aes(x=Repl, y=MaxH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side ))
+  print(ggplot(CT, aes(x=Repl, y=MaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side ))
 
-  print(ggplot(mct, aes(x=Repl, y=MaxH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
-  print(ggplot(mct, aes(x=Repl, y=MaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
+  print(ggplot(mct, aes(x=Repl, y=MaxH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side ))
+  print(ggplot(mct, aes(x=Repl, y=MaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side ))
 
-  print(ggplot(CT, aes(x=Repl, y=TMaxH)) + geom_point() + theme_bw() +scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
-  print(ggplot(CT, aes(x=Repl, y=TMaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
+  print(ggplot(CT, aes(x=Repl, y=TMaxH)) + geom_point() + theme_bw() +scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side ))
+  print(ggplot(CT, aes(x=Repl, y=TMaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side ))
 
-  print(ggplot(mct, aes(x=Repl, y=TMaxH)) + geom_point() + theme_bw() +scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
-  print(ggplot(mct, aes(x=Repl, y=TMaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ . ))
+  print(ggplot(mct, aes(x=Repl, y=TMaxH)) + geom_point() + theme_bw() +scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side ))
+  print(ggplot(mct, aes(x=Repl, y=TMaxRich)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + facet_grid(MetaType ~ Side ))
 
 }
 
@@ -941,15 +943,15 @@ plot_simul_timeRH <- function(CT,mct)
 # if delo=T make new simulations and delete old ones
 #    delo=F read files generated by previous simulations
 #
-simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=10,simulate=T,mf="N",meta="U",delo=T) 
+simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=10,simulate=T,mf="N",meta="U",delo=T,ssed="N") 
 {
 
   if(toupper(meta)=="L") {
-    prob <- genFisherSAD(nsp,side)
+    if(simulate) prob <- genFisherSAD(nsp,side)
     neuParm <- paste0("fishP",nsp,"_",side,"R", repl)
     bname <- paste0("neuFish",nsp,"_",side,"R", repl)
   } else {
-    prob <- rep(1/nsp,nsp)  
+    if(simulate) prob <- rep(1/nsp,nsp)  
     neuParm <- paste0("unifP",nsp,"_",side,"R", repl)
     bname <- paste0("neuUnif",nsp,"_",side,"R", repl)
   }
@@ -972,7 +974,7 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
     par[par$V1=="inter",]$V2 <- time          # interval to measure Density and Diversity
     par[par$V1=="init",]$V2 <- time           # Firs time of measurement = interval
     par[par$V1=="modType",]$V2 <- 4           # Hierarchical saturated
-    par[par$V1=="sa",]$V2 <- "N"              # Save a snapshot of the model
+    par[par$V1=="sa",]$V2 <- ssed              # Save a snapshot of the model
     par[par$V1=="baseName",]$V2 <- bname      # Base name for output
     par[par$V1=="mfDim",]$V2 <- mf
     par[par$V1=="minBox",]$V2 <- 2
@@ -1023,42 +1025,36 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
 # Simulates up to time and saves a snapshot of the model 
 #
 #
-simul_NeutralSAD <- function(nsp,side,time,meta="L",ReplRate=c(0,0.001,0.01,0.1,1)) {
+simul_NeutralSAD <- function(nsp,side,disp,migr,ReplRate,clus="S",time=1000,meta="L",delo=F) {
   if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
   if(!require(untb))  stop("Untb package not installed")
 
-  if(toupper(meta)=="L") {
-    prob <- genFisherSAD(nsp,side)
-    sadName <- "Neutral"
-  } else {
-  
-  if(toupper(meta)=="L") {
-    prob <- genFisherSAD(nsp,side)
-    neuParm <- paste0("fishE",nsp,"_",side)
-    bname <- paste0("neuFish",nsp,"_",side)
-    sadName <- "Neutral"
-  } else {
-    prob <- rep(1/nsp,nsp)  
-    neuParm <- paste0("unifE",nsp,"_",side)
-    bname <- paste0("neuUnif",nsp,"_",side)
-    sadName <- "NeuUnif"
-  }
-    sadName <- "NeuUnif"
-  }
   sad <- data.frame()
   for(i in 1:length(ReplRate)) {
+
     if(toupper(meta)=="L") {
-      neuParm <- paste0("fishE",nsp,"_",side,"R", ReplRate[i])
+      sadName <- "Logseries"
+      prob <- genFisherSAD(nsp,side)
+      neuParm <- paste0("fishP",nsp,"_",side,"R", ReplRate[i])
       bname <- paste0("neuFish",nsp,"_",side,"R", ReplRate[i])
     } else {
-      neuParm <- paste0("unifE",nsp,"_",side,"R", ReplRate[i])
+      sadName <- "Uniform"
+      prob <- rep(1/nsp,nsp)  
+      neuParm <- paste0("unifP",nsp,"_",side,"R", ReplRate[i])
       bname <- paste0("neuUnif",nsp,"_",side,"R", ReplRate[i])
     }
 
-    genNeutralParms(neuParm,side,prob,1,0.2,0.4,0.001,ReplRate[i])
+    genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,ReplRate[i])
+
 
     # Delete old simulations
-    system(paste0("rm ",bname,"*"))
+    if(delo){
+      system(paste0("rm ",bname,"m*.txt")) # MultiFractal mf
+      system(paste0("rm ",bname,"D*.txt")) # Density
+      system(paste0("rm ",bname,"C*.txt")) # Clusters
+    }
+    system(paste0("rm ",bname,"-",formatC(time,width=4,flag=0),".sed"))
+    
 
     par <- read.table("sim.par",quote="",stringsAsFactors=F)
     # Change base name
@@ -1068,9 +1064,13 @@ simul_NeutralSAD <- function(nsp,side,time,meta="L",ReplRate=c(0,0.001,0.01,0.1,
     par[par$V1=="modType",]$V2 <- 4 # Hierarchical saturated
     par[par$V1=="sa",]$V2 <- "S" # Save a snapshot of the model
     par[par$V1=="baseName",]$V2 <- bname 
+    par[par$V1=="mfDim",]$V2 <- "N"
     par[par$V1=="minBox",]$V2 <- 2
     par[par$V1=="pomac",]$V2 <- 0 # 0:one set of parms 
                                   # 1:several simulations with pomac.lin parameters 
+
+    par[par$V1=="minProp",]$V2 <- 0
+    par[par$V1=="clusters",]$V2 <- clus       # Calculate max cluster size
 
     parfname <- paste0("sim",nsp,"_",side,"_",ReplRate[i],".par")
     write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
@@ -1261,45 +1261,68 @@ readDq_fit <- function(side,nsp,sad="U") {
 # Plot of multiespecies spatial pattern generated with neutral model and logseries SAD
 #
 #
-plotNeutral_SpatPat<-function(nsp,side,time,meta="L",ReplRate=c(0,0.001,0.01,0.1,1))
+plotNeutral_SpatPat<-function(nsp,side,time,meta,ReplRate,spanClu=F)
 {
   require(ggplot2)
- 
+  options("scipen"=0, "digits"=4)
+  p <-expand.grid(MetaType=meta,Repl=ReplRate) 
+
   spa <- data.frame()
-  for(i in 1:length(ReplRate)) {
-    if(toupper(meta)=="L") {
-      bname <- paste0("neuFish",nsp,"_",side,"R", ReplRate[i])
+  for(i in 1:nrow(p)) {
+    if(toupper(p$MetaType[i])=="L") {
+      bname <- paste0("neuFish",nsp,"_",side,"R", p$Repl[i])
     } else {
-      bname <- paste0("neuUnif",nsp,"_",side,"R", ReplRate[i])
+      bname <- paste0("neuUnif",nsp,"_",side,"R", p$Repl[i])
     }
     
     fname <- paste0(bname,"-",formatC(time,width=4,flag=0),".sed")
     
     sp1 <-read_sed2xy(fname)
-    sp1$Type <- paste("Replacement:", ReplRate[i])
+    sp1$MetaType <- p$MetaType[i] 
+    sp1$Repl <- p$Repl[i]
     sp1$Species <- paste("Species:",length(unique(sp1$v)))
-
+    
+    ## assume the last is the one with sed
+    #
+    if(spanClu) {
+      clu <-readClusterOut(bname)
+      spanSp <- clu$SpanningSpecies[nrow(clu)]
+      require(dplyr)
+      sp1 <- mutate(sp1, SpanningSpecies= ifelse(v==spanSp,1,0))
+    }
     spa <-  rbind(spa,sp1)
+    
   }
-  #lvl <- unique(spa$Type)
-  #spa$Type <- factor(spa$Type, levels = lvl)
+
+  mc <- c("#b35806","#e08214","#fdb863","#fee0b6","#f7f7f7","#d8daeb","#b2abd2","#8073ac","#542788")
   
-#  g <- ggplot(spa, aes(x, y, fill = factor(v))) + geom_raster(hjust = 0, vjust = 0) + 
-  g <- ggplot(spa, aes(x, y, fill = v)) + geom_raster(hjust = 0, vjust = 0) + 
-    theme_bw() + coord_equal() 
+  options("scipen"=Inf, "digits"=4)
   
-  g <- g + scale_fill_gradient(low="red", high="green", guide=F) +
-#  g <- g + scale_fill_grey(guide=F) +
-    scale_x_continuous(expand=c(.01,.01)) + 
-    scale_y_continuous(expand=c(.01,.01)) +  
-    labs(x=NULL, y=NULL) 
+  if(spanClu){  
+    #lvl <- unique(spa$Type)
+    #spa$Type <- factor(spa$Type, levels = lvl)
+    
+    g <- ggplot(spa, aes(x, y, fill = factor(SpanningSpecies))) + geom_raster(hjust = 0, vjust = 0) + 
+      theme_bw() + coord_equal() 
+    g <- g +  scale_fill_manual(values=mc[c(5,9)],name="Species no.") +
+      scale_x_continuous(expand=c(.01,.01)) + 
+      scale_y_continuous(expand=c(.01,.01)) +  
+      labs(x=NULL, y=NULL) 
+  } else {
   
-  g <- g + facet_wrap( ~ Type +Species,ncol=2) 
+    g <- ggplot(spa, aes(x, y, fill = v)) + geom_raster(hjust = 0, vjust = 0) + 
+      theme_bw() + coord_equal() 
+  #  g <- g + scale_fill_gradient(low="red", high="green", guide=F) +
+  #  g <- g + scale_fill_grey(guide=F) +
+    g <- g + scale_fill_gradientn(colours=mc,guide="colourbar",name="Species no.") + #guide=F
+      scale_x_continuous(expand=c(.01,.01)) + 
+      scale_y_continuous(expand=c(.01,.01)) +  
+      labs(x=NULL, y=NULL) 
+  }
+  #g <- g + facet_grid( Repl ~ MetaType) 
+  g <- g + facet_wrap( ~ Repl + MetaType,ncol=2)
   print(g)
   
-  #g <- ggplot(spa, aes(x, y, fill = v)) + geom_raster(hjust = 0, vjust = 0) + theme_bw() + coord_equal() + facet_grid(. ~ Type)
-  #g <- g + scale_fill_gradient(low="red", high="green", guide=F) +
-  #    labs(x=NULL, y=NULL) 
 }
 
 
@@ -1454,9 +1477,10 @@ plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T,cpal="")
       }
       fname <- paste0(bname ,"T", time, "Density.txt")
 
+      den <- meltDensityOut_NT(fname,nsp)
       if(local) {
-        den <- meltDensityOut_NT(fname,nsp)
         den <- calcRankSAD_by(den,"value",1:5)
+        #den <- rename(den,Freq=value)
         den <- group_by(den,ReplacementRate,Rank) %>% summarize(Freq=mean(value),count=n()) 
         den <- calcRankSAD_by(den,"Freq",1:1)
       } else {
@@ -1466,14 +1490,13 @@ plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T,cpal="")
       den1 <- rbind(den1,den)
     }
     
-    g <- ggplot(den1,aes(x=Rank,y=log(Freq),colour=factor(ReplacementRate))) +  theme_bw() + geom_point(size=1,shape=c(21))
+    g <- ggplot(den1,aes(x=Rank,y=log(Freq),colour=factor(ReplacementRate))) +  theme_bw() + geom_line() #geom_point(size=1,shape=c(19))
     #library(RColorBrewer)
     #mc <- brewer.pal(6, "Set1")
     if(cpal=="")
-      g <- g + scale_colour_discrete(name=bquote("  "~rho))  + geom_line()
+      g <- g + scale_colour_discrete(name=bquote("  "~rho))  
     else
-      g <- g + scale_colour_manual(values=cpal,name=bquote("  "~rho))  + geom_line()
-
+      g <- g + scale_colour_manual(values=cpal,name=bquote("  "~rho))
 
 
 #     g <- ggplot(den1,aes(x=Rank,y=log(Freq),colour=ReplacementRate)) +  theme_bw() + geom_point(size=1)

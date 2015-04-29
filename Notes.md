@@ -132,7 +132,9 @@ not find any of the above mentioned attractors.
 
 ---------
 
-@Gravel2006
+@Gravel2006 Reconciling niche and neutrality: the continuum hypothesis.
+
+Results demonstrate that niche and neutrality form ends of a continuum from competitive to stochastic exclusion. In the absence of immigration, competitive exclusion tends to create a regular spacing of niches. However, immigration prevents the establishment of a limiting similarity.
 
 A community solely driven by competition will have a
 deterministic succession, while a neutral community will
@@ -175,3 +177,34 @@ the patch size distribution can be compared with the patch size distribution gen
 by a null model for the same fractional cover. An excess in large patches compared with
 the null model would mean that local interactions might be at play, as a mechanism
 promoting longer spatial correlations than expected otherwise.
+
+-----------------------
+
+@Orrock2010 Local community size mediates ecological drift and competition in metacommunities
+
+The model highlights the role of community size, i.e. the number of competitors in the local community, in mediating the relative importance of stochastic and deterministic forces. In metacommunities where local communities are small, ecological drift is substantial enough that strong competitors become effectively neutral, creating abrupt changes in the outcome of competition not predicted by the standard competition-colonization trade-off. Importantly, the model illustrates that, even when other aspects of species interactions (e.g. migration ability, competitive ability) are unchanged, local community size can alter the dynamics of metacommunity persistence. Our work demonstrates that activities which reduce the size of local communities, such as habitat destruction and degradation, effectively compound the extinction debt
+
+------------------------
+@Fort2013a  Tropical Forests Are Non-Equilibrium Ecosystems Governed by Interspecific Competition Based on Universal 1/6 Niche Width
+
+This niche width yields an average ratio of 0.25 between interspecific and intraspecific competition that corresponds to an intermediate value between the extreme claims of the neutral model and the classical niche-based model of community assembly (where interspecific competition is dominant).
+
+
+------------------------
+@Martorell2014 Testing the roles of competition, facilitation and stochasticity on community structure in a species-rich assemblage
+
+Most ecologists would agree that interactions and stochasticity occur concurrently in ecological communities. Neutrality may operate within subsets of closely related or convergent species (Leibold & McPeek 2006; Scheffer & van Nes 2006; Vergnon, Dulvy & Freckleton 2009), or among species pairs with similar fitness (equalizing mechanisms). However, increasing niche differentiation is required for coexistence to occur as asymmetries in competitive ability become greater (stabilizing mechanisms; Chesson 2000b; Adler, HilleRis- Lambers & Levine 2007). Furthermore, immigration may counteract competitive exclusion in interconnected metacommunities, reducing the degree of niche organization required for diversity maintenance (Gravel et al. 2006). Nevertheless, stochasticity is expected to set more restrictive conditions to coexistence in interaction-driven communities (May 1973; Tilman 2004; Adler & Drake 2008).
+
+Empirical evidence is still insufficient to settle the conflict between these theories. Community patterns expected from theories based on interactions and stochasticity are frequently indistinguishable (Hubbell 2001; Chave, Muller-Landau & Levin 2002; Rosindell, Hubbell & Etienne 2011),
+
+Our results, taken together with recent studies on tropical forests, suggest that weak
+interactions among established plants may be a general phenomenon, but that local interactions dur-
+ing colonization are important drivers of community composition.
+
+----------------------
+@Vergnon2009 Niches versus neutrality: uncovering the drivers of diversity in a species-rich community
+
+Our study strongly suggests that a combination of niche-based and
+equalizing processes best explains the patterns and species
+dynamics within the L4 station marine phytoplankton
+community (Table 2). 
