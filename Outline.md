@@ -1,5 +1,4 @@
-# The critical transition between neutral and competitive communities  
-
+# A spatial phase transition between neutral and niche ecological communities
 
 * There is a critical transition from neutral communities to competitive communities, when the degree of competition reachs the critical value there is a sharp drop in the Shannon diversity, the number of species drops more slowly
 
@@ -17,11 +16,15 @@
 ## Introduction
 
 
+* Why Phase transitions are important for ecology
+
+The problems of pattern and scale are critical in ecology [@Chave2013; @Levin1992], because patterns that seem stochastic at one scale may reveal structrure at another scale, when we are turning the know of our ecological microscope some patterns appear and dissapear while we change the focus. But there are some patterns that cross scales, and these patterns are produced by critical transitions. The concept of pattern is related to some sort of repetition that our brain can detect, but when this pattern repeats at different scales we talk about scale invariance or auto-similarity  A phase transition is... 
+
 * Continuum between Neutral/competitive models 
 
-* Phase transitions in ecology
 
 * We demostrate a phase transition between hierarchical competition and neutral states of a community 
 
 * In an homogeneous environment this results in a sudden loss of species and equitativity
 
+* Fragmentation modifies the critical point towards lower values of the competitive intensity

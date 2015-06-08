@@ -1,6 +1,10 @@
 OPTS= -H margins.sty --bibliography CriticalTransition.bib --csl=plos.csl 
 
-all: SomeResults.pdf 
+
+%.pdf: %.md 
+	pandoc  -V geometry:margin=1cm  --latex-engine=xelatex $^ -o $@
+
+all: CTSolabimaRes.pdf SomeResults.pdf
 
 
 SomeResults.pdf: SomeResults.md

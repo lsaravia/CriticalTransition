@@ -25,7 +25,7 @@ require(plyr)
 
 panderOptions('table.split.table',Inf)
 panderOptions('table.style', 'multiline')
-options("scipen"=100, "digits"=4)
+options("scipen"=100, "digits"=6)
 ```
 
 ## Neutral Simulations to reach steady state
@@ -45,7 +45,7 @@ alfa=2.038974
 side <- 100
 nsp <- 64
 nSimul <- 30
-ReplRate <- c(0,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.009,0.01,0.015,0.02,0.025,0.03,0.05,0.07,0.1,0.2,0.3,0.6,1)
+ReplRate <- c(0,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.009,0.01,0.02,0.03,0.05,0.07,0.1,0.2,0.3,0.6,1)
 
 # loop con do paralell 
 
@@ -61,14 +61,6 @@ CT <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
 stopCluster(cl)
 
 rm(cn,cl)
-```
-
-
-```{r plotsimul100_64_U30, eval=F,error=F,echo=F,message=F,warning=F}
-setwd("Simul")
-# plots of simulations
-#
-#CT <- data.frame()
 
 for(i in 1:length(ReplRate)){
   kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,3000,nSimul)
@@ -92,113 +84,6 @@ plot_simul_timeRH(CT,mct)
 save.image()
 
 ```
-
-## Calculate Bray-curtis dissimilarity, Kullback-Leiber divergences and Kolmogorov-Smirnov distances 
-
-I  use the previous simulations to calculate the distances between the neutral ReplacementRate=0 and the other communities
-
-
-
-```{r calcDist100_64_U30, eval=F,error=F,echo=F,message=F,warning=F}
-setwd("Simul")
-
-bdist <- data.frame()
-tdist <- data.frame()
-
-for(i in 1:length(ReplRate))
-  {
-  kk <- calc_CommunityDist(nsp,side,alfa,m,ReplRate[c(1,i)],nSimul)
-
-#  bdist <- rbind(bdist,data.frame(Repl=ReplRate[i],bray=mean(kk$bray),sdBray=sd(kk$bray),ks=mean(kk$ks),sdKs=sd(kk$ks),KL=mean(kk$KL),sdKL=sd(kk$KL)))
-  
-  tdist <- rbind(kk,tdist)
-}
-
-bdist <- group_by(tdist,ReplacementRate,ReplacementRate.1) %>% summarise(meanBray=mean(bray),medBray=median(bray),meanKS=mean(ks),medKS=median(ks),meanKL=mean(KL),medKL=median(KL)) %>% rename(Repl=ReplacementRate.1) 
-
-tdist <- select(tdist, -X1,-Rep,-Rep.1, -ReplacementRate) %>% rename(Repl=ReplacementRate.1) %>% mutate(MetaNsp=nsp,Side=side,Disp=alfa,Migr=m) 
-tdist <- tdist[,c(6:9,1:5)]
-
-require(ggplot2)
-
-ggplot(tdist, aes(x=Repl, y=bray)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=median,geom="line",colour="red")
-
-ggplot(tdist, aes(x=Repl, y=KL)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=median,geom="line",colour="red")
-
-ggplot(bdist, aes(x=Repl, y=meanKS)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + geom_point(aes(x=Repl,y=medKS),colour="red")
-
-ggplot(bdist, aes(x=Repl, y=meanBray)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + geom_point(aes(x=Repl,y=medBray),colour="red")
-
-ggplot(bdist, aes(x=Repl, y=meanKL)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))+ geom_point(aes(x=Repl,y=medKL),colour="red")
-
-
-# Hacer relativo al valor de bray curtist intra neutral
-setwd(oldcd)
-
-rm(kk)
-save.image()
-```
-
-## calculate information fractal dimension and species-area exponent and save figures
-
-
-```{r calcFrac100_64_U30, eval=F,error=F,echo=F,message=F,warning=F}
-setwd("Simul")
-
-mDq <- calc_CommunityDq(nsp,side,alfa,m,ReplRate,nSimul)
-
-require(ggplot2)
-
-setwd(oldcd)
-
-ggplot(CT, aes(x=Repl, y=meanH)) + geom_point(size=1) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + stat_summary(fun.y=median,geom="point",colour="red") + xlab(expression(rho))
-ggsave("figs/H_Repl_T3000_64_100.png", width=6,height=6,units="in",dpi=600)
-
-ggplot(CT, aes(x=Repl, y=meanRich)) + geom_point(size=1) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + stat_summary(fun.y=median,geom="point",colour="red") + xlab(expression(rho))
-ggsave("figs/Rich_Repl_T3000_64_100.png", width=6,height=6,units="in",dpi=600)
-
-
-ggplot(tdist, aes(x=Repl, y=bray)) +  theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=median,geom="point",colour="red") + xlab(expression(rho))
-ggsave("figs/Bray_Repl_T3000_64_100.png", width=6,height=6,units="in",dpi=600)
-
-
-ggplot(tdist, aes(x=Repl, y=KL)) +  theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=median,geom="point",colour="red") + xlab(expression(rho))
-ggsave("figs/KL_Repl_T3000_64_100.png", width=6,height=6,units="in",dpi=600)
-
-# mct = ensemble means of Rich, H ...
-#
-ggplot(mct, aes(x=Repl, y=meanH)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) +xlab(expression(rho))
-
-# bdist = ensemble means of distances Bray/KL
-#
-ggplot(bdist, aes(x=Repl, y=meanKL)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) +xlab(expression(rho))
-
-# reorganize to match names of CT data.frame
-#
-mDq <- select(mDq, -MortalityRate) %>% rename(MetaNsp=Nsp,Disp=DispersalDistance,Migr=ColonizationRate,Repl=ReplacementRate)
-mDq <- ungroup(mDq)
-mDq <- mDq[,c(8,9,2:7)]
-
-
-ggplot(mDq, aes(x=Repl, y=D1)) + geom_point(size=1) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=median,geom="point",colour="red")+  xlab(expression(rho))
-ggsave("figs/D1_Repl_T3000_64_100.png", width=6,height=6,units="in",dpi=600)
-
-ggplot(mDq, aes(x=Repl, y=D0)) + geom_point(size=1) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))  + stat_summary(fun.y=median,geom="point",colour="red") + xlab(expression(rho))
-ggsave("figs/D0_Repl_T3000_64_100.png", width=6,height=6,units="in",dpi=600)
-
-
-# enseble averages
-
-# mDqA <- group_by(mDq, Repl) %>% summarise(meanD0=mean(D0), meanD1=mean(D1),medDO=median(D0),medD1=median(D1))
-# 
-# ggplot(mDqA, aes(x=Repl, y=meanD1)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))
-# 
-# ggplot(mDqA, aes(x=Repl, y=meanD0)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1))
-
-save.image()
-```
-
-
 
 ## Time series simulations for side=256 time=3000 uniform metacomunity   
 
@@ -465,15 +350,13 @@ side <- 512
 nsp <- 64
 nSimul <- 30
 
-nSimul <- 15
-#ReplRate <- c(0.0000,0.0005,0.0010,0.0014,0.0018,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
 #ReplRate <- c(0.0006,0.0007,0.0008,0.0011,0.0012,0.0013,0.0015,0.0016,0.0017,0.0019)
-ReplRate <- c(0.0017,0.0019)
 
 #time <- 100
 time <- 5000
 
-p <-expand.grid(disp=2.038974,migr=0.0001596079,repl=ReplRate,side=c(100,256,512),meta=c("U","L")) 
+p <-expand.grid(disp=2.038974,migr=0.0001596079,repl=ReplRate,side=c(100,256,512),meta=c("L")) 
 
 
 require(doParallel)
@@ -486,7 +369,7 @@ registerDoParallel(cl)
 Clu <- data.frame()
 Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
 {
-    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"N",p$meta[i],F)
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"N",p$meta[i])
 }
 
 # Clu <- data.frame()
@@ -505,34 +388,43 @@ rm(cn,cl,Clu)
 
 save.image()
 ```
-# Calculation of the critical point T=3000
+
+# Calculation of the critical point T=3000, have to re-do the simulations  
 
 ```{r logfit_clu_side_64_meta30, eval=F,echo=F,message=T,warning=T}
 
+m <-  round(0.0001596079,9)
+alfa<-round(2.038974,5)
+side <- 512
+nsp <- 64
+nSimul <- 30
+
 require(plyr)
 require(dplyr)
-mClusters <- filter(Clusters, Time==3000) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
 
+mClusters <- filter(Clusters, Time==3000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
 
 require(ggplot2)
-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red")
 
 #
 # Calculates the probability of spanning cluster
 #
 
+k <- group_by(mClusters, MetaType,Side) %>% mutate(near=abs(SpanningProb-0.5),n=n()) %>% arrange(near) %>% filter(near<0.35)
+
 k <-group_by(mClusters, MetaType,Side) %>% filter(ReplacementRate>0  & ReplacementRate<0.004) 
 # DELETE RECORDS 
 k <- k[-c(3,13,16),]
-k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)$y,critClust=approx(SpanningProb,SpanningClust,xout=0.5)$y)
+
+k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
 
 require(pander)
-pandoc.table(k,round=4)
+pandoc.table(k,round=5)
 
 #
 # finite size scaling to determine pcrit for infinite lattices
 #
-k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)))                                                 
+k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)            
    
 k1$MetaType <- c("L","U") 
 k1$iSide <- 0 
@@ -573,38 +465,45 @@ ggsave("figs/SpanClusRepl_T3000_64_side_meta.png", width=6,height=6,units="in",d
 
 ```
 
-# Calculation of the critical point T=5000
+# Calculation of the critical point T=5000 DispersalDistance=26
 
 ```{r pcT5000_clu_side_64_meta30, eval=F,echo=F,message=T,warning=T}
 
+m   <-round(0.0001596079,9)
+alfa <-round(2.03897,5)
+
+
 require(plyr)
 require(dplyr)
-mClusters <- filter(Clusters, Time==5000) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+mClusters <- filter(Clusters, Time==5000,MetaNsp==64,DispersalDistance==2.03897,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
 
 
 require(ggplot2)
-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red")
-
 #
 # Calculates the probability of spanning cluster
 #
-k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.050 & SpanningProb<0.75,ReplacementRate>0)
+k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.050 & SpanningProb<0.75)
 # Delete one record
 #k <- k[-6,]
 
-k <- k %>% filter(SpanningProb>0.050 & SpanningProb<0.75,ReplacementRate>0,!(Side==100 & ReplacementRate==0.014)) %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)$y,critClust=approx(SpanningProb,SpanningClust,xout=0.5)$y)
-
+k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
+k$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
+k$ColonizationRate <- m
 require(pander)
-pandoc.table(k,round=4)
-
+pandoc.table(k,round=5)
+rhoCritSide <- rbind(rhoCritSide,k[,c(1,5,6,2:4)])
 #
 # finite size scaling to determine pcrit for infinite lattices
 #
-k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)))                                                 
+k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
    
+ 
 k1$MetaType <- c("L","U") 
 k1$iSide <- 0 
-pandoc.table(k1)
+k1$DispersalDistance<-26.67
+k1$ColonizationRate <- m
+rhoCrit <- k1[,c(3,5,6,1,2)]
+pandoc.table(rhoCrit)
 
 ggplot(k,aes(x=1/(Side*Side),y=pcrit,colour=MetaType)) + geom_point() + theme_bw() +stat_smooth(method=lm,se=F) + geom_point(data=k1,aes(x=iSide,y=pcrit),shape=21)
 
@@ -623,7 +522,7 @@ ggsave("figs/SpanPvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dp
 #
 # Shannon diversity vs rho
 #
-tClusters <- Clusters %>% filter(Time==5000)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
+tClusters <- Clusters %>% filter(Time==5000,MetaNsp==64)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
 k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
 ggplot(tClusters, aes(x=ReplacementRate, y=H)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green")
 ggsave("figs/HvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
@@ -662,7 +561,7 @@ ggplot(tClusters, aes(x=ReplacementRate, y=SpanningClust)) + geom_point(alpha=.2
 ```{r plotsad_256_64_U30, eval=F,echo=F,message=T,warning=T}
 
 time <- 3000
-ReplRate <- c(0.0000,0.0010,0.0020,0.0030,0.0040,0.0100,0.0200,0.0500,0.1000,1)
+ReplRate <- c(0.0000,0.0005,0.0010,0.0020,0.0050,0.0100,0.0200,0.0500,0.1000,1)
 setwd("Simul")
 
 plotNeutral_SAD_1T(64,100,ReplRate,time)
@@ -684,6 +583,8 @@ mc <- c("#a50026","#d73027","#f46d43","#fdae61","#fee090","#e0f3f8","#abd9e9","#
 # What happens at time=5000
 #
 setwd("Simul")
+options("scipen"=0, "digits"=4)
+
 time <- 5000
 # kk <- Clusters %>% filter(Time==time) %>% group_by(Side,MetaType,ReplacementRate) %>% summarise(n=n())
 # unique(kk$ReplacementRate)
@@ -725,13 +626,12 @@ g + scale_colour_manual(values=mc,name=bquote("  "~rho))  + geom_line() + facet_
 setwd(oldcd)
 ggsave("figs/SAD_Time_64_512_meta.png", width=6,height=6,units="in",dpi=600)
 
-## DIBUJAR PATRON ESPACIAL CON SPANNING CLUSTERS!!!
 ```
 
 
 ## Simulations to Time=5000 to graph spatial patterns 
 
-```{r gensimul_spat_512_64_meta30_T5000, eval=T,echo=F,message=T,warning=T}
+```{r gensimul_spat_256_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
 
@@ -743,9 +643,9 @@ nSimul <- 1
 
 
 #ReplRate <- c(0,0.1)
-ReplRate <- c(0.0000,0.0005,0.0010,0.0014,0.0018,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
-time <- 3000
-#time <- 5000
+ReplRate <- c(0.0000,0.0005,0.0010,0.0013,0.0016,0.0020,0.0050,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+#time <- 3000
+time <- 5000
 
 p <-expand.grid(disp=2.038974,migr=0.0001596079,repl=ReplRate,side=side,meta=c("U","L")) 
 
@@ -780,20 +680,26 @@ side <- 256
 nsp <- 64
 nSimul <- 1
 
-ReplRate <- c(0.0000,0.0005,0.0010,0.0014,0.0018,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+ReplRate <- c(0.0000,0.0005,0.0010,0.0013,0.0016,0.0020,0.0050,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
 
-ReplRate <- c(0.0000,0.0005)
-ReplRate <- c(0.0005,0.0010,0.0014)
-time <- 3000
+ReplRate <- c(0.0000, 0.0013,0.0020,0.0050)
+ReplRate <- c(0.0000,0.0005,0.0010,0.0013)
+time <- 5000
 
 #ReplRate <- c(0.1)
 options("scipen"=0, "digits"=4)
 
 # only the spanning species
 plotNeutral_SpatPat(nsp,side,time,meta=c("U"),ReplRate,T)
+setwd(oldcd)
+ggsave("figs/SpatSpan_Repl_T5000_64_256_Unif.png", width=6,height=6,units="in",dpi=600)
 
 # All species
+setwd("Simul")
 plotNeutral_SpatPat(nsp,side,time,meta=c("U"),ReplRate,F)
+setwd(oldcd)
+ggsave("figs/SpatAllSp_Repl_T5000_64_256_Unif.png", width=6,height=6,units="in",dpi=600)
+
 plotNeutral_SpatPat(nsp,side,time,meta=c("L"),ReplRate,F)
 
 
@@ -810,18 +716,16 @@ alfa=2.038974
 side <- 512
 nsp <- 64
 nSimul <- 30
-
+time <- 3000
 
 require(dplyr)
 
 
-mClusters <- filter(Clusters, Time==5000,Side==512) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+mClusters <- filter(Clusters, Time==time) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
 ReplRate <- unique(mClusters$ReplacementRate)
 
-#time <- 100
-time <- 5000
 
-p <-expand.grid(disp=2.038974,migr=0.0001596079,repl=ReplRate,side=c(512),meta=c("U","L")) 
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(100,256,512),meta=c("U","L")) 
 
 Clu <- data.frame()
 for(i in 1:nrow(p))
@@ -829,16 +733,552 @@ for(i in 1:nrow(p))
   Clu <- rbind(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,F,"N",p$meta[i]))
   }
 
-kk <-filter(Clu, Time==5000,Side==512) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate) %>% summarise(n=n())
+kk <-filter(Clu, Time==5000) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance) %>% summarise(n=n())
 
-Clusters <- filter(Clusters, !(Time==5000 & Side==512 )) #%>% distinct()
+Clusters <- filter(Clusters, !(Time==5000)) #%>% distinct()
+
+# Eliminate firs simulations with metacommunity of 86 sp
+#
+Clusters <- filter(Clusters, MetaNsp==64) #%>% distinct()
 
 Clusters <-rbind(Clusters,Clu)
 
 setwd(oldcd)
 
-rm(kk,cn,cl,Clu)
+rm(mClusters,p,kk,cn,cl,Clu)
+
+save.image()
+
+
+```
+
+
+## Simulations to Time=5000 with migration=0.00016 dispersal=13.
+
+```{r simuldisp13_clu_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+
+# Calculate dispersal parameter for half the mean distance from @Anand2010 DispersalDistance=13
+#
+ana <- read.table("Data/Anand2010_DD.dat", header=T)
+m_DD <-mean(ana$DD)
+m_DD <- m_DD/2
+mean_power_opt <-function(alfa,x=1) abs(((alfa-1)/(alfa-2)*x)-m_DD)
+optimize(mean_power_opt,c(2,4))
+mean_power(2.081069)
+
+setwd("Simul")
+
+
+m <-  0.0001596079
+alfa <- 2.081069
+side <- 512
+nsp <- 64
+nSimul <- 30
+
+ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+#ReplRate <- c(0.0006,0.0007,0.0008,0.0011,0.0012,0.0013,0.0015,0.0016,0.0017,0.0019)
+
+#time <- 100
+time <- 5000
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(100,256,512),meta=c("U","L")) 
+
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+## OJO NO BORRA SIMULACIONES ANTERIORES!
+## ultimo F!!
+Clu <- data.frame()
+Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"N",p$meta[i],F)
+}
+
+# Clu <- data.frame()
+# for(i in 1:nrow(p))
+#   {
+#   Clu <- rbind(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,F,"N",p$meta[i]))
+#   }
+
+
+stopCluster(cl)
+
+Clusters <-rbind(Clusters,Clu)
+setwd(oldcd)
+
+rm(cn,cl,Clu)
+
+save.image()
+```
+
+
+
+# Calculation of the critical point T=5000 migration=0.00016 dispersal=13
+
+```{r pcT5000_clu_side_64_disp13, eval=F,echo=F,message=T,warning=T}
+
+m <-  round(0.0001596079,9)
+alfa <- round(2.081069,5)
+side <- 512
+nsp <- 64
+nSimul <- 30
+
+
+require(plyr)
+require(dplyr)
+mClusters <- filter(Clusters, Time==5000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+
+
+require(ggplot2)
+#
+# Calculates the probability of spanning cluster
+#
+k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.050 & SpanningProb<0.75)
+# Delete one record
+#k <- k[-6,]
+
+k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
+k$DispersalDistance<-round(mean_power(alfa),2) 
+k$ColonizationRate <- m
+require(pander)
+pandoc.table(k,round=5)
+rhoCritSide <- rbind(rhoCritSide,k[,c(1,5,6,2:4)])
+
+#
+# finite size scaling to determine pcrit for infinite lattices
+#
+k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
+   
+k1$MetaType <- c("L","U") 
+k1$iSide <- 0 
+k1$DispersalDistance<-round(mean_power(alfa),2) #13.34
+k1$ColonizationRate <- m
+rhoCrit <- rbind(rhoCrit,k1[,c(3,5,6,1,2)])
+
+pandoc.table(rhoCrit)
+save.image()
+
+ggplot(k,aes(x=1/(Side*Side),y=pcrit,colour=MetaType)) + geom_point() + theme_bw() +stat_smooth(method=lm,se=F) + geom_point(data=k1,aes(x=iSide,y=pcrit),shape=21)
+
+plotCritical_Clusters(Clusters,5000,nsp,alfa,m)
+
+rm(k,k1)
+```
+
+There seem to be no big changes in critical point with regard to dispersal distance 
+
+## Simulations to Time=5000 with migration=0.0016 dispersal distance =26.66
+
+
+```{r gensimul_m10_clu_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+setwd("Simul")
+
+
+m =  0.001596079
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 30
+ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+
+#time <- 100
+time <- 5000
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(100,256,512),meta=c("U","L")) 
+
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+## OJO NO BORRA SIMULACIONES ANTERIORES!
+## ultimo F!!
+Clu <- data.frame()
+Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"N",p$meta[i],F)
+}
+
+# Clu <- data.frame()
+# for(i in 1:nrow(p))
+#   {
+#   Clu <- rbind(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,F,"N",p$meta[i]))
+#   }
+
+
+stopCluster(cl)
+
+Clusters <-rbind(Clusters,Clu)
+setwd(oldcd)
+
+rm(cn,cl,Clu)
+
+save.image()
+```
+
+# Plot Critical Clusters H and Richness vs Replacement rate for migration=0.0016 dispersal=26.66
+
+```{r pcT5000_clu_side_64_m0016_disp26, eval=F,echo=F,message=T,warning=T}
+
+m <-  round(0.001596079,8)
+alfa<-round(2.038974,5)
+side <- 512
+nsp <- 64
+nSimul <- 30
+require(plyr)
+require(dplyr)
+
+mClusters <- filter(Clusters, Time==5000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+
+
+require(ggplot2)
+#
+# Calculates the probability of spanning cluster
+#
+k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.050 & SpanningProb<0.75)
+# Delete one record
+#k <- k[-6,]
+
+k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
+k$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
+k$ColonizationRate <- m
+require(pander)
+pandoc.table(k,round=5)
+rhoCritSide <- rbind(rhoCritSide,k[,c(1,5,6,2:4)])
+
+
+#
+# finite size scaling to determine pcrit for infinite lattices
+#
+k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
+   
+k1$MetaType <- c("L","U") 
+k1$iSide <- 0 
+k1$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
+k1$ColonizationRate <- m
+rhoCrit <- rbind(rhoCrit,k1[,c(3,5,6,1,2)])
+rhoCrit <- arrange(rhoCrit,MetaType)
+pandoc.table(rhoCrit)
+save.image()
+
+plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
+
+```
+
+
+## Simulations to Time=5000 with migration=0.016 dispersal distance =26
+
+
+```{r gensimul_m100_clu_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+setwd("Simul")
+
+
+m =  0.01596079
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 30
+ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+
+#time <- 100
+time <- 5000
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(100,256,512),meta=c("U","L")) 
+
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+## OJO NO BORRA SIMULACIONES ANTERIORES!
+## ultimo F!!
+Clu <- data.frame()
+Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"N",p$meta[i],F)
+}
+
+# Clu <- data.frame()
+# for(i in 1:nrow(p))
+#   {
+#   Clu <- rbind(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,F,"N",p$meta[i]))
+#   }
+
+
+stopCluster(cl)
+
+Clusters <-rbind(Clusters,Clu)
+setwd(oldcd)
+
+rm(cn,cl,Clu)
+
+save.image()
+```
+
+
+# Plot critical point for m=0.016 dispersal=26.67
+
+```{r pcT5000_clu_side_64_m016_disp26, eval=F,echo=F,message=T,warning=T}
+
+m   <-round(0.01596079,7)
+alfa <-round(2.038974,5)
+side <- 512
+nsp <- 64
+nSimul <- 30
+time <- 5000
+
+require(plyr)
+require(dplyr)
+
+mClusters <- filter(Clusters, Time==5000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+
+
+require(ggplot2)
+#
+# Calculates the probability of spanning cluster
+#
+k <- group_by(mClusters, MetaType,Side) %>% filter(ReplacementRate>=0.01 & ReplacementRate<=0.015)
+# Delete one record
+#k <- k[-6,]
+
+k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
+k$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
+k$ColonizationRate <- m
+require(pander)
+pandoc.table(k,round=5)
+rhoCritSide <- rbind(rhoCritSide,k[,c(1,5,6,2:4)])
+
+#
+# finite size scaling to determine pcrit for infinite lattices
+#
+k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
+   
+k1$MetaType <- c("L","U") 
+k1$iSide <- 0 
+k1$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
+k1$ColonizationRate <- m
+rhoCrit <- rbind(rhoCrit,k1[,c(3,5,6,1,2)])
+rhoCrit <- arrange(rhoCrit,MetaType)
+pandoc.table(rhoCrit)
+save.image()
+
+ggplot(filter(rhoCrit,DispersalDistance!=13.34),aes(x=ColonizationRate,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ scale_x_log10() + theme_bw() 
+
+ggplot(filter(rhoCrit,ColonizationRate==0.0001596079),aes(x=DispersalDistance,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ theme_bw() 
+
+
+plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
+
+```
+
+## Simulations to Time=5000 with migration=0.00016 dispersal distance =6.66
+
+```{r simuldisp6_clu_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+
+# Calculate dispersal parameter for 1/4 the mean distance from @Anand2010 DispersalDistance=13
+#
+# ana <- read.table("Data/Anand2010_DD.dat", header=T)
+# m_DD <-mean(ana$DD)
+# m_DD <- m_DD/4
+# mean_power_opt <-function(alfa,x=1) abs(((alfa-1)/(alfa-2)*x)-m_DD)
+# optimize(mean_power_opt,c(2,4))
+# mean_power(2.17641)
+
+setwd("Simul")
+
+
+m <-  0.0001596079
+alfa <- 2.17641
+side <- 512
+nsp <- 64
+nSimul <- 30
+
+ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+
+
+time <- 5000
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(100,256,512),meta=c("U","L")) 
+
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+## OJO NO BORRA SIMULACIONES ANTERIORES!
+## ultimo F!!
+Clu <- data.frame()
+Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"N",p$meta[i],F)
+}
+
+
+stopCluster(cl)
+
+Clusters <-rbind(Clusters,Clu)
+setwd(oldcd)
+
+rm(cn,cl,Clu)
+
+save.image()
+```
+
+# Plot critical point for m=0.00016 dispersal=6.67
+
+```{r pcT5000_clu_side_64_m016_disp6, eval=F,echo=F,message=T,warning=T}
+
+
+# To find the value of m
+#
+# filter(Clusters, Time==time,MetaNsp==nsp,DispersalDistance==alfa) %>% distinct(ColonizationRate)
+m   <-round(0.0001596079,9)
+
+alfa <-round(2.17641,5)
+side <- 512
+nsp <- 64
+nSimul <- 30
+time <- 5000
+
+
+require(plyr)
+require(dplyr)
+
+mClusters <- filter(Clusters, Time==time,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+
+
+require(ggplot2)
+
+
+#
+# Calculates the probability of spanning cluster
+#
+k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>=0.30 & SpanningProb<=0.70)
+# Delete one record
+#k <- k[-6,]
+
+k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
+
+k$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
+k$ColonizationRate <- m
+require(pander)
+pandoc.table(k,round=5)
+rhoCritSide <-data.frame()
+rhoCritSide <- rbind(rhoCritSide,k[,c(1,5,6,2:4)])
+#
+# finite size scaling to determine pcrit for infinite lattices
+#
+k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
+   
+k1$MetaType <- c("L","U") 
+k1$iSide <- 0 
+k1$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
+k1$ColonizationRate <- m
+rhoCrit <- rbind(rhoCrit,k1[,c(3,5,6,1,2)])
+rhoCrit <- arrange(rhoCrit,MetaType)
+pandoc.table(rhoCrit)
+save.image()
+
+ggplot(filter(rhoCrit,DispersalDistance!=13.34),aes(x=ColonizationRate,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ scale_x_log10() + theme_bw() 
+
+rhoCrit <- mutate(rhoCrit,ColonizationRate=ifelse(ColonizationRate==0.0001596079,0.000159608,ColonizationRate))
+
+ggplot(filter(rhoCrit,round(ColonizationRate,9)==0.000159608),aes(x=DispersalDistance,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ theme_bw() 
+
+
+plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
+
+```
+
+
+# Simulate to estimate distributions of patch sizes statistics
+
+```{r simuldisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+setwd(oldcd)
+source("R/powerlaw/discpowerexp.R")
+source("R/powerlaw/discexp.R")
+source("R/powerlaw/powerexp.R")
+source("R/powerlaw/exp.R")
+source("R/powerlaw/pareto.R")
+source("R/powerlaw/zeta.R")
+
+setwd("Simul")
+
+
+m <-  0.0001596079
+alfa <- 2.038974
+side <- 512
+nsp <- 64
+nSimul <- 3
+time <- 5000
+#time <- 100
+ReplRate <- c(0.0000,0.0005,0.0010,0.0020,0.0030,0.004,0.005,0.01)
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(256),meta=c("U","L")) 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+Models <- data.frame()
+Mdl <- data.frame()
+Mdl <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",time,nSimul,F,"N",p$meta[i],F)
+}
+
+stopCluster(cl)
+setwd(oldcd)
+
+Models <- rbind(Models,Mdl)
+
+rm(cn,cl,Mdl)
 
 save.image()
 
 ```
+
+
+# Plot the cluster sizes with fitted functions, and relation of power exponent with ReplacementRate
+ 
+```{r plotdisp26_cluAll_side_64_meta30_T5000, eval=T,echo=F,message=T,warning=T}
+setwd(oldcd)
+source("R/powerlaw/discpowerexp.R")
+source("R/powerlaw/discexp.R")
+source("R/powerlaw/powerexp.R")
+source("R/powerlaw/exp.R")
+source("R/powerlaw/pareto.R")
+source("R/powerlaw/zeta.R")
+
+setwd("Simul")
+
+
+m <-  0.0001596079
+alfa <- 2.038974
+side <- 512
+nsp <- 64
+nSimul <- 3
+time <- 5000
+ReplRate <- c(0.0000,0.0005,0.0010,0.0020,0.0030,0.004,0.005,0.01)
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(256),meta=c("U","L")) 
+
+for(i in 1:nrow(p)){
+  plotNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],time,p$meta[i],Models)
+}
+
+require(ggplot2)
+require(dplyr)
+Models <- ungroup(Models)
+namType <- c("c) Spanning","a) Abundant","b) Other Abund","d) Other Spanning")
+mMdl <- filter(Models,model=="PowExp",MetaType=="L") %>% mutate(type=namType[type])
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red")
+ggplot(mMdl,aes(x=ReplacementRate,y=rate)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") 
+
+mMdl <- filter(Models,model=="PowExp",MetaType=="U") %>% mutate(type=namType[type])
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red")
+ggplot(mMdl,aes(x=ReplacementRate,y=rate)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") 
