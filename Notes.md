@@ -208,3 +208,41 @@ Our study strongly suggests that a combination of niche-based and
 equalizing processes best explains the patterns and species
 dynamics within the L4 station marine phytoplankton
 community (Table 2). 
+
+
+---------
+@Xu2015a Partial recovery of a tropical rainforest a half century after clear-cut and
+selective logging
+
+Species richness recovered faster than species composition and structure in both selectively
+logged and clear-cut forests. Both total number of species and number of rare spe
+
+--------
+
+@Chisholm2010
+
+niche theory and neutral theory are two
+major families of theoretical models that aim to explain patterns
+of biodiversity observed in nature (1, 2). Niche theory, which has
+a long history of development (3–5), assumes that different species
+are regulated by different environmental factors and proposes that
+diversity arises from spatial and temporal environmental hetero-
+geneity (6). Neutral theory, which was developed more recently
+from the theory of island biogeography (7), assumes that species
+are equivalent and proposes that diversity arises from a balance
+between immigration, speciation, and extinction (8–10)
+
+in which a semiisolated local community receives immigrants from a much larger metacommunity that is assumed to be static relative to the timescale of the local community 
+
+Our results confirm that the neutral model of species abundances emerges from more complex models (29) at sufficiently large scales, sufficiently high levels of diversity, and sufficiently low niche dimensionality.
+
+-------
+Eco-evolutionary responses of biodiversity to climate change.
+
+F1000 Recommendation - DOI: 10.3410/f.717967699.793467371
+
+This interesting study investigates the role of multi-species interactions and evolutionary processes in determining species extinction due to a changing climate. Current predictions of the effect of climate change on biodiversity commonly overlook processes of species interactions and the possibility of adaptation to a changing climate. In this study, Norberg et al. develop a spatially explicit eco-evolutionary model of multi-species responses to climate change. Their study suggests that species with higher genetic variance and shorter dispersal distances are less likely to become extinct due to climate change. This is because reduced connectivity facilitates the fixation of mutations that may allow species to adapt to the new environmental conditions. 
+
+This contradicts the current understanding that populations well-connected at large spatial scales are less vulnerable to disturbances. The rationale behind this idea is that isolated populations have a greater difficulty to recover from disturbances, since they do not receive recruits from other locations. In terms of management for conservation, this has led to an effort in designing networks of protected areas that maximise the connectivity among populations (e.g. spacing of marine protected areas and green corridors). While maximising connectivity is a valid practice to minimise risks of extinction due to habitat fragmentation and episodic acute disturbances, Norberg et al.'s findings suggest it might not be ideal to face climate change. Thus, instead of aiming to 'maximise' connectivity, maybe we should start aiming to 'optimise' connectivity. 
+
+The authors also highlight the role of competition in the extinction of species and predict the occurrence of extinction and evolutionary debts, i.e. changes in species richness that occur long after the climate stabilises.

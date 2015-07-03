@@ -471,11 +471,14 @@ ggsave("figs/SpanClusRepl_T3000_64_side_meta.png", width=6,height=6,units="in",d
 
 m   <-round(0.0001596079,9)
 alfa <-round(2.03897,5)
-
+side <- 512
+nsp <- 64
+nSimul <- 30
+time <- 5000
 
 require(plyr)
 require(dplyr)
-mClusters <- filter(Clusters, Time==5000,MetaNsp==64,DispersalDistance==2.03897,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+mClusters <- filter(Clusters, Time==5000,MetaNsp==64,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
 
 
 require(ggplot2)
@@ -515,7 +518,7 @@ ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme
 #
 # The same Plot in linear x scale 
 #
-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + xlim(0,0.02) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green")
+ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + xlim(0,0.02) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green") + ylab("Probability of Spanning cluster")
 ggsave("figs/SpanPvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
 
 
@@ -524,13 +527,21 @@ ggsave("figs/SpanPvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dp
 #
 tClusters <- Clusters %>% filter(Time==5000,MetaNsp==64)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
 k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
+
+tClusters <- Clusters %>% filter(Time==time,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
+k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
+
+#
+# H vs rho
+#
 ggplot(tClusters, aes(x=ReplacementRate, y=H)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green")
 ggsave("figs/HvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
 
 #
-# The same Plot in linear x scale 
-
+# H vs rho in linear x scale 
+#
 ggplot(tClusters, aes(x=ReplacementRate, y=H)) + geom_point(alpha=.2) + theme_bw() + xlim(0,0.02) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green")
+ggsave("figs/HvsRepl_T5000_64_side_meta_lin.png", width=6,height=6,units="in",dpi=600)
 
 
 #
@@ -538,6 +549,11 @@ ggplot(tClusters, aes(x=ReplacementRate, y=H)) + geom_point(alpha=.2) + theme_bw
 #
 ggplot(tClusters, aes(x=ReplacementRate, y=Richness)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y") +xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green")
 ggsave("figs/RichvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
+
+#
+# Richness vs rho linear scale
+#
+ggplot(tClusters, aes(x=ReplacementRate, y=Richness)) + geom_point(alpha=.2) + theme_bw() + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green")
 
 
 #
@@ -582,13 +598,13 @@ mc <- c("#a50026","#d73027","#f46d43","#fdae61","#fee090","#e0f3f8","#abd9e9","#
 #
 # What happens at time=5000
 #
-setwd("Simul")
 options("scipen"=0, "digits"=4)
 
 time <- 5000
 # kk <- Clusters %>% filter(Time==time) %>% group_by(Side,MetaType,ReplacementRate) %>% summarise(n=n())
 # unique(kk$ReplacementRate)
 
+# ADD 
 rank <- plotNeutral_SAD_1T(64,512,ReplRate,time,"L",T)
 rank$MetaType="Logseries"
 r1 <-  plotNeutral_SAD_1T(64,512,ReplRate,time,"U",T) 
@@ -601,7 +617,7 @@ g <- ggplot(rank,aes(x=Rank,y=log(Freq),colour=factor(ReplacementRate))) +  them
 g + scale_colour_manual(values=mc,name=bquote("  "~rho))  + geom_line() + facet_grid(. ~ MetaType, scales="free_x" )
 #g + scale_colour_discrete(name=bquote("  "~rho))  + geom_line() + facet_grid(. ~ MetaType, scales="free_x" )
 setwd(oldcd)
-ggsave("figs/SAD_T5000_64_512_meta.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/SAD_T5000_64_512_meta.png", width=6,height=4,units="in",dpi=600)
 
 #
 # Time =3000
@@ -682,8 +698,8 @@ nSimul <- 1
 
 ReplRate <- c(0.0000,0.0005,0.0010,0.0013,0.0016,0.0020,0.0050,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
 
-ReplRate <- c(0.0000, 0.0013,0.0020,0.0050)
 ReplRate <- c(0.0000,0.0005,0.0010,0.0013)
+ReplRate <- c(0.0000,0.0013,0.0020,0.0050)
 time <- 5000
 
 #ReplRate <- c(0.1)
@@ -693,6 +709,12 @@ options("scipen"=0, "digits"=4)
 plotNeutral_SpatPat(nsp,side,time,meta=c("U"),ReplRate,T)
 setwd(oldcd)
 ggsave("figs/SpatSpan_Repl_T5000_64_256_Unif.png", width=6,height=6,units="in",dpi=600)
+
+setwd("Simul")
+ReplRate <- c(0.0000,0.0013,0.0020,0.0050)
+plotNeutral_SpatPat(nsp,side,time,meta=c("L"),ReplRate,T)
+setwd(oldcd)
+ggsave("figs/SpatSpan_Repl_T5000_64_256_Logser.png", width=6,height=6,units="in",dpi=600)
 
 # All species
 setwd("Simul")
@@ -1185,11 +1207,13 @@ rhoCrit <- arrange(rhoCrit,MetaType)
 pandoc.table(rhoCrit)
 save.image()
 
-ggplot(filter(rhoCrit,DispersalDistance!=13.34),aes(x=ColonizationRate,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ scale_x_log10() + theme_bw() 
+ggplot(filter(rhoCrit,round(DispersalDistance,1)==26.7),aes(x=ColonizationRate,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ scale_x_log10() + theme_bw() + xlab("Migration") + ylab("Critical Probability")
+ggsave("figs/CritProb_Migr_T5000_64_meta.png", width=6,height=4,units="in",dpi=600)
 
-rhoCrit <- mutate(rhoCrit,ColonizationRate=ifelse(ColonizationRate==0.0001596079,0.000159608,ColonizationRate))
+#rhoCrit <- mutate(rhoCrit,ColonizationRate=ifelse(ColonizationRate==0.0001596079,0.000159608,ColonizationRate))
 
-ggplot(filter(rhoCrit,round(ColonizationRate,9)==0.000159608),aes(x=DispersalDistance,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ theme_bw() 
+ggplot(filter(rhoCrit,round(ColonizationRate,9)==0.000159608),aes(x=DispersalDistance,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ theme_bw() +xlab("Dispersal Distance") + ylab("Critical Probability")
+ggsave("figs/CritProb_Disp_T5000_64_meta.png", width=6,height=4,units="in",dpi=600)
 
 
 plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
@@ -1215,7 +1239,7 @@ m <-  0.0001596079
 alfa <- 2.038974
 side <- 512
 nsp <- 64
-nSimul <- 3
+nSimul <- 6
 time <- 5000
 #time <- 100
 ReplRate <- c(0.0000,0.0005,0.0010,0.0020,0.0030,0.004,0.005,0.01)
@@ -1237,17 +1261,16 @@ setwd(oldcd)
 
 Models <- rbind(Models,Mdl)
 
-rm(cn,cl,Mdl)
+rm(cn,cl,Mdl,p)
 
 save.image()
 
 ```
 
 
-# Plot the cluster sizes with fitted functions, and relation of power exponent with ReplacementRate
+# Plot the cluster sizes with fitted functions
  
-```{r plotdisp26_cluAll_side_64_meta30_T5000, eval=T,echo=F,message=T,warning=T}
-setwd(oldcd)
+```{r plotFitdisp26_cluAll_side_64_meta30_T5000, eval=T,echo=F,message=T,warning=T}
 source("R/powerlaw/discpowerexp.R")
 source("R/powerlaw/discexp.R")
 source("R/powerlaw/powerexp.R")
@@ -1262,7 +1285,7 @@ m <-  0.0001596079
 alfa <- 2.038974
 side <- 512
 nsp <- 64
-nSimul <- 3
+nSimul <- 10
 time <- 5000
 ReplRate <- c(0.0000,0.0005,0.0010,0.0020,0.0030,0.004,0.005,0.01)
 p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(256),meta=c("U","L")) 
@@ -1270,15 +1293,88 @@ p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(256),meta=c("U","L"))
 for(i in 1:nrow(p)){
   plotNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],time,p$meta[i],Models)
 }
+setwd(oldcd)
 
+```
+
+# Plot relation of power exponent/ exponential rate with ReplacementRate
+
+```{r plotdisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+setwd(oldcd)
+
+#
+# Hacer grafico con proporcion de ajustes 
 require(ggplot2)
 require(dplyr)
 Models <- ungroup(Models)
-namType <- c("c) Spanning","a) Abundant","b) Other Abund","d) Other Spanning")
-mMdl <- filter(Models,model=="PowExp",MetaType=="L") %>% mutate(type=namType[type])
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red")
-ggplot(mMdl,aes(x=ReplacementRate,y=rate)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") 
+namType <- c("a) Spanning","b) Abundant","d) Other Abund","c) Other Spanning")
+namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other Species")
 
-mMdl <- filter(Models,model=="PowExp",MetaType=="U") %>% mutate(type=namType[type])
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red")
-ggplot(mMdl,aes(x=ReplacementRate,y=rate)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") 
+mMdl <- group_by(Models,model,type) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
+mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc) + theme_bw()
+
+
+# Select Power or Power exponential models
+#
+mMdl <- filter(Models,DeltaAIC==0,MetaType=="L",model %in% c("PowExp","Pow")) %>% mutate(typeAb=namTypeAb[type],type=namType[type],rate=ifelse(model=="PowExp",rate,NA))
+
+# Plot of power exponent 
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line") + 
+  scale_x_continuous(breaks=c(0,0.0010,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) +guides(colour=F) + ylab("Power exponent")+ xlab(bquote(rho))
+ggsave("figs/discExp_T5000_64_256_Logser.png", width=6,height=4,units="in",dpi=600)
+
+
+ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line")  + 
+  scale_x_continuous(breaks=c(0,0.0010,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) +guides(colour=F) + ylab("Exponential rate") + xlab(bquote(rho))
+ggsave("figs/discRate_T5000_64_256_Logser.png", width=6,height=4,units="in",dpi=600)
+
+
+# Select Power or Power exponential models for Metacommunity  Uniform
+#
+mMdl <- filter(Models,DeltaAIC==0,MetaType=="U",model %in% c("PowExp","Pow")) %>% mutate(typeAb=namTypeAb[type],type=namType[type],rate=ifelse(model=="PowExp",rate,NA))
+
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line") +
+  scale_x_continuous(breaks=c(0,0.0010,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) +guides(colour=F)+ ylab("Power exponent")+ xlab(bquote(rho))
+ggsave("figs/discExp_T5000_64_256_Unif.png", width=6,height=4,units="in",dpi=600)
+
+
+ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line") +
+  scale_x_continuous(breaks=c(0,0.0010,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) +guides(colour=F) + ylab("Exponential rate") + xlab(bquote(rho))
+
+ggsave("figs/discRate_T5000_64_256_Unif.png", width=6,height=4,units="in",dpi=600)
+
+# Exponential rate of other sp
+#
+mMdl <- filter(Models,model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
+ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Exponential rate") + xlab(bquote(rho))
+ggsave("figs/discRateOther_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
+
+# Power exponent rate of other sp
+#
+mMdl <- filter(Models,model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Power exponent") + xlab(bquote(rho))
+ggsave("figs/discExpOther_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
+
+# Power exponent rate of spanning or most abundant  sp
+#
+mMdl <- filter(Models,model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Power exponent") + xlab(bquote(rho))
+ggsave("figs/discExpSpan_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
+
+# Exponential rate of spanning or  most abundant sp
+#
+mMdl <- filter(Models,model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
+ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Exponential rate") + xlab(bquote(rho))
+ggsave("figs/discRateSpan_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
+
+
+```

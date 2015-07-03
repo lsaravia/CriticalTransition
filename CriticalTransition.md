@@ -32,7 +32,7 @@ The model shows a phase transition between neutral an niche communities that pro
 
 ## Abstract
 
-The dynamics of ecological communities can be described by two contrasting models: the first assumes that the individuals of all species are identical and do not have competitive interactions, the second assumes that species are different, adapted to particular habitat conditions and have strong interactions. These represent extremes of a continuum: the first is the neutral and the later the niche model of communities. Real communities are a mixture of both dynamics. Here I study the simplest model of neutral-niche communities where niche dynamics is represented as a competitive hierarchy. The competition intensity is represented as a parameter that modulates the transition between these extremes. I use a stochastic cellular automata to show that there is a phase transition between the neutral and niche model with a spanning cluster formed by the most abundant species. The transition implies a sharp fall of species diversity (Shannon entropy) but the richness (number of species) shows a gentle decline with increasing competitive intensity. The critical point is at a very low value of competitive intensity and the same was reported for different real communities. Thus it will be possible that a mechanism of self-organization is driving communities to criticality, that mechanism could be similar but not equal to self-organizing criticality.
+The dynamics of ecological communities can be described by two contrasting models: the first assumes that the individuals of all species are identical and do not have competitive interactions, the second assumes that species are different, adapted to particular habitat conditions and have strong interactions. These represent extremes of a continuum: the first is the neutral and the later the niche model of communities. Real communities are actually a mixture of both dynamics. Here I study the simplest model of neutral-niche communities where niche dynamics is represented as a competitive hierarchy. The competition intensity is represented as a parameter that modulates the transition between these extremes. I use a stochastic cellular automata to show that there is a phase transition between the neutral and niche model with a spanning cluster formed by the most abundant species. The transition implies a sharp fall of species diversity (Shannon entropy) but the richness (number of species) shows a gentle decline with increasing competitive intensity. The critical point is at a very low value of competitive intensity and the same was reported for different real communities. Thus it will be possible that a mechanism of self-organization is driving communities to criticality, that mechanism could be similar but not equal to self-organizing criticality.
 
 
 ## Introduction
@@ -67,3 +67,6 @@ When can we distinguish between neutral and non-neutral processes in community d
 
 Beta-Diversity in Tropical Forest Trees [@Condit2002; @Chave2002a]  
 
+# Methods
+
+# Results

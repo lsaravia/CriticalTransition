@@ -142,18 +142,21 @@ pairwiseAD_Dif <- function(denl,vv,parms){
 
 # Read simulation output and change from wide to long format NO TIME
 #
-meltDensityOut_NT <- function(fname,num_sp){
+meltDensityOut_NT <- function(fname,num_sp,colRate=0,dispDist=0,time=0){
   if(!grepl("Density.txt",fname)) fname <- paste0(fname,"Density.txt")
+  require(plyr)
+  require(dplyr)
 
   den <- read.delim(fname,stringsAsFactors = F)
   names(den)[1:5]<-c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate")
+  if(colRate!=0) {
+    den <- filter(den,ColonizationRate==colRate,DispersalDistance==dispDist,Time==time)
+  }
   
   # from 7 to 473 there are species densities
   # Put simpler names to variables to identify species
   names(den)[7:(6+num_sp)]<-as.character(1:num_sp)
 
-  require(plyr)
-  
   den <- ddply(den, 1:5, function(x){ i <- c(1:nrow(x)); data.frame(x,rep=i)})
   
   require(reshape2)
@@ -1412,54 +1415,89 @@ plotCCDF_Neutral_Clusters <-function(clu,mdl,meta){
       m1 <- filter(mdl,model=="Exp")
       mExp$setXmin(xmin)
       mExp$setPars(m1$alfa)
-  
+      tit <- paste("Rho",unique(clu$ReplacementRate),tdes,"Rep",unique(mdl$Rep),meta)
   
   #    fname <- paste0("pLaw_R",unique(clu$ReplacementRate),"_T",tipo,"_Rep",unique(clu$Rep))
   
   #    png(filename=fname,res=300,units = "mm", height=200, width=200)
-      plot(mPow,main=paste("Rho",unique(clu$ReplacementRate),tdes,paste0(sp,collapse=" ")),xlab="Patch Area",ylab="log[P(X > x)]")
-      lines(mPow,col=2)
-      lines(mExp,col=3)
+#      plot(mPow,main=paste("Rho",unique(clu$ReplacementRate),tdes,paste0(sp,collapse=" ")),xlab="Patch Area",ylab="log[P(X > x)]")
+#      lines(mPow,col=2)
+#      lines(mExp,col=3)
       
       # Estimate Power with exponential cutoff
       #
-      m1 <- filter(mdl,model=="PowExp")
-      x <- sort(unique(clu$ClusterSize))
-      y <- pdiscpowerexp(x,m1$alfa,m1$rate,xmin)
-      y <- y/max(y)
-      lines(x,y,col=4)
+      m2 <- filter(mdl,model=="PowExp")
+#      x <- sort(unique(clu$ClusterSize))
+#      y <- pdiscpowerexp(x,m1$alfa,m1$rate,xmin)
+#      y <- y/max(y)
+#      lines(x,y,col=4)
   #    dev.off()
-      #cdfplot_displ_exp(clu$ClusterSize,m0$alfa,m1$alfa,m1$rate,xmin)
+      freq_plot_displ_exp(clu$ClusterSize,m0$alfa,m1$alfa,m2$alfa,m2$rate,xmin,tit)
+      #cdfplot_displ_exp(clu$ClusterSize,m0$alfa,m1$alfa,m2$alfa,m2$rate,xmin,tit)
     }
   }
 
 }
 
-cdfplot_displ_exp <- function(x,exp1,exponent,rate,xmin=1)
+cdfplot_displ_exp <- function(x,exp0,exp1,exponent,rate,xmin=1,tit="")
 {
-  x <- sort(x)
-  len_tP <-length(x)
-  tP <- data.frame(psize=x,Rank=c(len_tP:1)/len_tP)
+  m <- displ$new(x)
+  tP <- plot(m,draw=F)
+  m <- disexp$new(x)
+  m$setPars(exp1)
+#  x <- sort(x)
+#  len_tP <-length(x)
+#  tP <- data.frame(psize=x,Rank=c(len_tP:1)/len_tP)
   require(ggplot2)
   require(dplyr)
   x <- unique(x)
   # Plot with base plot and poweRlaw package
   #
-  tP1 <- data.frame(psize=x,powl=pzeta(x,xmin,exp1,F))
-  tP2 <- data.frame(psize=x,powl=pdiscpowerexp(x,exponent,rate,xmin)) 
-  #tP2 <-filter(tP2, powl>= min(tP$Rank))
+  tP1 <- data.frame(psize=x,powl=pzeta(x,xmin,exp0,F))
+  tP2 <- data.frame(psize=x,powl=pdiscpowerexp(x,exponent,rate,xmin))
+  tP2 <- mutate(tP2, powl = powl/max(powl)) # y <- y/max(y)
+  tP3 <- data.frame(psize=x,powl=dist_cdf(m,x,lower_tail=F))
+#tP2 <-filter(tP2, powl>= min(tP$Rank))
   #tP1 <-filter(tP1, powl>= min(tP$Rank))
   
   mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
   
-  g <- ggplot(tP, aes(y=Rank,x=psize)) +  theme_bw() + geom_point(alpha=0.3) + 
-    scale_y_log10() +scale_x_log10() + ylab("ccdf") 
+  g <- ggplot(tP, aes(y=y,x=x)) +  theme_bw() + geom_point(alpha=0.3) + coord_cartesian(ylim=c(1,min(y)))+
+    scale_y_log10() +scale_x_log10() + ylab("ccdf") + xlab("Patch size") +ggtitle(tit)
   
-  print(g + geom_line(data=tP1,aes(y=powl,x=psize,colour="Power law")) + 
-          geom_line(data=tP2,aes(y=powl,x=psize,colour="Power law with\nexp cutoff"))+
+  g <- g + geom_line(data=tP1,aes(y=powl,x=psize,colour="P.law")) + 
+          geom_line(data=tP2,aes(y=powl,x=psize,colour="P.law with\nexp. cutoff"))+
+          geom_line(data=tP3,aes(y=powl,x=psize,colour="Exp."))+
           scale_colour_manual(values=mc,name="")  
-  ) 
+  
+  fil <- gsub(" ", "", tit, fixed = TRUE)
+  ggsave(fil,plot=g)
 }
+
+freq_plot_displ_exp <- function(x,exp0,exp1,exponent,rate,xmin=1,tit="")
+{
+  xx <-as.data.frame(table(x))
+  xx$x <- as.numeric(xx$x)
+  xx$pexp <-ddiscpowerexp(xx$x,exponent,rate,xmin)
+  xx$pow  <-dzeta(xx$x,xmin,exp0)
+  xx$exp  <-ddiscexp(xx$x,exp1,xmin)
+  xx$Freq <- xx$Freq/sum(xx$Freq)
+  g <- ggplot(xx, aes(y=Freq,x=x)) +  theme_bw() + geom_point(alpha=0.3) + #coord_cartesian(ylim=c(1,min(xx$Freq)))+
+    scale_y_log10() +scale_x_log10() + ylab("Frequency") + xlab("Patch size") +ggtitle(tit)
+
+  mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+  
+  g <- g + geom_line(aes(y=pow,x=x,colour="P.law")) + 
+          geom_line(aes(y=pexp,x=x,colour="P.law with\nexp. cutoff"))+
+          geom_line(aes(y=exp,x=x,colour="Exp."))+
+          scale_colour_manual(values=mc,name="")  
+  
+  fil <- gsub(" ", "", tit, fixed = TRUE)
+  fil <- paste0(fil,".png")
+  ggsave(fil,plot=g)
+  
+}
+
 
 # Discrete power law with exponential cutoff 
 # Cumulative distribution function
@@ -1692,8 +1730,8 @@ plotNeutral_SpatPat<-function(nsp,side,time,meta,ReplRate,spanClu=F)
     g <- ggplot(spa, aes(x, y, fill = factor(SpanningSpecies))) + geom_raster(hjust = 0, vjust = 0) + 
       theme_bw() + coord_equal() 
     g <- g +  scale_fill_manual(values=mc[c(5,9,1)],name="Species",labels=c("Other","Spanning","Most abundant")) +
-      scale_x_continuous(expand=c(.01,.01)) + 
-      scale_y_continuous(expand=c(.01,.01)) +  
+      scale_x_continuous(expand=c(.01,.01),breaks=NULL) + 
+      scale_y_continuous(expand=c(.01,.01),breaks=NULL) +  
       labs(x=NULL, y=NULL) 
   } else {
   
@@ -1702,15 +1740,15 @@ plotNeutral_SpatPat<-function(nsp,side,time,meta,ReplRate,spanClu=F)
   #  g <- g + scale_fill_gradient(low="red", high="green", guide=F) +
   #  g <- g + scale_fill_grey(guide=F) +
     g <- g + scale_fill_gradientn(colours=mc,guide="colourbar",name="Species no.") + #guide=F
-      scale_x_continuous(expand=c(.01,.01)) + 
-      scale_y_continuous(expand=c(.01,.01)) +  
+      scale_x_continuous(expand=c(.01,.01),breaks=NULL) + 
+      scale_y_continuous(expand=c(.01,.01),breaks=NULL) +  
       labs(x=NULL, y=NULL) 
   }
   if(length(meta)>1) {
     g <- g + facet_grid( Repl ~ MetaType)
   } else { 
     #  g <- g + facet_wrap( ~ Repl + Species,ncol=2)
-    g <- g + facet_wrap( ~ Repl ,ncol=2)
+    g <- g + facet_wrap( ~ Repl + Species ,ncol=2)
   }
   print(g)
   
@@ -1852,7 +1890,7 @@ R2Neutral_Dq<-function(side,time=500,meta="L")
 #  local=T : plots the average of local RAD
 #        F : plots metacommunity RAD
 #
-plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T,cpal="")
+plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T,cpal="",m=0.000159608,alfa=2.08107)
 {
   require(ggplot2)
   require(plyr)
@@ -1867,8 +1905,9 @@ plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T,cpal="")
         bname <- paste0("neuUnif",nsp,"_",side,"R", r)
       }
       fname <- paste0(bname ,"T", time, "Density.txt")
-
-      den <- meltDensityOut_NT(fname,nsp)
+      
+      # Select simulations 
+      den <- meltDensityOut_NT(fname,nsp,m,alfa,time)
       if(local) {
         den <- calcRankSAD_by(den,"value",1:5)
         #den <- rename(den,Freq=value)
