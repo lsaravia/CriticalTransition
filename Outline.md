@@ -1,5 +1,17 @@
 # A spatial phase transition between neutral and niche ecological communities
 
+# The critical transition between hierarchical competition and neutrality in ecological communities
+
+## Abstract
+
+Ecological communities are shaped by a mixture of niche-based and neutral ecological processes. In neutral communities individuals are identical except for is abundance in a metacommunity and the dynamics is dominated by demographic stochasticity and dispersal. Niche communities can be represented by competitive hierarchies were replacement of competitive superior species occurs. Here I present the most simple model representing the continuum of neutral-niche communities. I add to a classical neutral model a competitive hierarchy where each species have a probability $\rho$ of replace another species that measures competitive intensity. 
+In this model shows a phase transition between neutral an niche communities that produce a spanning cluster of the most competitive species is observed. The diversity (measured with Shannon index) have and abrupt fall but richness shows a slower decrease. The critical point is observed at a very low value of the competitive intensity, thus weak competition can have a strong effect on communities. Some recent studies suggest that most communities present weak competitive interactions thus they may be near the critical point, understanding the dynamics this phase transition will be very important to prevent shifts in community structure.  
+
+## Abstract (to present the model and this lack of trade-off)
+
+Ecological communities are shaped by a mixture of niche-based and neutral ecological processes. In neutral communities individuals are identical except for is abundance in a metacommunity and the dynamics is dominated by demographic stochasticity and dispersal. Niche communities can be represented by competitive hierarchies and to maintain diversity some form of trade-off is assumed. Here I present the most simple model representing the continuum of neutral-niche communities. I add to a classical neutral model a competitive hierarchy where each species have a probability $\rho$ of replace another species. 
+The model shows a phase transition between neutral an niche communities that produce a biodiversity collapse. This phase transition is characteristic of some ecological systems and has been termed robust criticality. Here we describe for the first time the observation of this kind of criticality for a community assembly model.  
+
 * There is a critical transition from neutral communities to competitive communities, when the degree of competition reachs the critical value there is a sharp drop in the Shannon diversity, the number of species drops more slowly
 
 * We studied this effect using spatially explicit models using both number of species and shannon equitativity index 

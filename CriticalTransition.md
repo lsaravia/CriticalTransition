@@ -1,31 +1,22 @@
-
-# The critical transition between hierarchical competition and neutrality in ecological communities
-
 # A spatial phase transition between neutral and niche ecological communities
 
-**Leonardo A. Saravia**, Ph.D.
+**Leonardo A. Saravia** ^1^, **Jordi Bascompte** ^2^
 
-Instituto de Ciencias Básicas
+1. Instituto de Ciencias Básicas
 
-Universidad Nacional de General Sarmiento
+	Universidad Nacional de General Sarmiento
 
-J.M. Gutierrez 1159 (1613), Los Polvorines
+	J.M. Gutierrez 1159 (1613), Los Polvorines
 
-Buenos Aires, Argentina.
+	Buenos Aires, Argentina.
 
-<lsaravia@ungs.edu.ar>
+	<lsaravia@ungs.edu.ar>
 
+2. Institute of Evolutionary Biology and Environmental Studies University of Zurich
+	
+	Winterthurerstrasse 190, 8057 Zurich Switzerland
 
-
-## Abstract
-
-Ecological communities are shaped by a mixture of niche-based and neutral ecological processes. In neutral communities individuals are identical except for is abundance in a metacommunity and the dynamics is dominated by demographic stochasticity and dispersal. Niche communities can be represented by competitive hierarchies were replacement of competitive superior species occurs. Here I present the most simple model representing the continuum of neutral-niche communities. I add to a classical neutral model a competitive hierarchy where each species have a probability $\rho$ of replace another species that measures competitive intensity. 
-In this model shows a phase transition between neutral an niche communities that produce a spanning cluster of the most competitive species is observed. The diversity (measured with Shannon index) have and abrupt fall but richness shows a slower decrease. The critical point is observed at a very low value of the competitive intensity, thus weak competition can have a strong effect on communities. Some recent studies suggest that most communities present weak competitive interactions thus they may be near the critical point, understanding the dynamics this phase transition will be very important to prevent shifts in community structure.  
-
-## Abstract (to present the model and this lack of trade-off)
-
-Ecological communities are shaped by a mixture of niche-based and neutral ecological processes. In neutral communities individuals are identical except for is abundance in a metacommunity and the dynamics is dominated by demographic stochasticity and dispersal. Niche communities can be represented by competitive hierarchies and to maintain diversity some form of trade-off is assumed. Here I present the most simple model representing the continuum of neutral-niche communities. I add to a classical neutral model a competitive hierarchy where each species have a probability $\rho$ of replace another species. 
-The model shows a phase transition between neutral an niche communities that produce a biodiversity collapse. This phase transition is characteristic of some ecological systems and has been termed robust criticality. Here we describe for the first time the observation of this kind of criticality for a community assembly model.  
+	<jordi.bascompte@ieu.uzh.ch>
 
 ## Abstract
 
@@ -38,52 +29,21 @@ Much effort has been devoted to understand the mechanisms of community assembly 
 
 Finally arises a unified view that accepts that both kinds of mechanisms are present at the same time and try to quantify the importance of these in natural communities [@Leibold2006; @Martorell2014; @Vergnon2009; @Kalyuzhny2014]. The main point is to understand which species level traits are important for community dynamics and which ones are unimportant [@Matthews2014], and this is related to the scale of observation. The problems of pattern and scale are critical in ecology [@Chave2013; @Levin1992], because patterns that seem stochastic at one scale may reveal structure at another scale. The concept of pattern is related to some sort of repetition that our brain can detect, but when this pattern repeats at different scales we talk about scale invariance or auto-similarity, and these patterns could be produced by critical phase transitions. Critical phase transitions were first introduced in ecology in the framework of habitat fragmentation [@Bascompte1996]. This phenomenon is characterized by the presence of two phases defined by some macroscopic features, that are linked by a critical point were a sudden transition happens [@Sole2006]. 
 
-Several different ecological spatial models exhibit critical behavior related to the degree of disturbance [@Pascual2005a]. Some of these models showed robust criticality: a particular kind of criticality discovered for ecological systems [@Roy2003], where the scaling laws are present for a wide range of parameters. More important is that this kind of criticality has been documented for arid ecosystems [@Sole2007]; here the sudden shift towards a desert condition might occur when rainfall decrease [@Scanlon2007]or also with more intense grazing [@Kefi2007b]. The main mechanism is the positive effect produced by local facilitation, the chance of a new seedling to become established is higher near the parent plant.
+Several different ecological spatial models exhibit critical behavior related to the degree of disturbance [@Pascual2005a]. Some of these models showed robust criticality: a particular kind of criticality discovered for ecological systems [@Roy2003], where the scaling laws are present for a wide range of parameters. More important is that this kind of criticality has been documented for arid ecosystems [@Sole2007]; here the sudden shift towards a desert condition might occur when rainfall decrease [@Scanlon2007] or also with more intense grazing [@Kefi2007b]. The main mechanism is the positive effect produced by local facilitation, the chance of a new seedling to become established is higher near the parent plant.
 
-Another example of an ecosystem exhibiting criticality are savannas, where the transition occurs between tree and grass cover [@Abades2014]. In critical phenomena the transition is produced by the capacity of the system to transmit some signal or information, in savannas the proportion of 60% grass 40% trees is linked to the threshold needed for fire to spread. The increase in the proportion of trees, due to a change in environmental conditions, can create positive feedback mechanism resulting in the encroachment of savanna ecosystems [@Abades2014].  
+Another example of an ecosystem exhibiting criticality are savannas, where the transition occurs between tree and grass cover [@Abades2014]. In critical phenomena the transition is produced by the capacity of the system to transmit some signal or information, in savannas the proportion of 60% grass 40% trees is linked to the threshold needed for fire to spread. The increase in the proportion of trees, due to a change in environmental conditions, can create positive feedback mechanisms resulting in the encroachment of savanna ecosystems [@Abades2014].  
 
-* NEUTRAL MODELS produce power laws [@Manor2008]!  
+Here I study a new kind of ecological phase transition that is not related to disturbance or fire, is the transition between a neutral and a niche community. This phase transition has been studied in non-spatial models [@Fisher2014]. I formulated the simplest model of neutral-niche communities where niche dynamics is represented as a competitive hierarchy [@Saravia2015]. This spatially explicit model unifies the Tilman's model of hierarchical competition with the classical neutral model using one parameter: the competition intensity. This parameter is represented as the probability that one species replace another and modulates the transition between the neutral phase and niche phase. 
 
-* Phase transition not linked to disturbances but to competence!!
+Our aim is to demonstrate the existence of a spatial phase transition, to explore the dependence of the critical point with some model's parameters and to suggest some possible early warnings of the transition.
 
-(
-Kalyuzhny M, Seri E, Chocron R, Flather CH, Kadmon R, Shnerb NM
-Niche versus neutrality: a dynamical analysis.
-The American naturalist. 
-
-2014Fort H, Inchausti P Tropical forests are non-equilibrium ecosystems governed by interspecific competition based on universal 1/6 niche width.
-PloS one. 2013
-Condit R, Chisholm RA, Hubbell SP Thirty years of forest census at Barro Colorado and the importance of immigration in maintaining diversity.
-PloS one. 2012 
-
-)
-
-Here I study the simplest model of neutral-niche communities where niche dynamics is represented as a competitive hierarchy. The competition intensity is represented as a parameter that modulates the transition between these extremes. 
-
-Following this view I present a model that unify the Tilman's model of hierarchical competition with the classical neutral model using one parameter $\rho$ to link them in a spatially extended system. In this model a phase transition that produce a biodiversity collapse is observed. 
-
-I use a stochastic cellular automata to show that there is a phase transition between the neutral and niche model with a spanning cluster formed by the most abundant species.
 
 * biodiversity collapse [@Sole2004c]
 
 * Multispecies early indicators [@Dakos2014]
 
 
-* Communities evolve to avoid competition (Ghost of competition) thus they naturally have a very low competitive intensity. The effect of the niche is to keep low the competitive intensity 
 
-* Fragmentation push the critical value to a lower competitive intensity - Comparison of fragments of different sizes with neutral dynamics rho=0 and with rho near critical value. Fragmentation makes the community to cross the critical value and become more hierarchical. 
-
-See [@Pueyo2007] 
-
-dos Santos FAS, Johst K, Grimm V (2011) Neutral communities may lead to decreasing diversity-disturbance relationships: insights from a generic simulation model. Ecol Lett 14: 653–660. doi:10.1111/j.1461-0248.2011.01626.x.
-
-Reconciling neutral community models and environmental filtering: theory and an empirical test [@Jabot2008; ]
-
-Quantifying the importance of local niche-based and stochastic processes to tropical tree community assembly [@Shipley2011]
-
-When can we distinguish between neutral and non-neutral processes in community dynamics under ecological drift? [@Ruokolainen2009] 
-
-Beta-Diversity in Tropical Forest Trees [@Condit2002; @Chave2002a]  
 
 # Methods
 
@@ -133,5 +93,10 @@ $1/N$, the intercept becomes an estimate for a lattice of infinite size [@Stauff
 
 * This phase transition is characteristic of some ecological systems and has been termed robust criticality. Here we describe for the first time the observation of this kind of criticality for a community assembly model. 
 
+* Communities evolve to avoid competition (Ghost of competition) thus they naturally have a very low competitive intensity. The effect of the niche is to keep low the competitive intensity. This suggest the possible existence of mechanism similar to critical self organization. 
+
+* Fragmentation push the critical value to a lower competitive intensity - Comparison of fragments of different sizes with neutral dynamics $\rho=0$ and with rho near critical value. Fragmentation makes the community to cross the critical value and become more hierarchical. 
+
+* 
 
 # References
