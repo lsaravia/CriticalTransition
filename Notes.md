@@ -246,3 +246,74 @@ This interesting study investigates the role of multi-species interactions and e
 This contradicts the current understanding that populations well-connected at large spatial scales are less vulnerable to disturbances. The rationale behind this idea is that isolated populations have a greater difficulty to recover from disturbances, since they do not receive recruits from other locations. In terms of management for conservation, this has led to an effort in designing networks of protected areas that maximise the connectivity among populations (e.g. spacing of marine protected areas and green corridors). While maximising connectivity is a valid practice to minimise risks of extinction due to habitat fragmentation and episodic acute disturbances, Norberg et al.'s findings suggest it might not be ideal to face climate change. Thus, instead of aiming to 'maximise' connectivity, maybe we should start aiming to 'optimise' connectivity. 
 
 The authors also highlight the role of competition in the extinction of species and predict the occurrence of extinction and evolutionary debts, i.e. changes in species richness that occur long after the climate stabilises.
+
+----------
+@Rosindell2011 The Unified Neutral Theory of Biodiversity and Biogeography at Age Ten.
+
+Many different models can explain the same sampled
+species abundance data [16–18]. Even models based on
+neutral theory, but introducing a particular niche struc-
+ture, give mathematically identical results to the classic
+neutral model at large spatial scales [19,20]. On the one
+hand, this implies that neutral models are robust to the
+introduction of certain niche structures, but on the other
+hand, it means that species abundance data will not always
+be able to distinguish various models.
+
+
+For example, fits of species–area curves by neutral models were not realistic [26,27] until long-distance dispersal was incorporated [28] (Box 3). This supports the general concept that long-distance dispersal is
+important [29].
+
+-------------
+@Hubbell2005 Neutral theory in community ecology and the hypothesis of functional equivalence
+
+
+The importance of trade-offs in resource use led Tilman (1994) to consider trade-offs in other life-history characteristics besides those involving resource exploitation, and here additional problems with the classical paradigm began to surface. In particular, Tilman revisited the old fugitive species concept of Hutchinson, and showed theoretically that if there was a strict transitive trade-off between competitive ability (site tenacity) and dispersal ability then, in principle, any arbitrary number of species could coexist.
+
+However, soon thereafter, Hurtt & Pacala (1995) showed that Tilman’s trade-off assumption could be relaxed and that species of arbitrary competitive and dispersal abilities could coexist if dispersal and recruitment limitation were sufficiently strong. Hurtt and Pacala defined dispersal and recruitment limitation as the failure of species to reach and/or establish in all sites favourable for their growth and survival. When dispersal was infinite, such that all species reached all sites, then the best competitor won each site for which it was superior, the equilibrium solution expected from the classical theory. However, when dispersal and recruitment limitation were strong, many sites were won by default by competitively inferior species because the best competitor for the sites failed to reach them. Although the coexistence produced by this mechanism is non-equilibrium, Hurtt and Pacala showed that competitive exclusion could be essentially infinitely delayed. This result meant that Gause’s competitive exclusion principle was not generally true in spatial ecology. The slowness to reach equilibrium also depended on species richness.
+
+---------------
+
+@Jabot2008 Reconciling neutral community models and environmental filtering: theory and an empirical test
+
+Value of m
+
+--------------
+@Condit2012 Thirty Years of Forest Census at Barro Colorado and the Importance of Immigration in Maintaining Diversity
+
+Value of m
+
+--------------
+@Sole2007 Scaling laws in the drier
+
+A fuller theory of scaling behaviour is required to provide firmer connections between predicted and observed patterns of desertification---and so to provide a better understanding of the nature of transitions between green and desert phases. These belong to the family of non-equilibrium phase transitions seen in several different fields of research8,9. There is a great opportunity here for interdisciplinary work that would have potentially far-reaching consequences in conservation biology.
+
+---------------
+@Abades2014 Fire, percolation thresholds and the savanna forest transition: a neutral model approach
+
+Although many factors can promote increases in tree cover, acting alone or in tandem the 40% tree cover threshold is likely to be the tipping point for encroachment through disrupting grass percolation and thus suppressing fire spread
+
+---------------
+@Manor2008 Facilitation, competition, and vegetation patchiness: From scale free distribution to patterns
+
+Another mechanism that yields power-laws and other fat-
+tailed distributions is multiplicative noise. This situation occurs
+when the random fluctuations that affect the system are
+proportional in magnitude to the size of the system itself. An
+example is the neutral theory of species abundance (Hubbell,
+2001); if the chances of any individual to produce an offspring and to die are the same, the abundance fluctuates along generations and the size of the fluctuation is proportional to the population.
+This ‘‘law of proportion effect’’ was first discovered in the context
+of business firm’s size (Gibrat, 1930; Simon and Bonini, 1958; Levy
+and Solomon, 1996) and is also relevant to the effect of small Facilitation, competition, and vegetation patchiness: From scale free distribution to patterns
+fluctuations in growing populations, like surname abundance
+(Manrubia et al., 2003) and degree distribution in scale free networks (Barabasi et al., 1999).
+
+---------------
+@Stumpf2012 Critical Truths About Power Laws
+
+Moreover, knowledge of whether or not a distribution is heavy-tailed is far more important than whether it can be fit using a power law.
+
+Suppose that one generates a large number of independent random variables xi drawn from heavy-tailed distributions, which need not be power laws. Then, by a version of the central limit theorem (CLT), the sum of these random variables is generically power-law distributed (www.informs-sim.org/wsc04papers/016.pdf).
+
+
+

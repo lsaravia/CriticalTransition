@@ -4,7 +4,12 @@ OPTS= -H margins.sty --bibliography CriticalTransition.bib --csl=plos.csl
 %.pdf: %.md 
 	pandoc  -V geometry:margin=1cm  --latex-engine=xelatex $^ -o $@
 
-all: CTSolabimaRes.pdf CSDCPoster.pdf
+all: CSDCPoster.pdf
+
+CSDCPoster.pdf: CSDCPoster.md makefile
+	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" CriticalTransition.bib
+	pandoc $< -o $@  --bibliography CriticalTransition.bib
+
 
 
 SomeResults.pdf: SomeResults.md
