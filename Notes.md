@@ -1,7 +1,15 @@
 # Notes
 
+### percolation
+The simplest mechanism that produces scale invariance is percolation, physically describes the movement of a fluid through porous media. One can think about a two dimensional landscape where each site is connected to the others neighbors with some probability $p$. The landscape will be connected when $p$ reaches some threshold value . 
+
+
 The most common species in a neutral community should coincide with the most common species in the metacommunity, probably a species with high dispersal capabilities. But a hierarchycal community, if the community is at steady state, the most common species will be the most competitive. If you study the traits of the most common and the community is near steady state you will know what are the principal forces structuring the community.
 
+
+* biodiversity collapse [@Sole2004c]
+
+* Multispecies early indicators [@Dakos2014]
 
 # Fragments from papers
 
@@ -56,8 +64,7 @@ made about environmental variability (Gravel et al., 2006).
 
 The theme is re-echoed, with variations, by Bonsall et al. (2004b), 
 who show how ‘organization dominated by niche structure and organization through chance and 
-neutral processes’ can operate simultaneously, with varying weights, depending on the interplay between population dynamics (ecology) and life-history trade 
-offs (evolution). 
+neutral processes’ can operate simultaneously, with varying weights, depending on the interplay between population dynamics (ecology) and life-history trade offs (evolution). 
 
 (Ver Bonsall, M.B., Jansen, V.A.A., and Hassell, M.P. 2004b. 
 
@@ -71,24 +78,6 @@ which translates roughly as ‘seek simplicity, and distrust
 it’. 
 
 
------------
-
-Gravel D, Canham CD, Beaudet M, Messier C (2006) Reconciling 
-niche and neutrality: the continuum hypothesis. Ecol Lett 9: 
-399–409. doi:10.1111/j.1461-0248.2006.00884.x. 
-	
-It has been argued that observing patterns of species abundance 
-typically predicted by neutral models cannot necessarily be 
-taken as evidence of neutral processes (Purves & Pacala 2005), 
-and our results concur with that. However, our results also show 
-that the observed patterns can result from a neutral drift created 
-by an elevated niche overlap, sustained by the constant reintro- 
-duction of excluded species through high immigration and/ or 
-speciation rates. Under such conditions, the rare species are 
-transients and their occurrence depends on immigration; on 
-the other hand, the resident species are permanent and their 
-occurrence depends on niche differentiation (Magurran & Henderson 
-2003; Schwilk & Ackerly 2005). 
 
 -----------
 
@@ -133,6 +122,24 @@ not find any of the above mentioned attractors.
 ---------
 
 @Gravel2006 Reconciling niche and neutrality: the continuum hypothesis.
+
+
+For simplicity, we assume species are equal in their death probability, although it is obvious that differentiation could also occur through this process. The models also focus on the local community scale. Thus, we do not consider speciation, and we recognize that further work is necessary to unify the models at the metacommunity scale.
+
+	
+It has been argued that observing patterns of species abundance 
+typically predicted by neutral models cannot necessarily be 
+taken as evidence of neutral processes (Purves & Pacala 2005), 
+and our results concur with that. However, our results also show 
+that the observed patterns can result from a neutral drift created 
+by an elevated niche overlap, sustained by the constant reintro- 
+duction of excluded species through high immigration and/ or 
+speciation rates. Under such conditions, the rare species are 
+transients and their occurrence depends on immigration; on 
+the other hand, the resident species are permanent and their 
+occurrence depends on niche differentiation (Magurran & Henderson 
+2003; Schwilk & Ackerly 2005). 
+
 
 Results demonstrate that niche and neutrality form ends of a continuum from competitive to stochastic exclusion. In the absence of immigration, competitive exclusion tends to create a regular spacing of niches. However, immigration prevents the establishment of a limiting similarity.
 
@@ -317,3 +324,18 @@ Suppose that one generates a large number of independent random variables xi dra
 
 
 
+---------------
+
+@Zillio2008 Incipient criticality in ecological communities
+
+Our results demonstrate that scaling provides a model-independent
+framework for analyzing and unifying ecological data and that,
+despite the absence of power laws, ecosystems are poised in the
+vicinity of a critical point.
+
+----------------
+
+@Fisher2014 The transition between the niche and neutral regimes in ecology
+
+
+As a result, it is possible to drive a community between the niche and neutral phases by changing the environmental conditions. As an example, we consider the effects of selective logging on a population of butterflies in a tropical forest on Buru, Indonesia (32). Through habitat destruction, logging essentially moves the butterfly community from a position with high K/ω to one with low K/ω, tracing a path along the stochasticity axis in the phase diagram (Fig. 4A). Our model predicts that when a diverse community within the niche phase is placed under a stress that lowers K/ω to the critical value, it will undergo a transition to the neutral regime. LV sim- ulations show that this transition results in a collapse of biodiversity and leads to an increase in the skewness of the species abundance distribution 

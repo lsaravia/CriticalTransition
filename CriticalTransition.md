@@ -27,41 +27,38 @@ The dynamics of ecological communities can be described by two contrasting model
 
 Much effort has been devoted to understand the mechanisms of community assembly and dynamics. In principle the emphasis were on deterministic mechanisms based on niche differences between species; the niche theory assumes that different species are regulated by different environmental factors and infer that diversity originates from spatial and temporal environmental heterogeneity [@Hutchinson1957; @Tilman1982; @Chesson2000]. More recently the emphasis shifted to stochastic mechanisms in the form of the Neutral theory of Biodiversity and Biogeography [@Hubbell2001]. The neutral theory assumes that individuals of all species are equivalent and it proposes that diversity originates from a balance between immigration, speciation, and extinction. Neutral theory has been proposed as a parsimonious formulation that can provide new insight into the patterns of community assembly [@Hubbell2005], besides this simplification it can predict some community metrics very well [@Volkov2007; @Rosindell2012], mainly the species abundance distribution (SAD).
 
-Finally arises a unified view that accepts that both kinds of mechanisms are present at the same time and try to quantify the importance of these in natural communities [@Leibold2006; @Martorell2014; @Vergnon2009; @Kalyuzhny2014]. The main point is to understand which species level traits are important for community dynamics and which ones are unimportant [@Matthews2014], and this is related to the scale of observation. The problems of pattern and scale are critical in ecology [@Chave2013; @Levin1992], because patterns that seem stochastic at one scale may reveal structure at another scale. The concept of pattern is related to some sort of repetition that our brain can detect, but when this pattern repeats at different scales we talk about scale invariance or auto-similarity, and these patterns could be produced by critical phase transitions. Critical phase transitions were first introduced in ecology in the framework of habitat fragmentation [@Bascompte1996]. This phenomenon is characterized by the presence of two phases defined by some macroscopic features, that are linked by a critical point were a sudden transition happens [@Sole2006]. 
+Finally arises a unified view that accepts that both kinds of mechanisms are present at the same time and try to quantify the importance of these in natural communities [@Leibold2006; @Martorell2014; @Vergnon2009; @Kalyuzhny2014]. The main point is to understand which species level traits are important for community dynamics and which ones are unimportant [@Matthews2014], and this is related to the scale of observation. The problems of pattern and scale are critical in ecology [@Chave2013; @Levin1992], because patterns that seem stochastic at one scale may reveal structure at another scale. The concept of pattern is related to some sort of repetition that our brain can detect, but when this pattern repeats at different scales we talk about scale invariance or auto-similarity, described by power laws. These patterns could be produced by critical phase transitions described by percolation theory [@Stauffer1994] . Critical phase transitions were first introduced in ecology in the framework of landscape ecology [@Loehle1996b] and habitat fragmentation [@Bascompte1996]. Percolation is characterized by the presence of two phases defined by some macroscopic features, that are linked by a critical point were a sudden transition happens  and a large spatial pattern emerges. In a two dimensional landscape where each site is connected to the others neighbors with some probability $p$, if you start with a small $p$ there will be some connected clusters, but if you increase $p$ there is a point where a cluster of sites spanning the entire landscape appears. This spanning cluster has a self-similar structure and is produced by local interactions [@Sole2006]. 
 
 Several different ecological spatial models exhibit critical behavior related to the degree of disturbance [@Pascual2005a]. Some of these models showed robust criticality: a particular kind of criticality discovered for ecological systems [@Roy2003], where the scaling laws are present for a wide range of parameters. More important is that this kind of criticality has been documented for arid ecosystems [@Sole2007]; here the sudden shift towards a desert condition might occur when rainfall decrease [@Scanlon2007] or also with more intense grazing [@Kefi2007b]. The main mechanism is the positive effect produced by local facilitation, the chance of a new seedling to become established is higher near the parent plant.
 
+(Describe SOC as another possible mechanism?)
+
 Another example of an ecosystem exhibiting criticality are savannas, where the transition occurs between tree and grass cover [@Abades2014]. In critical phenomena the transition is produced by the capacity of the system to transmit some signal or information, in savannas the proportion of 60% grass 40% trees is linked to the threshold needed for fire to spread. The increase in the proportion of trees, due to a change in environmental conditions, can create positive feedback mechanisms resulting in the encroachment of savanna ecosystems [@Abades2014].  
 
-Here I study a new kind of ecological phase transition that is not related to disturbance or fire, is the transition between a neutral and a niche community. This phase transition has been studied in non-spatial models [@Fisher2014]. I formulated the simplest model of neutral-niche communities where niche dynamics is represented as a competitive hierarchy [@Saravia2015]. This spatially explicit model unifies the Tilman's model of hierarchical competition with the classical neutral model using one parameter: the competition intensity. This parameter is represented as the probability that one species replace another and modulates the transition between the neutral phase and niche phase. 
+Neutral models can produce species patches with power law distributions without been near a critical state [@Houchmandzadeh2003], so the detection of this kind of patterns do not imply a phase transition. Moreover phase transitions are also observed in non-spatial models, some studies detected the presence of a sharp transition between neutral and niche dynamics in spatially implicit models [@Chisholm2011] and Fisher et al. [-@Fisher2014] demonstrated the presence of a phase transition for this kind of neutral-niche models.
 
-Our aim is to demonstrate the existence of a spatial phase transition, to explore the dependence of the critical point with some model's parameters and to suggest some possible early warnings of the transition.
+Here I study a different kind of ecological spatial phase transition that is not related to disturbance or fire, is the transition between a neutral and a niche community. I formulated the simplest model of neutral-niche communities where niche dynamics is represented as a competitive hierarchy [@Saravia2015]. This spatially explicit model unifies the Tilman's model of hierarchical competition with the classical neutral model using one parameter: the competition intensity. This parameter is represented as the probability that one species replace another and modulates the transition between the neutral phase and niche phase. 
 
-
-* biodiversity collapse [@Sole2004c]
-
-* Multispecies early indicators [@Dakos2014]
-
-
+Our first aim is to demonstrate the existence of a spatial phase transition in neutral-niche models, our second objective is to explore the dependence of the critical point with the parameters that are more important for the spatial pattern and to suggest some possible early warnings of the transition. 
 
 
 # Methods
+
+Characterization of phase transition
 
 ## The spatial stochastic model
 
 This model represent a continuum between hierarchical and neutral model in the same spirit as in [@Gravel2006;@Chisholm2010;@Zhou2008]. The model is a stochastic cellular automata (CA) or also called interactive particle system [@Durrett1994a]. In these kind of models space is discretized into a grid and only one individual can occupy a particular position. Each position represents an area fixed by the investigator to mimic the real system. Time is continuous so the update of the model is asynchronous. I update one randomly chosen site at a time and to perform one complete time interval $c J$ sites have to be updated, where $c$ is a constant that describes the overall rate at which transitions are occurring and $J$ is the size of the grid [@Durrett1994a].   
 
-The model use periodic boundary conditions, which makes the landscape a torus. It means that sites on the top edge of the grid are neighbors of those on the bottom edge, and sites on the right edge are neighbors of those on the left. With this choice I can avoid edge effects and is equivalent to thinking that the grid is embedded in a large community.
+We use periodic boundary conditions, which makes the landscape a torus. It means that sites on the top edge of the grid are neighbors of those on the bottom edge, and sites on the right edge are neighbors of those on the left. With this choice we can avoid edge effects and is equivalent to thinking that the grid is embedded in a large community.
 
-The size of the community is given by *J = dimX* x *dimY*, where *dimX* and *dimY* are the dimension of the grid. Thus *J* is the maximum number of individuals in the simulated area. 
+The size of the community is given by *J = dimX* x *dimY*, where *dimX* and *dimY* are the dimension of the grid. Thus *J* is the maximum number of individuals in the simulated area. As in a classical neutral model there is a metacommunity i.e. a regional species pool assumed very large and invariant in ecological time scales [@Hubbell2001]. All individuals have the same parameters, besides they should belong to different species [@Hubbell2001], and each species is assigned with a number. There are only two possible differences between species: 
 
-In this model all individuals have the same parameters, besides they should belong to different species [@Hubbell2001], and each species is assigned with a number. There are only two possible differences between species: 
-
-* They may have a different frequency in the metacommunity and also different abundances in the local community.
+* They may have a different frequency $X_i$ in the metacommunity and also different abundances in the local community.
 
 * Hierarchical competition: species with lower numbers have a probability to replace species with higher numbers as in [@Tilman1994]. Thus a species with number 1 have a probability to replace species with number 2 and greater. The species with number 2 can replace species starting from 3. The probability of replacement is a parameter, when it is 0 replacement occurs only when a species dies.  
 
-The colonization-competition and other trade-off are not explicitly included in the model. But a colonization-competition trade-off can be established if species numbering is arranged in inverse order as it's abundance $X_i$ in the metacommunity, the most competitive species (with number 1) will have the lowest migration rate and the less competitive will have the highest migration rate.  
+The colonization-competition and other trade-off is not explicitly included in the model. But a colonization-competition trade-off can be established if species numbering is arranged in inverse order as it's frequency $X_i$ in the metacommunity, the most competitive species (with number 1) will have the lowest migration rate and the less competitive will have the highest migration rate.  
 
 There are four processes included in the model: death, local dispersal, and migration, starting with an empty site the following events can happen:
 
@@ -77,13 +74,13 @@ There are four processes included in the model: death, local dispersal, and migr
 
 ## Simulations
 
-* I defined as tuning parameter the probability of replacement of individuals of different species $\rho$, the order parameter is  spanning cluster probability $SC_p$.
+To characterize our model in terms of percolation theory we need to define an order parameter that depends on an external control or tunning parameter that can be continuously varied. Thus we defined as tunning parameter the replacement probability $\rho$, and the order parameter was the spanning cluster probability $SC_p$.
 
-* The size of the lattice affects the value critical probability $p_c$ at which the transition
-occurs; in small lattices $SC_p$ is non-zero for values of $\rho$ below the $p_c$, thus it is easier to form patches that connect the entire lattice. Therefore, in order to obtain an asymptotic estimate for the $p_c$ I performed a finite size scaling analysis. For this, I run simulations for different lattice sizes (Side = 100, 256, 512) and obtained asymptotic $p_c$ values by regressing $p_c$ against
+The size of the lattice affects the value critical probability $p_c$ at which the transition
+occurs; in small lattices $SC_p$ is non-zero for values of $\rho$ below the $p_c$, thus it is easier to form patches that connect the entire lattice. Therefore, in order to obtain an asymptotic estimate for the $p_c$ we performed a finite size scaling analysis. For this, we run simulations for different lattice sizes (Side = 100, 150, 256, 512) and obtained asymptotic $p_c$ values by regressing $p_c$ against
 $1/N$, the intercept becomes an estimate for a lattice of infinite size [@Stauffer1994; @Sornette2013].
 
-* I determined critical probabilities for two different metacommunities: a) One with a logseries species abundance distribution, the most common distribution that fits experimental data [@White2012]. b) A uniform species distribution, this is analogous to simulate the apparition of a new species by evolution.    
+We determined critical probabilities for two different metacommunities: a) One with a logseries species abundance distribution, the most common distribution that fits experimental data [@White2012]. b) A uniform species distribution, this is analogous to simulate the apparition of a new species by evolution.    
 
 
 # Results
@@ -97,6 +94,15 @@ $1/N$, the intercept becomes an estimate for a lattice of infinite size [@Stauff
 
 * Fragmentation push the critical value to a lower competitive intensity - Comparison of fragments of different sizes with neutral dynamics $\rho=0$ and with rho near critical value. Fragmentation makes the community to cross the critical value and become more hierarchical. 
 
-* 
+* The existence of an spanning patch of one dominant species can point us that the system is near the critical point.
+
+*  [@Chisholm2011] predicts that most
+ecosystems will exhibit patterns of diversity that are either
+strongly niche-structured or indistinguishable from neutral, but taking into account space ??.
+
+* Fisher2014 after disturbances their model predicts that under stress a community will suffer a biodiversity collapse produced by a shift towards neutrality, this means that disturbed less diverse communities should have neutral dynamics. This prediction is contrary to most of the models and experimental data that suggest that niche dynamics dominate low-diversity communities while neutral dynamics will be more common in high diversity communities  [@Chisholm2011]
+
+
+* At the smaller lattice sizes (sides 100-150 in our case) there is a non-zero probability of a spanning clusters ($SC_p$) in the neutral phase, but at after that the $SC_p$ drops to zero. Abades et al. [-@Abades2014] reported a critical phase transition for a neutral model using a lattice with sides from 10 to 100, their results are analogous to our neutral phase. Only with lattice sides lower than 150 we observed a non-zero probability of a spanning clusters ($SC_p$), after that the $SC_p$ drops to zero. Besides that they use a different tunning parameter and a different neighborhood there is some concerns that their results could be due to the limited range of size they used in the spatial simulations. 
 
 # References
