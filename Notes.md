@@ -339,3 +339,29 @@ vicinity of a critical point.
 
 
 As a result, it is possible to drive a community between the niche and neutral phases by changing the environmental conditions. As an example, we consider the effects of selective logging on a population of butterflies in a tropical forest on Buru, Indonesia (32). Through habitat destruction, logging essentially moves the butterfly community from a position with high K/ω to one with low K/ω, tracing a path along the stochasticity axis in the phase diagram (Fig. 4A). Our model predicts that when a diverse community within the niche phase is placed under a stress that lowers K/ω to the critical value, it will undergo a transition to the neutral regime. LV sim- ulations show that this transition results in a collapse of biodiversity and leads to an increase in the skewness of the species abundance distribution 
+
+
+
+-----------
+
+@Rosindell2009 Species-area curves, neutral models, and long-distance dispersal
+
+Speciation rates are estimated at mean=0.56 SE .17 species
+per million years (Baldwin and Sanderson 1998), which
+corresponded to rates from 2.3 10^-6  to 1.1 10^-5 per
+species per generation; note, however, that this figure
+needs to be divided by the number of individuals per
+species to give the speciation rate per birth m.
+
+
+----------
+
+@Seri2012 Neutral Dynamics and Cluster Statistics in a Tropical Forest.
+
+The Cauchy kernel, with the right dispersal parameter
+g (see “Methods”), was found to yield the observed pat-
+terns with very good accuracy, while the data rule out the
+entire spectrum of kernels covered by the MLGK. First,
+we discuss the inadequacy of the MLGK (and the discrim-
+inatory power of our technique), and then we show how
+the Cauchy kernel yields a good fit to the data.

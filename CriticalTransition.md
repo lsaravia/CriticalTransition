@@ -44,7 +44,7 @@ Our first aim is to demonstrate the existence of a spatial phase transition in n
 
 # Methods
 
-Characterization of phase transition
+First we define the spatial explicit neutral-hierarchical model, then we explain how we characterized its critical behavior in terms of percolation theory and how we made simulations. We refer to interested readers to more extensive introductions to percolation theory in an ecological context [@Sole2006;Oborny2007]. 
 
 ## The spatial stochastic model
 
@@ -58,13 +58,18 @@ The size of the community is given by *J = dimX* x *dimY*, where *dimX* and *dim
 
 * Hierarchical competition: species with lower numbers have a probability to replace species with higher numbers as in [@Tilman1994]. Thus a species with number 1 have a probability to replace species with number 2 and greater. The species with number 2 can replace species starting from 3. The probability of replacement is a parameter, when it is 0 replacement occurs only when a species dies.  
 
-The colonization-competition and other trade-off is not explicitly included in the model. But a colonization-competition trade-off can be established if species numbering is arranged in inverse order as it's frequency $X_i$ in the metacommunity, the most competitive species (with number 1) will have the lowest migration rate and the less competitive will have the highest migration rate.  
+The colonization-competition and other possible trade-offs are not explicitly included in the model. But a colonization-competition trade-off can be established if species numbering is arranged in inverse order as it's frequency $X_i$ in the metacommunity, the most competitive species (with number 1) will have the lowest migration rate and the less competitive will have the highest migration rate.  
 
 There are four processes included in the model: death, local dispersal, and migration, starting with an empty site the following events can happen:
 
 (1) With probability *m* an individual of a species *i* can migrate from the metacommunity at a rate proportional to its frequency $X_i$ in the metacommunity.
 
-(2) When the grid is not full, individuals give birth with rate 1 to a new individual that disperse to the neighborhood with a dispersal kernel, here I use an inverse power kernel [@Marco2011].
+(2) When the grid is not full, individuals give birth with rate 1 to a new individual that disperse to the neighborhood with a dispersal kernel, here I use an inverse power kernel [@Marco2011]:
+
+ 	$d(x) =  \frac{\alpha -1}{x_{min}} \left(\frac{x}{x_{min}} \right)^{-\alpha}$ with $mean =\frac{\alpha-1}{\alpha-2}x_{min}$ where $\alpha > 1$ and $x \ge x_{min}$. 
+
+	where $d(x)$ is the probability that an individual disperse a distance $x$ from the parent. In all cases I used $x_{min} = 1$.
+
 
 (2) Individuals die a rate $\mu$
 
@@ -72,15 +77,23 @@ There are four processes included in the model: death, local dispersal, and migr
 
 (6) If the individual does not die it can be replaced by an individual from the metacommunity or neighborhood as in (5), but an individual of species with number $k$ can replace and individual of a species $k+1$ with probability $\rho$. Thus a hierarchical ordering of species is established. When this probability is zero the model behavior is neutral.
 
-## Simulations
+The model was developed using the C++ programing language and its source code is available at <https://github/lasaravia/neutral> and figshare <http://dx.doi.org/10.6084/m9.figshare.969692>. 
 
-To characterize our model in terms of percolation theory we need to define an order parameter that depends on an external control or tunning parameter that can be continuously varied. Thus we defined as tunning parameter the replacement probability $\rho$, and the order parameter was the spanning cluster probability $SC_p$.
+## Percolation and simulations
 
-The size of the lattice affects the value critical probability $p_c$ at which the transition
+To characterize our model in terms of percolation theory we need to define an order parameter that depends on an external control or tunning parameter that can be continuously varied. Thus we defined as tunning parameter the replacement probability $\rho$, and the order parameter was the spanning cluster probability $SC_p$. 
+
+In our model percolation is produced when there is at least one patch of one species that spans from one edge of the system to the opposite edge. To detect species patches we used a modified Hoshen–Kopelman cluster labeling algorithm [@Hoshen1976] with a neighborhood defined by the four nearest sites (Von Neumann neighborhood) available at github (https://github.com/lsaravia/Clusters). The percolation point is defined as the  value of the tunning parameter $\rho$ at which $SC_p$ is 0.5 and the patch size distributions were measured after 5000 time iterations. 
+
+The size of the lattice affects the value of the critical probability $p_c$ at which the transition
 occurs; in small lattices $SC_p$ is non-zero for values of $\rho$ below the $p_c$, thus it is easier to form patches that connect the entire lattice. Therefore, in order to obtain an asymptotic estimate for the $p_c$ we performed a finite size scaling analysis. For this, we run simulations for different lattice sizes (Side = 100, 150, 256, 512) and obtained asymptotic $p_c$ values by regressing $p_c$ against
 $1/N$, the intercept becomes an estimate for a lattice of infinite size [@Stauffer1994; @Sornette2013].
 
-We determined critical probabilities for two different metacommunities: a) One with a logseries species abundance distribution, the most common distribution that fits experimental data [@White2012]. b) A uniform species distribution, this is analogous to simulate the apparition of a new species by evolution.    
+We determined critical probabilities for two different metacommunities: a) One with a logseries species abundance distribution, the most common distribution that fits experimental data [@White2012]. With this metacommunity we included a competition-colonization trade-off by arranging species numbers in inverse order as it's frequency $X_i$ in the metacommunity. b) A uniform species distribution, all species have the same probability to colonize the local community, this is analogous to simulate the apparition of a new species by evolution thus the migration parameter $m$ would represent an speciation rate. The values of the $m$ parameter (Table 1) were at least two orders of magnitude higher than realist speciation rates [@Rosindell2009] thus we could not interpret our results in an evolutionary framework.    
+
+All simulations started with an empty lattice that is colonized by migrants mimicking the assembly of a new community. The range of parameters used were compatible with published results in tropical forest [@Anand2010; @Condit2002; @Etienne2007], It was suggested that fat-tail dispersal kernels give more realistic results [@Rosindell2009; @Seri2012] so we used an inverse power law distribution with an exponents always greater than two---so the mean exist (Table 1). The parameter $\rho$ is varied in all the range between 0 and 1 to determine the critical point, in the region where we suspect the $p_c$ will be located (near 0) the steps were very small (0.0001) and greater (0.1) in the region were we don't expect the $p_c$. All the simulations and the analysis of the model output were done in the R statistical statistical language [@RCoreTeam2014] and the scripts are available at github <https://github.com/lsaravia/CriticalTransition>
+
+
 
 
 # Results
@@ -96,13 +109,22 @@ We determined critical probabilities for two different metacommunities: a) One w
 
 * The existence of an spanning patch of one dominant species can point us that the system is near the critical point.
 
-*  [@Chisholm2011] predicts that most
-ecosystems will exhibit patterns of diversity that are either
-strongly niche-structured or indistinguishable from neutral, but taking into account space ??.
+* This implies that as spatially implicit models suggest [@Chisholm2011] most ecosystems will exhibit patterns of diversity that are either strongly niche-structured or indistinguishable from neutral.
 
 * Fisher2014 after disturbances their model predicts that under stress a community will suffer a biodiversity collapse produced by a shift towards neutrality, this means that disturbed less diverse communities should have neutral dynamics. This prediction is contrary to most of the models and experimental data that suggest that niche dynamics dominate low-diversity communities while neutral dynamics will be more common in high diversity communities  [@Chisholm2011]
 
 
 * At the smaller lattice sizes (sides 100-150 in our case) there is a non-zero probability of a spanning clusters ($SC_p$) in the neutral phase, but at after that the $SC_p$ drops to zero. Abades et al. [-@Abades2014] reported a critical phase transition for a neutral model using a lattice with sides from 10 to 100, their results are analogous to our neutral phase. Only with lattice sides lower than 150 we observed a non-zero probability of a spanning clusters ($SC_p$), after that the $SC_p$ drops to zero. Besides that they use a different tunning parameter and a different neighborhood there is some concerns that their results could be due to the limited range of size they used in the spatial simulations. 
+
+* Detections of communities at critical state:
+ 	* long transient time 
+ 	* spanning patch one species occupying 30% of the area..
+
+* New directions
+	* Study realistic evolutionary rates m
+	* Study how the diversity of metacommunity influence
+	* Disturbances!
+	* Extension to food webs trophics
+
 
 # References

@@ -1215,7 +1215,7 @@ k1$iSide <- 0
 k1$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
 k1$ColonizationRate <- m
 rhoCrit <- rbind(rhoCrit,k1[,c(3,5,6,1,2)])
-rhoCrit <- arrange(rhoCrit,MetaType)
+rhoCrit <- arrange(rhoCrit,MetaType,desc(DispersalDistance))
 pandoc.table(rhoCrit)
 
 ggplot(filter(rhoCrit,round(DispersalDistance,1)==26.7),aes(x=ColonizationRate,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ scale_x_log10() + theme_bw() + xlab("Migration") + ylab("Critical Probability")
@@ -1236,7 +1236,7 @@ save.image()
 
 ## Simulations to Time=5000 with side=150, varying migration and dispersal to add to finite size scaling 
 
-```{r simuldisp_clu_side150_meta64_n30_T5000, eval=T,echo=F,message=T,warning=T}
+```{r simuldisp_clu_side150_meta64_n30_T5000, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
 
@@ -1282,6 +1282,51 @@ rm(cn,cl,Clu)
 save.image()
 
 ```
+
+## Simulations to Time=5000 with side=500, dispersal=26 migration=0.0001596079 species=256 
+
+```{r simuldisp_clu_side512_meta256_n30_T5000, eval=T,echo=F,message=T,warning=T}
+setwd("Simul")
+
+
+side <- 512
+nsp <- 256
+nSimul <- 30
+
+ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+
+time <- 5000
+
+m  <- 0.0001596079
+alfa <-2.038974
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("U","L")) 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+## OJO NO BORRA SIMULACIONES ANTERIORES!
+## ultimo F!!
+Clu <- data.frame()
+Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"N",p$meta[i],F)
+}
+
+
+stopCluster(cl)
+
+Clusters <-rbind(Clusters,Clu)
+setwd(oldcd)
+
+rm(cn,cl,Clu)
+
+save.image()
+
+```
+
 
 # Simulate to estimate distributions of patch sizes statistics
 

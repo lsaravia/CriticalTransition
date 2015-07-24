@@ -4,7 +4,7 @@ OPTS= -H margins.sty --bibliography CriticalTransition.bib --csl=plos.csl
 %.pdf: %.md 
 	pandoc  -V geometry:margin=1cm  --latex-engine=xelatex $^ -o $@
 
-all: CriticalTransition.pdf SomeResults.pdf
+all: CriticalTransition.pdf CriticalTransition_figures.pdf
 
 
 SomeResults.pdf: SomeResults.md
