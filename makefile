@@ -1,18 +1,18 @@
-OPTS= -H margins.sty --bibliography CriticalTransition.bib --csl=plos.csl 
+OPTS= -H margins.sty --bibliography ctnhm.bib --csl=plos.csl 
 
 
 %.pdf: %.md 
 	pandoc  -V geometry:margin=1cm  --latex-engine=xelatex $^ -o $@
 
-all: CriticalTransition.pdf CriticalTransition_figures.pdf
+all: ctnhm.pdf ctnhm_figures.pdf
 
 
 SomeResults.pdf: SomeResults.md
-	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" CriticalTransition.bib
+	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" ctnhm.bib
 	pandoc $< -o $@ $(OPTS)
 	evince SomeResults.pdf		
 
-CriticalTransition.pdf: CriticalTransition.md makefile
-	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" CriticalTransition.bib
+ctnhm.pdf: ctnhm.md makefile
+	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" ctnhm.bib
 	pandoc $< -o $@ $(OPTS)
-	evince CriticalTransition.pdf		
+	evince ctnhm.pdf		

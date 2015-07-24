@@ -91,17 +91,22 @@ $1/N$, the intercept becomes an estimate for a lattice of infinite size [@Stauff
 
 We determined critical probabilities for two different metacommunities: a) One with a logseries species abundance distribution, the most common distribution that fits experimental data [@White2012]. With this metacommunity we included a competition-colonization trade-off by arranging species numbers in inverse order as it's frequency $X_i$ in the metacommunity. b) A uniform species distribution, all species have the same probability to colonize the local community, this is analogous to simulate the apparition of a new species by evolution thus the migration parameter $m$ would represent an speciation rate. The values of the $m$ parameter (Table 1) were at least two orders of magnitude higher than realist speciation rates [@Rosindell2009] thus we could not interpret our results in an evolutionary framework.    
 
-All simulations started with an empty lattice that is colonized by migrants mimicking the assembly of a new community. The range of parameters used were compatible with published results in tropical forest [@Anand2010; @Condit2002; @Etienne2007], It was suggested that fat-tail dispersal kernels give more realistic results [@Rosindell2009; @Seri2012] so we used an inverse power law distribution with an exponents always greater than two---so the mean exist (Table 1). The parameter $\rho$ is varied in all the range between 0 and 1 to determine the critical point, in the region where we suspect the $p_c$ will be located (near 0) the steps were very small (0.0001) and greater (0.1) in the region were we don't expect the $p_c$. All the simulations and the analysis of the model output were done in the R statistical statistical language [@RCoreTeam2014] and the scripts are available at github <https://github.com/lsaravia/CriticalTransition>
+All simulations started with an empty lattice that is colonized by migrants mimicking the assembly of a new community, for each parameter combination we made 30 simulations. Thus we calculate the $SC_p$ as the number of times we observed a spanning cluster divided by the number of simulations. The range of parameters used were compatible with published results in tropical forest [@Anand2010; @Condit2002; @Etienne2007], It was suggested that fat-tail dispersal kernels give more realistic results [@Rosindell2009; @Seri2012] so we used an inverse power law distribution with an exponents always greater than two---so the mean exist (Table 1). The parameter $\rho$ is varied in all the range between 0 and 1 to determine the critical point, in the region where we suspect the $p_c$ will be located (near 0) the steps were very small (0.0001) and greater (0.1) in the region were we don't expect the $p_c$. All the simulations and the analysis of the model output were done in the R statistical statistical language [@RCoreTeam2014] and the scripts are available at github <https://github.com/lsaravia/CriticalTransition>
 
+# Communities early warnings signals
 
-
+To compare communities near and far from the $p_c$ we also measured the species abundance distribution (SAD), richness (S) and the Shannon diversity index (H).  
 
 # Results
+
 
 
 # Discussion
 
 * This phase transition is characteristic of some ecological systems and has been termed robust criticality. Here we describe for the first time the observation of this kind of criticality for a community assembly model. 
+
+* Real differences in H comes after the critical point that can be detected by the minimum exponential rate in patch size distribution of accompanying species.
+
 
 * Communities evolve to avoid competition (Ghost of competition) thus they naturally have a very low competitive intensity. The effect of the niche is to keep low the competitive intensity. This suggest the possible existence of mechanism similar to critical self organization. 
 
