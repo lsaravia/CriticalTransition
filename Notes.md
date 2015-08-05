@@ -204,6 +204,9 @@ Most ecologists would agree that interactions and stochasticity occur concurrent
 
 Empirical evidence is still insufficient to settle the conflict between these theories. Community patterns expected from theories based on interactions and stochasticity are frequently indistinguishable (Hubbell 2001; Chave, Muller-Landau & Levin 2002; Rosindell, Hubbell & Etienne 2011),
 
+The fact that intraspecific competition (altogether with stochasticity) was able to explain
+most of the variance in species abundance in our community would appear to support his claims. Nevertheless, the same pattern would be expected if the community were structured by interspecific competition, which would cause extinctions until only a set of species that are more limited by conspecific than heterospecific interactions remained (Chesson 2000b).
+
 Our results, taken together with recent studies on tropical forests, suggest that weak
 interactions among established plants may be a general phenomenon, but that local interactions dur-
 ing colonization are important drivers of community composition.
@@ -211,10 +214,7 @@ ing colonization are important drivers of community composition.
 ----------------------
 @Vergnon2009 Niches versus neutrality: uncovering the drivers of diversity in a species-rich community
 
-Our study strongly suggests that a combination of niche-based and
-equalizing processes best explains the patterns and species
-dynamics within the L4 station marine phytoplankton
-community (Table 2). 
+Our study strongly suggests that a combination of niche-based and equalizing processes best explains the patterns and species dynamics within the L4 station marine phytoplankton community (Table 2).
 
 
 ---------
@@ -365,3 +365,21 @@ entire spectrum of kernels covered by the MLGK. First,
 we discuss the inadequacy of the MLGK (and the discrim-
 inatory power of our technique), and then we show how
 the Cauchy kernel yields a good fit to the data.
+
+---------------------------
+@Chase2007 Drought mediates the importance of stochastic community assembly
+
+Here, I develop the hypothesis that the relative importance
+of stochastic ecological drift and/or priority effects depend on the
+harshness of the ecological filter in those habitats. I established
+long-term experimental ponds to explore the relative importance
+of community assembly history and drought on patterns of com-
+munity compositional similarity among ponds that were otherwise
+similar in their environmental conditions. I show considerable
+site-to-site variation in pond community composition in the ab-
+sence of drought that likely resulted from a combination of
+stochastic ecological drift and priority effects. However, in ponds
+that experienced drought, I found much higher similarity among
+communities that likely resulted from niche-selection filtering out
+species from the regional pool that could not tolerate such envi-
+ronmental harshness

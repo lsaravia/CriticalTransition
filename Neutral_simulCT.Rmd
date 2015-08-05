@@ -473,44 +473,35 @@ time <- 5000
 
 require(plyr)
 require(dplyr)
-mClusters <- filter(Clusters, Time==5000,MetaNsp==64,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
 
+# Calculates critical probabilities for differnt side (rCTs) and critical probability for infinite lattices (rCT)
+#
+k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 
 require(ggplot2)
-#
-# Calculates the probability of spanning cluster
-#
-k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.050 & SpanningProb<0.75)
-# Delete one record
-#k <- k[-6,]
-
-k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
-k$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
-k$ColonizationRate <- m
 require(pander)
-pandoc.table(k,round=5)
 
 # Create data frame to store Pc for lattices with different sides
 rhoCritSide <- data_frame()
-rhoCritSide <- rbind(rhoCritSide,k[,c(1,5,6,2:4)])
 
-#
-# finite size scaling to determine pcrit for infinite lattices
-#
-k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
-   
- 
-k1$MetaType <- c("L","U") 
-k1$iSide <- 0 
-k1$DispersalDistance<-26.66
-k1$ColonizationRate <- m
+# Update table after recalculation of critical points
+#rhoCritSide <- filter(rhoCritSide,DispersalDistance!=26.66 | ColonizationRate!=0.000159608 | MetaNsp!=64)
+rhoCritSide <- rbind(rhoCritSide,k$rCTs)
+pandoc.table(rhoCritSide,round=5)
 
 # Create data frame to store Pc for infinite lattices
 rhoCrit <- data_frame()
-rhoCrit <- k1[,c(3,5,6,1,2)]
+# 
+#rhoCrit <- filter(rhoCrit,DispersalDistance!=26.66 | ColonizationRate!=0.000159608 | MetaNsp!=64)
+
+rhoCrit <- rbind(rhoCrit,k$rCT)
 pandoc.table(rhoCrit,round=5)
 
-ggplot(k,aes(x=1/(Side*Side),y=pcrit,colour=MetaType)) + geom_point() + theme_bw() +stat_smooth(method=lm,se=F) + geom_point(data=k1,aes(x=iSide,y=pcrit),shape=21)
+# Make with different sides filter side=150
+# 
+k<-filter(rhoCritSide,MetaNsp==nsp,DispersalDistance==round(mean_power(alfa),2),ColonizationRate==m,Side!=150)
+
+mClusters <- filter(Clusters, Time==5000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m,Side!=150) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
 
 #
 # Spaninng probability vs rho
@@ -850,42 +841,21 @@ alfa <- round(2.081069,5)
 side <- 512
 nsp <- 64
 nSimul <- 30
+time <- 5000
+
+k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
+
+#filter(rhoCritSide,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
+#rhoCritSide <-filter(rhoCritSide,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
+rhoCritSide <- rbind(rhoCritSide,k$rCTs)
+
+#filter(rhoCrit,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
+#rhoCrit <- filter(rhoCrit,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
+
+rhoCrit <- rbind(rhoCrit,k$rCT)
+pandoc.table(rhoCrit,round=5)
 
 
-require(plyr)
-require(dplyr)
-mClusters <- filter(Clusters, Time==5000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
-
-
-require(ggplot2)
-#
-# Calculates the probability of spanning cluster
-#
-k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.050 & SpanningProb<0.75)
-# Delete one record
-#k <- k[-6,]
-
-k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
-k$DispersalDistance<-round(mean_power(alfa),2) 
-k$ColonizationRate <- m
-require(pander)
-pandoc.table(k,round=5)
-rhoCritSide <- rbind(rhoCritSide,k[,c(1,5,6,2:4)])
-
-#
-# finite size scaling to determine pcrit for infinite lattices
-#
-k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
-   
-k1$MetaType <- c("L","U") 
-k1$iSide <- 0 
-k1$DispersalDistance<-round(mean_power(alfa),2) #13.34
-k1$ColonizationRate <- m
-rhoCrit <- rbind(rhoCrit,k1[,c(3,5,6,1,2)])
-
-pandoc.table(rhoCrit)
-
-ggplot(k,aes(x=1/(Side*Side),y=pcrit,colour=MetaType)) + geom_point() + theme_bw() +stat_smooth(method=lm,se=F) + geom_point(data=k1,aes(x=iSide,y=pcrit),shape=21)
 
 plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
 
@@ -955,40 +925,20 @@ alfa<-round(2.038974,5)
 side <- 512
 nsp <- 64
 nSimul <- 30
-require(plyr)
-require(dplyr)
+time <- 5000
 
-mClusters <- filter(Clusters, Time==5000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 
+#filter(rhoCritSide,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
+#rhoCritSide <-filter(rhoCritSide,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
+rhoCritSide <- rbind(rhoCritSide,k$rCTs)
 
-require(ggplot2)
-#
-# Calculates the probability of spanning cluster
-#
-k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.050 & SpanningProb<0.75)
-# Delete one record
-#k <- k[-6,]
+#filter(rhoCrit,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
+#rhoCrit <- filter(rhoCrit,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
 
-k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
-k$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
-k$ColonizationRate <- m
-require(pander)
-pandoc.table(k,round=5)
-rhoCritSide <- rbind(rhoCritSide,k[,c(1,5,6,2:4)])
+rhoCrit <- rbind(rhoCrit,k$rCT)
+pandoc.table(rhoCrit,round=5)
 
-
-#
-# finite size scaling to determine pcrit for infinite lattices
-#
-k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
-   
-k1$MetaType <- c("L","U") 
-k1$iSide <- 0 
-k1$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
-k1$ColonizationRate <- m
-rhoCrit <- rbind(rhoCrit,k1[,c(3,5,6,1,2)])
-rhoCrit <- arrange(rhoCrit,MetaType)
-pandoc.table(rhoCrit)
 
 plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
 
@@ -1059,44 +1009,17 @@ nsp <- 64
 nSimul <- 30
 time <- 5000
 
-require(plyr)
-require(dplyr)
+k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 
-mClusters <- filter(Clusters, Time==5000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+#filter(rhoCritSide,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
+#rhoCritSide <-filter(rhoCritSide,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
+rhoCritSide <- rbind(rhoCritSide,k$rCTs)
 
+#filter(rhoCrit,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
+#rhoCrit <- filter(rhoCrit,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
 
-require(ggplot2)
-#
-# Calculates the probability of spanning cluster
-#
-k <- group_by(mClusters, MetaType,Side) %>% filter(ReplacementRate>=0.01 & ReplacementRate<=0.015)
-# Delete one record
-#k <- k[-6,]
-
-k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
-k$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
-k$ColonizationRate <- m
-require(pander)
-pandoc.table(k,round=5)
-rhoCritSide <- rbind(rhoCritSide,k[,c(1,5,6,2:4)])
-
-#
-# finite size scaling to determine pcrit for infinite lattices
-#
-k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
-   
-k1$MetaType <- c("L","U") 
-k1$iSide <- 0 
-k1$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
-k1$ColonizationRate <- m
-rhoCrit <- rbind(rhoCrit,k1[,c(3,5,6,1,2)])
-rhoCrit <- arrange(rhoCrit,MetaType)
-pandoc.table(rhoCrit)
-
-
-ggplot(filter(rhoCrit,DispersalDistance!=13.34),aes(x=ColonizationRate,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ scale_x_log10() + theme_bw() 
-
-ggplot(filter(rhoCrit,ColonizationRate==round(0.0001596079,9)),aes(x=DispersalDistance,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ theme_bw() 
+rhoCrit <- rbind(rhoCrit,k$rCT)
+pandoc.table(rhoCrit,round=5)
 
 
 plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
@@ -1173,60 +1096,36 @@ save.image()
 #
 # filter(Clusters, Time==time,MetaNsp==nsp,DispersalDistance==alfa) %>% distinct(ColonizationRate)
 m   <-round(0.0001596079,9)
-
 alfa <-round(2.17641,5)
 side <- 512
 nsp <- 64
 nSimul <- 30
 time <- 5000
 
+k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 
-require(plyr)
-require(dplyr)
+#filter(rhoCritSide,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
+#rhoCritSide <-filter(rhoCritSide,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
+rhoCritSide <- rbind(rhoCritSide,k$rCTs)
 
-mClusters <- filter(Clusters, Time==time,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+#filter(rhoCrit,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
+#rhoCrit <- filter(rhoCrit,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
 
+rhoCrit <- rbind(rhoCrit,k$rCT)
+pandoc.table(rhoCrit,round=5)
 
 require(ggplot2)
+ggplot(filter(rhoCrit,round(DispersalDistance,1)==26.7),aes(x=ColonizationRate,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=0)+ scale_x_log10() + theme_bw() + xlab("Migration") + ylab(bquote(rho[c]))
 
-
-#
-# Calculates the probability of spanning cluster
-#
-k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>=0.30 & SpanningProb<=0.70)
-# Delete one record
-#k <- k[-6,]
-
-k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
-
-k$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
-k$ColonizationRate <- m
-require(pander)
-pandoc.table(k,round=5)
-#rhoCritSide <-data.frame()
-rhoCritSide <- rbind(rhoCritSide,k[,c(1,5,6,2:4)])
-#
-# finite size scaling to determine pcrit for infinite lattices
-#
-k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
-   
-k1$MetaType <- c("L","U") 
-k1$iSide <- 0 
-k1$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
-k1$ColonizationRate <- m
-rhoCrit <- rbind(rhoCrit,k1[,c(3,5,6,1,2)])
-rhoCrit <- arrange(rhoCrit,MetaType,desc(DispersalDistance))
-pandoc.table(rhoCrit)
-
-ggplot(filter(rhoCrit,round(DispersalDistance,1)==26.7),aes(x=ColonizationRate,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ scale_x_log10() + theme_bw() + xlab("Migration") + ylab("Critical Probability")
 ggsave("figs/CritProb_Migr_T5000_64_meta.png", width=6,height=4,units="in",dpi=600)
 
 #rhoCrit <- mutate(rhoCrit,ColonizationRate=ifelse(ColonizationRate==0.0001596079,0.000159608,ColonizationRate))
 
-ggplot(filter(rhoCrit,round(ColonizationRate,9)==0.000159608),aes(x=DispersalDistance,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ theme_bw() +xlab("Dispersal Distance") + ylab("Critical Probability")
+ggplot(filter(rhoCrit,round(ColonizationRate,9)==0.000159608,MetaNsp==64),aes(x=DispersalDistance,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ theme_bw() +xlab("Dispersal Distance") + ylab(bquote(rho[c]))
 ggsave("figs/CritProb_Disp_T5000_64_meta.png", width=6,height=4,units="in",dpi=600)
 
-
+# Juntar las 3 figuras en 1 en el pdf ************************************
+#
 plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
 
 rm(k,k1,mClusters)
@@ -1283,24 +1182,25 @@ save.image()
 
 ```
 
-## Simulations to Time=5000 with side=500, dispersal=26 migration=0.0001596079 species=256 
+## Simulations to Time=5000 with side=100-512, dispersal=26 migration=0.0001596079 species=256 
 
-```{r simuldisp_clu_side512_meta256_n30_T5000, eval=T,echo=F,message=T,warning=T}
+```{r simuldisp_clu_side512_meta256_n30_T5000, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
 
-side <- 512
+side <- c(100,150,256,512)
 nsp <- 256
 nSimul <- 30
 
 ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
 
+#ReplRate <- c(0.0000,0.0007,0.0022,0.0028)
 time <- 5000
 
 m  <- 0.0001596079
 alfa <-2.038974
 
-p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("U","L")) 
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("U","L")) # ,"L"
 
 require(doParallel)
 cn <-detectCores()
@@ -1315,17 +1215,114 @@ Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
     simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"N",p$meta[i],F)
 }
 
+# for(i in 1:nrow(p))
+# {
+#     Clu <- bind_rows(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,F,"N",p$meta[i],F))
+#   
+# }
 
 stopCluster(cl)
 
 Clusters <-rbind(Clusters,Clu)
 setwd(oldcd)
 
-rm(cn,cl,Clu)
+rm(p,cn,cl,Clu)
 
 save.image()
 
 ```
+
+```{r pcT5000_clu_side_256_meta256_disp26, eval=F,echo=F,message=T,warning=T}
+
+#rhoCritSide$MetaNsp<-64
+#rhoCrit$MetaNsp<-64
+
+side <- c(100,150,256,512)
+nsp <- 256
+time <- 5000
+
+m   <-round(0.0001596079,9)
+alfa <-round(2.038974,5)
+
+rl <- calcCritical_prob(Clusters,time,nsp,alfa,m)
+#rhoCritSide <- filter(rhoCritSide,MetaNsp==64)
+rhoCritSide <- rbind(rhoCritSide,rl$rCTs)
+rhoCrit <- rbind(rhoCrit,rl$rCT)
+
+plotCritical_Clusters(Clusters,time,nsp,alfa,m,rhoCritSide)
+
+
+```
+
+## Simulations to Time=5000 with side=100-512, dispersal=26 migration=0.0001596079 species=16 
+
+```{r simuldisp_clu_side512_meta16_n30_T5000, eval=T,echo=F,message=T,warning=T}
+setwd("Simul")
+
+
+side <- 512 #c(100,150,256,512)
+nsp <- 16
+nSimul <- 30
+
+ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+
+#ReplRate <- c(0.0000,0.0007,0.0022,0.0028)
+time <- 5000
+
+m  <- 0.0001596079
+alfa <-2.038974
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("L")) # ,"L"
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+## OJO NO BORRA SIMULACIONES ANTERIORES!
+## ultimo F!!
+Clu <- data.frame()
+Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"N",p$meta[i],T)
+}
+
+stopCluster(cl)
+
+Clusters <-rbind(Clusters,Clu)
+setwd(oldcd)
+
+rm(p,cn,cl,Clu)
+
+save.image()
+```
+
+```{r pcT5000_clu_side_256_meta16_disp26, eval=F,echo=F,message=T,warning=T}
+
+
+m   <-round(0.0001596079,9)
+alfa <-round(2.038974,5)
+time <- 5000
+nsp<-16
+
+rl <- calcCritical_prob(Clusters,time,nsp,alfa,m)
+#rhoCritSide <- filter(rhoCritSide,MetaNsp==64)
+rhoCritSide <- rbind(rhoCritSide,rl$rCTs)
+rhoCrit <- rbind(rhoCrit,rl$rCT)
+
+plotCritical_Clusters(Clusters,time,nsp,alfa,m,rhoCritSide)
+
+require(pander)
+pandoc.table(filter(rhoCritSide,DispersalDistance==26.66,ColonizationRate==m, MetaNsp==64) %>% select(c(1,4:6)),round=5)
+
+pandoc.table(select(rhoCrit,c(6,1:5)) %>% arrange(MetaNsp,MetaType,DispersalDistance,ColonizationRate)
+             ,round=5)
+
+
+```
+
+With 16 species and logseries community the most abundant species have a nonzero probability to form a spanning cluster, if we take out neutral communities we can still calculate a critical point.
+
 
 
 # Simulate to estimate distributions of patch sizes statistics

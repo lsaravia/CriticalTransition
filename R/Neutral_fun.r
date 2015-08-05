@@ -1019,12 +1019,22 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
   clu <-readClusterOut(bname)
   if(nrow(den)<nrow(clu))
     clu <- clu[1:nrow(den),]
+  else if(nrow(den)>nrow(clu)) {
+    den <- den[1:nrow(clu),]
+  }
   clu$Richness <- den$Richness 
   clu$H <- den$H
   clu <-rename(clu,MaxSpeciesAbund=TotalSpecies) %>%
                mutate( MetaNsp=nsp, Side=side, MetaType=as.character(meta),MaxClusterProp = MaxClusterSize/(side*side),MaxClusterSpProp=MaxClusterSize/MaxSpeciesAbund,
-                SpanningClust=ifelse(SpanningSpecies>0,MaxClusterProp,0))
+                SpanningClust=ifelse(SpanningSpecies>0,MaxClusterProp,0)) # %>% sample_n(30)
 
+  if(nrow(clu)>sims){
+    clu <- clu %>% sample_n(30)
+  }
+  
+  if(nrow(clu)<sims){
+    warning("Simulations ", nrow(clu), " rho ", clu$ReplacementRate[1])
+  }
   
   clu <- clu[,c(14:16,1:13,17:19)]
   return(clu)
@@ -1978,14 +1988,14 @@ plotNeutral_SAD_aux<-function(nsp,side,time=500,meta="L")
 }
 
 
-plotCritical_Clusters<-function(Clusters,time,metaNsp,dispDist,migr, k)
+plotCritical_Clusters<-function(Clusters,time,metaNsp,alfa,m, k)
 {
   require(plyr)
   require(dplyr)
   require(ggplot2)
 
-  mClusters <- filter(Clusters, Time==time,MetaNsp==metaNsp,DispersalDistance==dispDist,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
-
+  mClusters <- filter(Clusters, Time==time,MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+  k <- filter(k,MetaNsp==metaNsp,DispersalDistance==round(mean_power(alfa),2),ColonizationRate==m)
   #
   # Spaninng probability vs rho
   #
@@ -1999,7 +2009,7 @@ plotCritical_Clusters<-function(Clusters,time,metaNsp,dispDist,migr, k)
 
   # Filter Clusters data.frame
   #
-  tClusters <- Clusters %>% filter(Time==time,MetaNsp==metaNsp,DispersalDistance==dispDist,ColonizationRate==m)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
+  tClusters <- Clusters %>% filter(Time==time,MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
   k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
 
 
@@ -2013,7 +2023,7 @@ plotCritical_Clusters<-function(Clusters,time,metaNsp,dispDist,migr, k)
   #
   # The same Plot in linear x scale 
   #
-  print(ggplot(tClusters, aes(x=ReplacementRate, y=SpanningClust)) + geom_point(alpha=.2) + theme_bw() + xlim(0,0.02)  + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType ) + ylab("Spanning Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green"))
+  #print(ggplot(tClusters, aes(x=ReplacementRate, y=SpanningClust)) + geom_point(alpha=.2) + theme_bw() + xlim(0,0.02)  + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType ) + ylab("Spanning Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green"))
 
 
   #
@@ -2048,3 +2058,70 @@ plotCritical_Clusters<-function(Clusters,time,metaNsp,dispDist,migr, k)
 #
 #
 mean_power <-function(alfa,x=1) abs(((alfa-1)/(alfa-2)*x))
+
+
+
+# Calculates critical probabilities for different side (rCTs) 
+# and critical probability for infinite lattices (rCT)
+# Interpolates linearly between the 4 nearest points of the spanning cluster prob=0.5
+#
+calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
+{
+  require(plyr)
+  require(dplyr)
+  require(ggplot2)
+
+  mClusters <- filter(Clusters, Time==time,MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+  #
+  # Calculates the probability of spanning cluster
+  #
+  #k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.050 & SpanningProb<0.75)
+  
+  # Select 2 records with probability>0.5
+  k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.50) %>% arrange(SpanningProb) %>% slice(1:2)
+  # Select 2 records with probability<=0.5  
+  k <- rbind(k,group_by(mClusters, MetaType,Side) %>% filter(SpanningProb<=0.50) %>% arrange(desc(SpanningProb)) %>% slice(1:2))
+
+  # Interpolate  
+  k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
+  k$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
+  k$ColonizationRate <- m
+
+  # Create data frame to store Pc for lattices with different sides
+
+  rhoCTSide <- k[,c(1,5,6,2:4)]
+  rhoCTSide$MetaNsp<-metaNsp
+
+  #
+  # finite size scaling to determine pcrit for infinite lattices
+  #
+  k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
+     
+   
+  k1$MetaType <- c("L","U") 
+  k1$iSide <- 0 
+  k1$DispersalDistance<-round(mean_power(alfa),2)
+  k1$ColonizationRate <- m
+
+  # Create data frame to store Pc for infinite lattices
+  rhoCT <- data_frame()
+  rhoCT <- k1[,c(3,5,6,1,2)]
+  rhoCT$MetaNsp<-metaNsp
+
+  #pandoc.table(rhoCrit,round=5)
+
+  g<-ggplot(k,aes(x=1/(Side*Side),y=pcrit,colour=MetaType)) + geom_point() + theme_bw() +stat_smooth(method=lm,se=F) + geom_point(data=k1,aes(x=iSide,y=pcrit),shape=21)
+  print(g)
+  #
+  # Spaninng probability vs rho
+  #
+  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green")
+  print(g)
+  #
+  # The same Plot in linear x scale 
+  #
+  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + xlim(0,0.02) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green") + ylab("Probability of Spanning cluster")
+  print(g)
+  #ggsave("figs/SpanPvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
+return(list(rCTs=rhoCTSide,rCT=rhoCT))
+}
