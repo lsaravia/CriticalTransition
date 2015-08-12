@@ -198,17 +198,6 @@ mct <- group_by(CT,Repl,MetaType) %>% summarize(meanRich = mean(meanRich),meanH=
 
 # Plots of all simulations and averages H & Richness
 
-# CTkk <- CT[(916:nrow(CT)),]
-#CT <- CT %>% filter(Time==5000) #12,Repl!=0.015,Repl!=0.025) %>% group_by(Repl) %>% summarise(n=n())
-# 
-# CTkk$Time<-5000
-# CT <- CT [1:915,] #%>% filter(Side!=512) 
-# CT$Time<-3000
-# names(CT)
-# CT <- rbind(CT,CTkk)
-# 
-# CT<- CT[,c(1:2,15:16,3:14)]
-# rm(CTkk,CTk1)
 
 plot_simul_timeRH(CT,mct)
 
@@ -500,30 +489,30 @@ pandoc.table(rhoCrit,round=5)
 # Make with different sides filter side=150
 # 
 k<-filter(rhoCritSide,MetaNsp==nsp,DispersalDistance==round(mean_power(alfa),2),ColonizationRate==m,Side!=150)
+k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
 
-mClusters <- filter(Clusters, Time==5000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m,Side!=150) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+mClusters <- filter(Clusters, Time==5000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m,Side!=150) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))  %>% ungroup() %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
 
 #
 # Spaninng probability vs rho
 #
-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green")
+ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green") + ylab("Probability of spanning cluster")
+ggsave("figs/SpanPvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
 
 #
 # The same Plot in linear x scale 
 #
 ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + xlim(0,0.02) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green") + ylab("Probability of Spanning cluster")
-ggsave("figs/SpanPvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/SpanPvsRepl_T5000_64_side_meta_lin.png", width=6,height=6,units="in",dpi=600)
 
 
 #
 # Shannon diversity vs rho
 #
 tClusters <- Clusters %>% filter(Time==5000,MetaNsp==64)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
-k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
+
 
 tClusters <- Clusters %>% filter(Time==time,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m,Side!=150)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
-k <- filter(k,Side!=150)
-k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
 
 #
 # H vs rho
@@ -534,7 +523,8 @@ ggsave("figs/HvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=60
 #
 # H vs rho in linear x scale 
 #
-ggplot(tClusters, aes(x=ReplacementRate, y=H)) + geom_point(alpha=.2) + theme_bw() + xlim(0,0.02) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green")
+require(grid)
+ggplot(tClusters, aes(x=ReplacementRate, y=H)) + geom_point(alpha=.2) + theme_bw() + xlim(0,0.02) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green") + theme(panel.margin.x=unit(0.6, "lines"))
 ggsave("figs/HvsRepl_T5000_64_side_meta_lin.png", width=6,height=6,units="in",dpi=600)
 
 
@@ -582,11 +572,9 @@ plotNeutral_SAD_1T(64,100,ReplRate,time,"L")
 
 plotNeutral_SAD_1T(64,256,ReplRate,time,"L")
 
-setwd(oldcd)
 
 # Plots of logseries and uniform metacommunity SAD 
 
-setwd("Simul")
 mc <- c("#a50026","#d73027","#f46d43","#fdae61","#fee090","#e0f3f8","#abd9e9","#74add1","#4575b4","#313695")
 
 #
@@ -599,6 +587,8 @@ time <- 5000
 # unique(kk$ReplacementRate)
 
 # ADD 
+ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+
 rank <- plotNeutral_SAD_1T(64,512,ReplRate,time,"L",T)
 rank$MetaType="Logseries"
 r1 <-  plotNeutral_SAD_1T(64,512,ReplRate,time,"U",T) 
@@ -607,8 +597,13 @@ rank <- rbind(rank,r1)
 rank$Time <- time
 rm(r1)
 
-g <- ggplot(rank,aes(x=Rank,y=log(Freq),colour=factor(ReplacementRate))) +  theme_bw() #+ geom_point(size=1,shape=c(21))
-g + scale_colour_manual(values=mc,name=bquote("  "~rho))  + geom_line() + facet_grid(. ~ MetaType, scales="free_x" )
+options("scipen"=100, "digits"=6)
+colourCount = length(unique(rank$ReplacementRate))
+mc1 <- colorRampPalette(mc)(colourCount)
+mc1[11]<-"#0D0D0D" # rho=0.0015
+g <- ggplot(rank,aes(x=Rank,y=log(Freq),colour=factor(ReplacementRate))) +  theme_bw() 
+g + scale_colour_manual(values=mc1,name=bquote("  "~rho),breaks=c(0.0000,0.0005,0.0010,0.0015,0.0020,0.0050,0.0100,0.1000,1))  + geom_line() + facet_grid(. ~ MetaType, scales="free_x" )
+
 #g + scale_colour_discrete(name=bquote("  "~rho))  + geom_line() + facet_grid(. ~ MetaType, scales="free_x" )
 setwd(oldcd)
 ggsave("figs/SAD_T5000_64_512_meta.png", width=6,height=4,units="in",dpi=600)
@@ -1115,20 +1110,50 @@ rhoCrit <- rbind(rhoCrit,k$rCT)
 pandoc.table(rhoCrit,round=5)
 
 require(ggplot2)
-ggplot(filter(rhoCrit,round(DispersalDistance,1)==26.7),aes(x=ColonizationRate,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=0)+ scale_x_log10() + theme_bw() + xlab("Migration") + ylab(bquote(rho[c]))
-
-ggsave("figs/CritProb_Migr_T5000_64_meta.png", width=6,height=4,units="in",dpi=600)
+require(dplyr)
+g1 <-ggplot(filter(rhoCrit,round(DispersalDistance,1)==26.7,MetaNsp==64),aes(x=ColonizationRate,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=0)+ scale_x_log10(breaks=c(0.00015,0.0015,0.015)) + theme_bw() + xlab("Migration") + ylab(bquote(rho[c])) + scale_colour_discrete(guide=FALSE)
+g1
+ggsave("figs/CritProb_Migr_T5000_64_meta.png", width=4,height=4,units="in",dpi=600)
 
 #rhoCrit <- mutate(rhoCrit,ColonizationRate=ifelse(ColonizationRate==0.0001596079,0.000159608,ColonizationRate))
 
-ggplot(filter(rhoCrit,round(ColonizationRate,9)==0.000159608,MetaNsp==64),aes(x=DispersalDistance,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ theme_bw() +xlab("Dispersal Distance") + ylab(bquote(rho[c]))
-ggsave("figs/CritProb_Disp_T5000_64_meta.png", width=6,height=4,units="in",dpi=600)
+g2 <-ggplot(filter(rhoCrit,round(ColonizationRate,9)==0.000159608,MetaNsp==64),aes(x=DispersalDistance,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ theme_bw() +xlab("Dispersal Distance") + ylab(bquote(rho[c]))  + scale_colour_discrete(guide=FALSE)
+g2
+ggsave("figs/CritProb_Disp_T5000_64_meta.png", width=4,height=4,units="in",dpi=600)
+
+
+g3 <- ggplot(filter(rhoCrit,round(ColonizationRate,9)==0.000159608,round(DispersalDistance,1)==26.7),aes(x=MetaNsp,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ theme_bw() +xlab("Metacomm no. species") + ylab(bquote(rho[c]))  + scale_colour_discrete(name="Metacomm.\nType") + theme(legend.justification=c(1,0),legend.position=c(1,0))
+g3
+ggsave("figs/CritProb_MetaNsp_T5000_64_meta.png", width=4,height=4,units="in",dpi=600)
+
+
 
 # Juntar las 3 figuras en 1 en el pdf ************************************
 #
+
+# multiplot(g1,g2,g3,layout=matrix(c(1,2,3,4),nrow=2,byrow=T))
+#
+# library(gtable)
+# library(gridExtra)
+# 
+# gA <- ggplotGrob(g1)
+# gB <- ggplotGrob(g3)
+# gC <- ggplotGrob(g2)
+# 
+# # Set the widths
+# gA$widths <- gB$widths
+# gC$widths <- gB$widths
+# 
+# # Arrange the two charts.
+# # The legend boxes are centered
+# grid.newpage()
+# grid.arrange(gA, gC,gB, nrow = 2)
+# 
+# ggsave("figs/CritProb_Migr_Disp_Mnsp_T5000.png", width=6,height=6,units="in",dpi=600)
+
 plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
 
-rm(k,k1,mClusters)
+rm(k,k1,mClusters,g1,g2,g3)
 save.image()
 
 ```
@@ -1207,14 +1232,16 @@ cn <-detectCores()
 cl <- makeCluster(cn)
 registerDoParallel(cl)
 
-## OJO NO BORRA SIMULACIONES ANTERIORES!
-## ultimo F!!
+# Last T/F deletes or not previous simulations
+#
 Clu <- data.frame()
 Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
 {
     simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"N",p$meta[i],F)
 }
 
+# Read simulations info and add it to Clusters data.frame
+#
 # for(i in 1:nrow(p))
 # {
 #     Clu <- bind_rows(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,F,"N",p$meta[i],F))
@@ -1233,9 +1260,6 @@ save.image()
 ```
 
 ```{r pcT5000_clu_side_256_meta256_disp26, eval=F,echo=F,message=T,warning=T}
-
-#rhoCritSide$MetaNsp<-64
-#rhoCrit$MetaNsp<-64
 
 side <- c(100,150,256,512)
 nsp <- 256
@@ -1260,7 +1284,7 @@ plotCritical_Clusters(Clusters,time,nsp,alfa,m,rhoCritSide)
 setwd("Simul")
 
 
-side <- 512 #c(100,150,256,512)
+side <- c(100,150) #c(100,150,256,512)
 nsp <- 16
 nSimul <- 30
 
@@ -1272,15 +1296,25 @@ time <- 5000
 m  <- 0.0001596079
 alfa <-2.038974
 
-p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("L")) # ,"L"
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("U","L")) # ,"L"
+
+# Read simulations info and add it to Clusters data.frame 
+# use it in case of broken simulations
+
+# Clu <- data.frame()
+# for(i in 1:nrow(p))
+# {
+#     Clu <- bind_rows(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,F,"N",p$meta[i],F))
+#   
+# }
 
 require(doParallel)
 cn <-detectCores()
 cl <- makeCluster(cn)
 registerDoParallel(cl)
 
-## OJO NO BORRA SIMULACIONES ANTERIORES!
-## ultimo F!!
+# Last parameter to delete previous simulations
+#
 Clu <- data.frame()
 Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
 {
@@ -1305,17 +1339,25 @@ alfa <-round(2.038974,5)
 time <- 5000
 nsp<-16
 
-rl <- calcCritical_prob(Clusters,time,nsp,alfa,m)
-#rhoCritSide <- filter(rhoCritSide,MetaNsp==64)
+rl <- calcCritical_prob(Clusters,time,nsp,alfa,m) #Exclude Side=100
+
+# Update table after recalculation of critical points
+#rhoCritSide <- filter(rhoCritSide,DispersalDistance!=26.66 | ColonizationRate!=0.000159608 | MetaNsp!=16)
 rhoCritSide <- rbind(rhoCritSide,rl$rCTs)
 rhoCrit <- rbind(rhoCrit,rl$rCT)
 
-plotCritical_Clusters(Clusters,time,nsp,alfa,m,rhoCritSide)
+# Save figures
+#
+plotCritical_Clusters(Clusters,time,nsp,alfa,m,rhoCritSide,150,T)
 
+#
+# Tables for paper
+#
 require(pander)
 pandoc.table(filter(rhoCritSide,DispersalDistance==26.66,ColonizationRate==m, MetaNsp==64) %>% select(c(1,4:6)),round=5)
 
-pandoc.table(select(rhoCrit,c(6,1:5)) %>% arrange(MetaNsp,MetaType,DispersalDistance,ColonizationRate)
+options("scipen"=100, "digits"=6)
+pandoc.table(select(rhoCrit,c(6,1:5)) %>% arrange(ColonizationRate,desc(DispersalDistance),MetaNsp,MetaType)
              ,round=5)
 
 

@@ -12,7 +12,11 @@ SomeResults.pdf: SomeResults.md
 	pandoc $< -o $@ $(OPTS)
 	evince SomeResults.pdf		
 
-ctnhm.pdf: ctnhm.md makefile
+ctnhm.pdf: ctnhm.md 
 	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" ctnhm.bib
 	pandoc $< -o $@ $(OPTS)
 	evince ctnhm.pdf		
+
+ctnhm_figures.pdf: ctnhm_figures.md
+	pandoc -H ctnhm_figures.sty ctnhm_figures.md -o ctnhm_figures.pdf 
+	evince ctnhm_figures.pdf		
