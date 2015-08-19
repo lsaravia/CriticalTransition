@@ -43,43 +43,6 @@ Table: Critical points $\rho_c$ and critical cluster size for the phase transiti
 \newpage
 
 
------------------------------------------------------------------
-Metacomm.  Metacomm.  Mean           $m$    $\rho_c$   SE$\rho_c$    
- species     type     Distance
---------- ---------- ---------- ---------  ---------- -----------
-   16         L          26.66    0.00016     0.00138     0.00012
-   
-   16         U          26.66    0.00016     0.00101     0.00004
-   
-   64         L          26.66    0.00016     0.00156     0.00004
-   
-   64         U          26.66    0.00016     0.00128     0.00007
-   
-   256        L          26.66    0.00016     0.00189     0.00015
-   
-   256        U          26.66    0.00016     0.00161     0.00013
-   
-   64         L          13.34    0.00016     0.00168     0.0002 
-   
-   64         U          13.34    0.00016     0.00131     0.00011
-   
-   64         L          6.67     0.00016     0.0016      0.00025
-   
-   64         U          6.67     0.00016     0.00124     0.00022
-   
-   64         L          26.66     0.0016     0.00286     0.00009
-   
-   64         U          26.66     0.0016     0.00178     0.00002
-   
-   64         L          26.66    0.01596     0.01244     0.00004
-   
-   64         U          26.66    0.01596     0.01151     0.00102
------------------------------------------------------------------
-
-
-Table: Critical points $\rho_c$ for infinite lattices. Where *Mean Dist.* is the mean dispersal distance,  $m$ is the migration parameter, $\rho_c$ the critical point SE $p_c$ the standar error of the critical point.  
-
-
 ## Figures
 
 \begin{figure}[H]
@@ -119,6 +82,4 @@ Table: Critical points $\rho_c$ for infinite lattices. Where *Mean Dist.* is the
 \caption{Critical point for infinite lattices $\rho_c$ in function of migration from metacommunity,local dispersal distance and number of species in the metacommunity. The parameters used in the simulations are specified in table 1. Two kinds of metacommunities with different species abundance distributions (SAD) were used: L, logseries SAD; and U, uniform SAD.}
 \end{figure}
 
-
-* Make figures of exponential rate from power law with exponential cutoff for patch distribution of species not spanning or most abuntant. Using $\rho$ near $p_c$ for that lattice size to show if there is a minimun.  
 

@@ -1383,9 +1383,9 @@ setwd("Simul")
 
 m <-  0.0001596079
 alfa <- 2.038974
-side <- 512
+side <- 256
 nsp <- 64
-nSimul <- 6
+nSimul <- 10
 time <- 5000
 #time <- 100
 ReplRate <- c(0.0000,0.0005,0.0010,0.0020,0.0030,0.004,0.005,0.01)
@@ -1429,7 +1429,7 @@ setwd("Simul")
 
 m <-  0.0001596079
 alfa <- 2.038974
-side <- 512
+side <- 256
 nsp <- 64
 nSimul <- 10
 time <- 5000
@@ -1453,13 +1453,24 @@ setwd(oldcd)
 require(ggplot2)
 require(dplyr)
 Models <- ungroup(Models)
-namType <- c("a) Spanning","b) Abundant","d) Other Abund","c) Other Spanning")
+
+# Number of repetitions
+nMdl <-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep) %>% filter(DeltaAIC==0)%>% summarize(n=n())
+
+Models1<-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep,model) %>% summarize(n=n()) %>% filter(n>2)  %>% inner_join(Models) %>% arrange(type)
+# inside group we can have 1 and 4 or 2 and 3 only n=2, this table must be empty!!!
+
+
+namType <- c("Spanning","Abundant","Other Abund","Other Spanning")
 namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other Species")
 
 mMdl <- group_by(Models,model,type) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
-mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc) + theme_bw()
 
+mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc,name="Species",breaks=c("Spanning","Abundant","Other Spanning","Other Abund")) + scale_x_discrete(labels=c("No Model","Power","Power Exp.")) + theme_bw()
+ggsave("figs/ClusModels_T5000_64_256_Logser.png", width=6,height=6,units="in",dpi=600)
+
+pandoc.table(mMdl)
 
 # Select Power or Power exponential models
 #
@@ -1524,4 +1535,30 @@ ggsave("figs/discRateSpan_T5000_64_256_meta.png", width=6,height=4,units="in",dp
 
 
 ```
+
+# Simulations to make a video of percolation
+
+```{r gensimul_spat_256_32_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+setwd("Simul")
+
+
+m =  0.0001596079
+alfa=2.038974
+side <- 256
+nsp <- 64
+nSimul <- 1
+
+
+ReplRate <- c(0.0011)
+time <- 1000
+
+simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",time,100,"L",T)
+
+
+# Plot simulations
+# Make video
+
+
+```
+
 
