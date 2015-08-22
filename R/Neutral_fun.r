@@ -1207,9 +1207,6 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
   # Spanning species
   clu1 <-group_by(clu,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>% slice(1:1) %>% rename(Spanning=ClusterSize)
   
-  # test sum of ClusterSize == side*side
-  # Cluster sizes of all species clu2 <-group_by(clu,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>% slice(2:n()) %>% summarize(sumClu=sum(ClusterSize)) 
-  
   clu <-group_by(clu,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>% slice(2:n()) %>% arrange(desc(ClusterSize))
   
   clu <- left_join(clu,clu1) %>% mutate(Spanning=ifelse(is.na(Spanning),0,1))
@@ -1219,14 +1216,16 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
   clu1 <- group_by(clu,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>%  slice(1:1) %>% select(Species,Spanning)
   clu2 <- inner_join(clu,clu1)
   
-  mdl <- group_by(clu2,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep) %>% 
+  # Fits only 1 species patches, most abundant or spanning
+  #
+  mdl <- group_by(clu2,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Species,Spanning) %>% 
       do(fitNeutral_Clusters(.))
   
   clu2 <- anti_join(clu,clu1) # eliminates most abundant or spanning sp
 
   # Select Other species not most abundant
   #
-  clu3 <- filter(clu1,Spanning==0) %>% ungroup() %>% select(MortalityRate:Rep) %>% distinct() # No spanning other species
+  clu3 <- filter(clu1,Spanning==0) %>% ungroup() %>% select(MortalityRate:Time) %>% distinct() # No spanning other species
 
   clu4 <- inner_join(clu2,clu3) %>% mutate(Spanning=3)
   mdl1 <- group_by(clu4,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep) %>% 
@@ -1234,12 +1233,12 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
   
   # Select Other species not spanning
   #
-  clu3 <- filter(clu1,Spanning==1)  %>% ungroup() %>% select(MortalityRate:Rep) %>% distinct() # Spanning other species
+  clu3 <- filter(clu1,Spanning==1)  %>% ungroup() %>% select(MortalityRate:Time) %>% distinct() # Spanning other species
   clu4 <- inner_join(clu2,clu3) %>% mutate(Spanning=4)
   mdl2 <- group_by(clu4,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep) %>% 
     do(fitNeutral_Clusters(.))
 
-  mdl <-   bind_rows(mdl,mdl1,mdl2)
+  mdl <- bind_rows(mdl,mdl1,mdl2)
   
   # Calculates DeltaAIC
   #
@@ -1252,12 +1251,13 @@ fitNeutral_Clusters <-function(clu,est_xmin=F){
   nPatch <- nrow(clu)
   tipo <- 2 # most abundant sp
   tdes <- "Abundant" 
-  
+  print(clu[1,])
   if(nPatch>0){
-  # if spanning cluster exist remove it 
-  #
     sp <- unique(clu$Species)
     if(clu$Spanning[1]==1){
+      #
+      # if spanning cluster exist remove it 
+      #
       clu1 <-group_by(clu,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>% summarize(n=n()) %>% filter(n==1)
       clu <- anti_join(clu,clu1)
       clu <-group_by(clu,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>% slice(2:n())
@@ -1275,7 +1275,7 @@ fitNeutral_Clusters <-function(clu,est_xmin=F){
     }
   }
   nPatchSizes <- length(unique(clu$ClusterSize))
-  if(nPatch>20 && nPatchSizes>5){
+  if(nPatch>19 && nPatchSizes>4){ #
     mPow<-displ$new(clu$ClusterSize)
     if(est_xmin){
       est <- estimate_xmin(mPow)
@@ -1369,14 +1369,16 @@ plotNeutral_Clusters <- function(nsp,side,disp,migr,repl,time,meta,mdl)
   clu1 <- group_by(clu,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>%  slice(1:1) %>% select(Species,Spanning)
   clu2 <- inner_join(clu,clu1)
   
-  mm <- group_by(clu2,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep) %>% 
+  # Fits only 1 species patches, most abundant or spanning
+  #
+  mm <- group_by(clu2,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Species,Spanning) %>% 
       do(plt=plotCCDF_Neutral_Clusters(.,mdl,meta))
   
   clu2 <- anti_join(clu,clu1) # eliminates most abundant or spanning sp
 
   # Select Other species not most abundant
   #
-  clu3 <- filter(clu1,Spanning==0) %>% ungroup() %>% select(MortalityRate:Rep) %>% distinct() # No spanning other species
+  clu3 <- filter(clu1,Spanning==0) %>% ungroup() %>% select(MortalityRate:Time) %>% distinct() # No spanning other species
 
   clu4 <- inner_join(clu2,clu3) %>% mutate(Spanning=3)
   mm <- group_by(clu4,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep) %>% 
@@ -1384,7 +1386,7 @@ plotNeutral_Clusters <- function(nsp,side,disp,migr,repl,time,meta,mdl)
   
   # Select Other species not spanning
   #
-  clu3 <- filter(clu1,Spanning==1)  %>% ungroup() %>% select(MortalityRate:Rep) %>% distinct() # Spanning other species
+  clu3 <- filter(clu1,Spanning==1)  %>% ungroup() %>% select(MortalityRate:Time) %>% distinct() # Spanning other species
   clu4 <- inner_join(clu2,clu3) %>% mutate(Spanning=4)
   mm <- group_by(clu4,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep) %>% 
     do(plt=plotCCDF_Neutral_Clusters(.,mdl,meta))
@@ -1399,8 +1401,8 @@ plotCCDF_Neutral_Clusters <-function(clu,mdl,meta){
   require(dplyr)
 
   nPatch <- nrow(clu)
-  
-  if(nPatch>0){
+  nPatchSizes <- length(unique(clu$ClusterSize))
+  if(nPatch>19 && nPatchSizes>4){
     tipo <- 2 # most abundant sp
     tdes <- "Abundant" 
     sp <- unique(clu$Species)
@@ -1441,7 +1443,7 @@ plotCCDF_Neutral_Clusters <-function(clu,mdl,meta){
       m1 <- filter(mdl,model=="Exp")
       mExp$setXmin(xmin)
       mExp$setPars(m1$alfa)
-      tit <- paste("Rho",unique(clu$ReplacementRate),tdes,"Rep",unique(mdl$Rep),meta)
+      tit <- paste("Rho",unique(clu$ReplacementRate),tdes,"Rep",unique(mdl$Rep),"S",sp[1],meta)
   
   #    fname <- paste0("pLaw_R",unique(clu$ReplacementRate),"_T",tipo,"_Rep",unique(clu$Rep))
   

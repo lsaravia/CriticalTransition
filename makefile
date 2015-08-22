@@ -4,7 +4,7 @@ OPTS= -H margins.sty --bibliography ctnhm.bib --csl=plos.csl
 %.pdf: %.md 
 	pandoc  -V geometry:margin=1cm  --latex-engine=xelatex $^ -o $@
 
-all: ctnhm.pdf ctnhm_figures.pdf ctnhm_appendices.md
+all: ctnhm.pdf ctnhm_figures.pdf ctnhm_appendices.pdf  
 
 
 SomeResults.pdf: SomeResults.md

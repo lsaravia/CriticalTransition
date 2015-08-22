@@ -383,3 +383,23 @@ that experienced drought, I found much higher similarity among
 communities that likely resulted from niche-selection filtering out
 species from the regional pool that could not tolerate such envi-
 ronmental harshness
+
+
+----------------
+@Kefi2014
+
+If the patterns are non-periodic or irregular
+(in particular, if the patch-size distribution is described by a heavy-
+tailed distribution), the patch size distribution may contain
+information about the degradation level of the ecosystem but
+more needs to be known about the underlying ecological
+mechanisms to interpret the changes in the shape of this
+distribution [15,20,46,60].
+
+
+There are other
+promising avenues of research to be pursued. Composite metrics
+that combine spatial patterns with their temporal dynamics could
+potentially offer new and potentially more reliable indicators of
+imminent transitions [66]
+

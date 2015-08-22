@@ -1280,7 +1280,7 @@ plotCritical_Clusters(Clusters,time,nsp,alfa,m,rhoCritSide)
 
 ## Simulations to Time=5000 with side=100-512, dispersal=26 migration=0.0001596079 species=16 
 
-```{r simuldisp_clu_side512_meta16_n30_T5000, eval=T,echo=F,message=T,warning=T}
+```{r simuldisp_clu_side512_meta16_n30_T5000, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
 
@@ -1360,6 +1360,15 @@ options("scipen"=100, "digits"=6)
 pandoc.table(select(rhoCrit,c(6,1:5)) %>% arrange(ColonizationRate,desc(DispersalDistance),MetaNsp,MetaType)
              ,round=5)
 
+# Calculation of the relative variation of each variable
+#
+senRhoCri <- filter(rhoCrit,ColonizationRate==round(0.0001596079,9),MetaNsp==64) %>% group_by(MetaType) %>% summarize(var="Dispersal",delta_pc=(max(pcrit) - min(pcrit))/max(pcrit), delta_var=(max(DispersalDistance) - min(DispersalDistance))/max(DispersalDistance),rv_var=delta_pc/delta_var)
+
+senRhoCri <- bind_rows(senRhoCri, filter(rhoCrit,ColonizationRate==round(0.0001596079,9),DispersalDistance==26.66) %>% group_by(MetaType) %>% summarize(delta_pc=(max(pcrit) - min(pcrit))/max(pcrit), delta_var=(max(MetaNsp) - min(MetaNsp))/max(MetaNsp),rv_var=delta_pc/delta_var,var="MetaNsp"))
+
+senRhoCri <- bind_rows(senRhoCri, filter(rhoCrit,MetaNsp==64,DispersalDistance==26.66) %>% group_by(MetaType) %>% summarize(delta_pc=(max(pcrit) - min(pcrit))/max(pcrit), delta_var=(max(ColonizationRate) - min(ColonizationRate))/max(ColonizationRate),rv_var=delta_pc/delta_var,var="Colonization"))
+
+pandoc.table(senRhoCri,round=2)
 
 ```
 
@@ -1369,7 +1378,7 @@ With 16 species and logseries community the most abundant species have a nonzero
 
 # Simulate to estimate distributions of patch sizes statistics
 
-```{r simuldisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+```{r simuldisp26_cluAll_side_64_meta30_T5000, eval=T,echo=F,message=T,warning=T}
 setwd(oldcd)
 source("R/powerlaw/discpowerexp.R")
 source("R/powerlaw/discexp.R")
@@ -1458,7 +1467,7 @@ Models <- ungroup(Models)
 nMdl <-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep) %>% filter(DeltaAIC==0)%>% summarize(n=n())
 
 Models1<-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep,model) %>% summarize(n=n()) %>% filter(n>2)  %>% inner_join(Models) %>% arrange(type)
-# inside group we can have 1 and 4 or 2 and 3 only n=2, this table must be empty!!!
+# inside group we can have 1 and 4 or 2 and 3,this means n=2 or n=4, if there is a shift from most abundant to spanning !!! n=3 is wrong!!!!
 
 
 namType <- c("Spanning","Abundant","Other Abund","Other Spanning")
@@ -1470,7 +1479,8 @@ mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79
 ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc,name="Species",breaks=c("Spanning","Abundant","Other Spanning","Other Abund")) + scale_x_discrete(labels=c("No Model","Power","Power Exp.")) + theme_bw()
 ggsave("figs/ClusModels_T5000_64_256_Logser.png", width=6,height=6,units="in",dpi=600)
 
-pandoc.table(mMdl)
+require(pander)
+pandoc.table(mMdl,round=2)
 
 # Select Power or Power exponential models
 #
@@ -1480,13 +1490,13 @@ mMdl <- filter(Models,DeltaAIC==0,MetaType=="L",model %in% c("PowExp","Pow")) %>
 ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line") + 
   scale_x_continuous(breaks=c(0,0.0010,0.0030,0.005,0.01)) +
   theme(axis.text.x=element_text(angle=90,vjust=0.5)) +guides(colour=F) + ylab("Power exponent")+ xlab(bquote(rho))
-ggsave("figs/discExp_T5000_64_256_Logser.png", width=6,height=4,units="in",dpi=600)
+#ggsave("figs/discExp_T5000_64_256_Logser.png", width=6,height=4,units="in",dpi=600)
 
 
 ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line")  + 
   scale_x_continuous(breaks=c(0,0.0010,0.0030,0.005,0.01)) +
   theme(axis.text.x=element_text(angle=90,vjust=0.5)) +guides(colour=F) + ylab("Exponential rate") + xlab(bquote(rho))
-ggsave("figs/discRate_T5000_64_256_Logser.png", width=6,height=4,units="in",dpi=600)
+#ggsave("figs/discRate_T5000_64_256_Logser.png", width=6,height=4,units="in",dpi=600)
 
 
 # Select Power or Power exponential models for Metacommunity  Uniform
@@ -1496,41 +1506,41 @@ mMdl <- filter(Models,DeltaAIC==0,MetaType=="U",model %in% c("PowExp","Pow")) %>
 ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line") +
   scale_x_continuous(breaks=c(0,0.0010,0.0030,0.005,0.01)) +
   theme(axis.text.x=element_text(angle=90,vjust=0.5)) +guides(colour=F)+ ylab("Power exponent")+ xlab(bquote(rho))
-ggsave("figs/discExp_T5000_64_256_Unif.png", width=6,height=4,units="in",dpi=600)
+#ggsave("figs/discExp_T5000_64_256_Unif.png", width=6,height=4,units="in",dpi=600)
 
 
 ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line") +
   scale_x_continuous(breaks=c(0,0.0010,0.0030,0.005,0.01)) +
   theme(axis.text.x=element_text(angle=90,vjust=0.5)) +guides(colour=F) + ylab("Exponential rate") + xlab(bquote(rho))
 
-ggsave("figs/discRate_T5000_64_256_Unif.png", width=6,height=4,units="in",dpi=600)
+#ggsave("figs/discRate_T5000_64_256_Unif.png", width=6,height=4,units="in",dpi=600)
 
 # Exponential rate of other sp
 #
 mMdl <- filter(Models,model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Exponential rate") + xlab(bquote(rho))
+ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[3]) + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Exponential rate") + xlab(bquote(rho))+ scale_colour_manual(values=mc)
 ggsave("figs/discRateOther_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
 
 # Power exponent rate of other sp
 #
 mMdl <- filter(Models,model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Power exponent") + xlab(bquote(rho))
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[3]) + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Power exponent") + xlab(bquote(rho))+ scale_colour_manual(values=mc)
 ggsave("figs/discExpOther_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
 
 # Power exponent rate of spanning or most abundant  sp
 #
 mMdl <- filter(Models,model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Power exponent") + xlab(bquote(rho))
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour=mc[3]) + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Power exponent") + xlab(bquote(rho)) + scale_colour_manual(values=mc)
 ggsave("figs/discExpSpan_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
 
 # Exponential rate of spanning or  most abundant sp
 #
 mMdl <- filter(Models,model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour="red") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Exponential rate") + xlab(bquote(rho))
+ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour=mc[3]) + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Exponential rate") + xlab(bquote(rho))+ scale_colour_manual(values=mc)
 ggsave("figs/discRateSpan_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
 
 
