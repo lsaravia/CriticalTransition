@@ -1378,7 +1378,7 @@ With 16 species and logseries community the most abundant species have a nonzero
 
 # Simulate to estimate distributions of patch sizes statistics
 
-```{r simuldisp26_cluAll_side_64_meta30_T5000, eval=T,echo=F,message=T,warning=T}
+```{r simuldisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
 setwd(oldcd)
 source("R/powerlaw/discpowerexp.R")
 source("R/powerlaw/discexp.R")
@@ -1425,7 +1425,7 @@ save.image()
 
 # Plot the cluster sizes with fitted functions
  
-```{r plotFitdisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+```{r plotFitdisp26_cluAll_side_64_meta30_T5000, eval=T,echo=F,message=T,warning=T}
 source("R/powerlaw/discpowerexp.R")
 source("R/powerlaw/discexp.R")
 source("R/powerlaw/powerexp.R")
@@ -1469,6 +1469,7 @@ nMdl <-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,Replacem
 Models1<-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep,model) %>% summarize(n=n()) %>% filter(n>2)  %>% inner_join(Models) %>% arrange(type)
 # inside group we can have 1 and 4 or 2 and 3,this means n=2 or n=4, if there is a shift from most abundant to spanning !!! n=3 is wrong!!!!
 
+Models1 <-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,type,Species) %>% arrange(DeltaAIC) %>% slice(2) %>% filter(DeltaAIC<2)
 
 namType <- c("Spanning","Abundant","Other Abund","Other Spanning")
 namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other Species")

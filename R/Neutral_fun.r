@@ -1242,7 +1242,7 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
   
   # Calculates DeltaAIC
   #
-  mdl <- group_by(mdl,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,type) %>% mutate( DeltaAIC= AICc -min(AICc),MetaType=as.character(meta)) %>% arrange(DeltaAIC)
+  mdl <- group_by(mdl,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,type,Species) %>% mutate( DeltaAIC= AICc -min(AICc),MetaType=as.character(meta)) %>% arrange(DeltaAIC)
 }
 
 
@@ -1307,8 +1307,8 @@ fitNeutral_Clusters <-function(clu,est_xmin=F){
     # Estimate Power with exponential cutoff
     #
     est1 <- discpowerexp.fit(clu$ClusterSize,xmin)
-    x <- sort(unique(clu$ClusterSize))
-    y <- ppowerexp(x,xmin,est1$exponent,est1$rate,lower.tail=F)
+#    x <- sort(unique(clu$ClusterSize))
+#    y <- ppowerexp(x,xmin,est1$exponent,est1$rate,lower.tail=F)
 #    lines(x,y,col=4)
 #    dev.off()
     
@@ -1424,17 +1424,24 @@ plotCCDF_Neutral_Clusters <-function(clu,mdl,meta){
       tdes <- "Other Spanning"
       sp <- ""
     }
-
-    mdl <- filter(mdl,MortalityRate==clu$MortalityRate[1],
+    mdl <- ungroup(mdl)
+    if(tipo==1 | tipo==2) {
+      mdl <- filter(mdl,MortalityRate==clu$MortalityRate[1],
+                    DispersalDistance==clu$DispersalDistance[1],ColonizationRate==clu$ColonizationRate[1],
+                    ReplacementRate==clu$ReplacementRate[1],Rep==clu$Rep[1],type==tipo,MetaType==meta,Species==sp)  
+      
+    } else {
+      mdl <- filter(mdl,MortalityRate==clu$MortalityRate[1],
                   DispersalDistance==clu$DispersalDistance[1],ColonizationRate==clu$ColonizationRate[1],
                   ReplacementRate==clu$ReplacementRate[1],Rep==clu$Rep[1],type==tipo,MetaType==meta)  
-    
+    }
     if(nrow(mdl)>1) {
       
       mPow<-displ$new(clu$ClusterSize)
   
       # select power law
       m0 <- filter(mdl,model=="Pow")
+      if(nrow(m0)==0 | nrow(m0)>1) browser()
       xmin <- m0$xmin
       mPow$setXmin(xmin)
       mPow$setPars(m0$alfa)
@@ -1504,6 +1511,7 @@ cdfplot_displ_exp <- function(x,exp0,exp1,exponent,rate,xmin=1,tit="")
 
 freq_plot_displ_exp <- function(x,exp0,exp1,exponent,rate,xmin=1,tit="")
 {
+  require(ggplot2)
   xx <-as.data.frame(table(x))
   xx$x <- as.numeric(xx$x)
   xx$pexp <-ddiscpowerexp(xx$x,exponent,rate,xmin)

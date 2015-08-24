@@ -63,20 +63,21 @@ Table: Relative variation of the critical point for infinite lattices $\rho_c^\i
 --------------------------------------
  model       type       n   Frequency 
 ------- -------------- --- -----------
-NoModel    Spanning    91     0.23    
+NoModel    Spanning    91     0.22    
 
-  Pow      Spanning    13     0.03    
+  Pow      Spanning    21     0.05    
 
   Pow      Abundant    13     0.03    
 
-PowExp     Spanning    23     0.06    
+PowExp     Spanning    42      0.1    
 
-PowExp     Abundant    65     0.16    
+PowExp     Abundant    137    0.33    
 
-PowExp   Other Abund   78      0.2    
+PowExp   Other Abund   47     0.11    
 
-PowExp  Other Spanning 111    0.28    
+PowExp  Other Spanning 60     0.15    
 --------------------------------------
+
 
 Table: Proportion of best models for patch size distributions from simulated neutral/niche model communities. We fitted 3 models to the patch distributions: exponential, power law (Pow) and power law with exponential cutoff (PowExp). The best model was selected using the Akaike information criteria. We made 10 simulations in a range of $\rho$ (see methods) and we used the following parameters: metacommunities have 64 species and two different species abundance distributions (SAD): logseries SAD; and uniform SAD; The size of the grid was 256*256 sites, migration=0.00016, and dispersal distance=26.66.
 
