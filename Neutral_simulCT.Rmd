@@ -1460,16 +1460,23 @@ setwd(oldcd)
 #
 # Hacer grafico con proporcion de ajustes 
 require(ggplot2)
+require(plyr)
 require(dplyr)
 Models <- ungroup(Models)
 
 # Number of repetitions
-nMdl <-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep) %>% filter(DeltaAIC==0)%>% summarize(n=n())
-
-Models1<-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep,model) %>% summarize(n=n()) %>% filter(n>2)  %>% inner_join(Models) %>% arrange(type)
+# nMdl <-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep) %>% filter(DeltaAIC==0)%>% summarize(n=n())
+# 
+# Models1<-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep,model) %>% summarize(n=n()) %>% filter(n>2)  %>% inner_join(Models) %>% arrange(type)
 # inside group we can have 1 and 4 or 2 and 3,this means n=2 or n=4, if there is a shift from most abundant to spanning !!! n=3 is wrong!!!!
 
-Models1 <-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,type,Species) %>% arrange(DeltaAIC) %>% slice(2) %>% filter(DeltaAIC<2)
+# Power laws best models 
+#
+nMdl <-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep) %>% filter(DeltaAIC>0, model=="PowExp")
+
+# Proportion of best models by model only
+#
+group_by(Models,model) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n))
 
 namType <- c("Spanning","Abundant","Other Abund","Other Spanning")
 namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other Species")
@@ -1489,13 +1496,13 @@ mMdl <- filter(Models,DeltaAIC==0,MetaType=="L",model %in% c("PowExp","Pow")) %>
 
 # Plot of power exponent 
 ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line") + 
-  scale_x_continuous(breaks=c(0,0.0010,0.0030,0.005,0.01)) +
+  scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
   theme(axis.text.x=element_text(angle=90,vjust=0.5)) +guides(colour=F) + ylab("Power exponent")+ xlab(bquote(rho))
 #ggsave("figs/discExp_T5000_64_256_Logser.png", width=6,height=4,units="in",dpi=600)
 
 
 ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~type,scales="free_y") + stat_summary(fun.y=mean,geom="line")  + 
-  scale_x_continuous(breaks=c(0,0.0010,0.0030,0.005,0.01)) +
+  scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) + stat_quantile(quantiles=c(.25, .5, .75))+
   theme(axis.text.x=element_text(angle=90,vjust=0.5)) +guides(colour=F) + ylab("Exponential rate") + xlab(bquote(rho))
 #ggsave("figs/discRate_T5000_64_256_Logser.png", width=6,height=4,units="in",dpi=600)
 
@@ -1516,33 +1523,93 @@ ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_b
 
 #ggsave("figs/discRate_T5000_64_256_Unif.png", width=6,height=4,units="in",dpi=600)
 
-# Exponential rate of other sp
+# Select Power w/exponential cutoff other sp most abundant or other spanning
 #
 mMdl <- filter(Models,model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[3]) + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Exponential rate") + xlab(bquote(rho))+ scale_colour_manual(values=mc)
-ggsave("figs/discRateOther_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
 
-# Power exponent rate of other sp
+# Plot lambda - exponential decay rate
+#
+ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(lambda)) + xlab(bquote(rho))+ scale_colour_manual(values=mc) +stat_quantile(alpha=0.5) + coord_cartesian(ylim=c(-0.02,0.65))
+ggsave("figs/discRateOther_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
+
+# Quantile regression lambda
+#
+#
+rqm <-group_by(mMdl,type,MetaType) %>%
+      do(as.data.frame(do.call(rbind,
+                               lapply(summary(rq(rate~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
+                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="lambda")
+
+
+# Plot power exponent alpha
 #
 mMdl <- filter(Models,model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[3]) + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Power exponent") + xlab(bquote(rho))+ scale_colour_manual(values=mc)
-ggsave("figs/discExpOther_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
 
-# Power exponent rate of spanning or most abundant  sp
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(alpha)) + xlab(bquote(rho))+ scale_colour_manual(values=mc)+stat_quantile(alpha=0.5)+ coord_cartesian(ylim=c(1.1,2.1))
+
+ggsave("figs/discExpOther_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
+
+
+# Quantile regression alpha
+#
+#
+rq1 <-group_by(mMdl,type,MetaType) %>%
+      do(as.data.frame(do.call(rbind,
+                               lapply(summary(rq(alfa~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
+                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="alpha")
+
+rqm <- rbind(rqm,rq1)
+
+# Select Power w/exponential cutoff - spanning or most abundant  sp
 #
 mMdl <- filter(Models,model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour=mc[3]) + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Power exponent") + xlab(bquote(rho)) + scale_colour_manual(values=mc)
-ggsave("figs/discExpSpan_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
 
-# Exponential rate of spanning or  most abundant sp
+
+# Plot Power exponent - alpha  of spanning or most abundant  sp
+#
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(alpha)) + xlab(bquote(rho)) + scale_colour_manual(values=mc)+stat_quantile(alpha=0.5)+ coord_cartesian(ylim=c(1.5,3.6))
+ggsave("figs/discExpSpan_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
+
+# Quantile regression alpha
+#
+#
+rq1 <-group_by(mMdl,type,MetaType) %>%
+      do(as.data.frame(do.call(rbind,
+                               lapply(summary(rq(alfa~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
+                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="alpha")
+
+rqm <- rbind(rqm,rq1)
+
+# Select Power w/exponential cutoff - spanning or most abundant  sp
 #
 mMdl <- filter(Models,model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour=mc[3]) + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab("Exponential rate") + xlab(bquote(rho))+ scale_colour_manual(values=mc)
-ggsave("figs/discRateSpan_T5000_64_256_meta.png", width=6,height=4,units="in",dpi=600)
+
+# Plot Exponential rate - lambda of spanning or  most abundant sp
+#
+ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(lambda)) + xlab(bquote(rho))+ scale_colour_manual(values=mc)+stat_quantile(alpha=0.5)+ coord_cartesian(ylim=c(-0.02,0.32))
+ggsave("figs/discRateSpan_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
+
+# Quantile regression lambda
+#
+#
+rq1 <-group_by(mMdl,type,MetaType) %>%
+      do(as.data.frame(do.call(rbind,
+                               lapply(summary(rq(rate~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
+                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="lambda")
+
+rqm <- rbind(rqm,rq1)
+rqm$slope<-c(F,T)
+names(rqm)[6]<-"pvalue"
+rqm <- filter(rqm, slope==T ) %>% #rename(species=type) %>%
+  select(MetaType,species,param,Tau,Value:pvalue)
+
+require(pander)
+pandoc.table(rqm,round=2)
+group_by(rqm,MetaType,type,param) %>% filter(pvalue<0.05) %>% summarise(n=n())
 
 
 ```
@@ -1552,19 +1619,41 @@ ggsave("figs/discRateSpan_T5000_64_256_meta.png", width=6,height=4,units="in",dp
 ```{r gensimul_spat_256_32_meta30_T5000, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
-
 m =  0.0001596079
 alfa=2.038974
 side <- 256
-nsp <- 64
+nsp <- 32
 nSimul <- 1
 
 
 ReplRate <- c(0.0011)
-time <- 1000
+time <- 3000
 
-simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",time,100,"L",T)
+require(animation)
+simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",time,10,100,"L",T,T)
 
+saveGIF(simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",1000,10,800,"L",T,F), 
+        interval = .3, 
+        movie.name=paste0("neuL",nsp,"_",side,"R", ReplRate,".gif")
+)
+
+
+ReplRate <- c(0.0029)
+time <- 3000
+simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",time,10,10,"L",T,T)
+
+saveGIF(simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",1100,10,850,"L",T,F), 
+        interval = .5, 
+        movie.name=paste0("neuL",nsp,"_",side,"R", ReplRate,".gif")
+)
+
+time <- 3000
+simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",time,10,100,"U",T,T)
+
+saveGIF(simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",1600,10,1350,"U",T,F), 
+        interval = .5, 
+        movie.name=paste0("neuU",nsp,"_",side,"R", ReplRate,".gif")
+)
 
 # Plot simulations
 # Make video

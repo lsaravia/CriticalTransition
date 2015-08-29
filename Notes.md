@@ -207,9 +207,27 @@ Empirical evidence is still insufficient to settle the conflict between these th
 The fact that intraspecific competition (altogether with stochasticity) was able to explain
 most of the variance in species abundance in our community would appear to support his claims. Nevertheless, the same pattern would be expected if the community were structured by interspecific competition, which would cause extinctions until only a set of species that are more limited by conspecific than heterospecific interactions remained (Chesson 2000b).
 
-Our results, taken together with recent studies on tropical forests, suggest that weak
-interactions among established plants may be a general phenomenon, but that local interactions dur-
-ing colonization are important drivers of community composition.
+Our results, taken together with recent studies on tropical forests, suggest that weak interactions among established plants may be a general phenomenon, but that local interactions during colonization are important drivers of community composition.
+
+----------------------
+@Volkov2009
+
+Both approaches yield very similar answers and show
+that the collective effects of the pairwise interspecific interaction
+strengths are weak compared with the intraspecific interactions.
+Our approaches can be applied to other ecological communities
+in steady state to evaluate the extent to which interactions need
+to be incorporated into theoretical explanations for their structure
+and dynamics.
+
+However, both models have different underlying assumptions and
+complement each other, and the degree of accord is noteworthy.
+In general, from a quantitative perspective, both approaches lead
+to the conclusion that the effects of interspecific interactions are
+relatively weak and impose a relatively minor constraint on species
+dynamics in the BCI forest (Fig. 3). It is as though evolution has
+chosen weakly interacting species for proximal coexistence.
+
 
 ----------------------
 @Vergnon2009 Niches versus neutrality: uncovering the drivers of diversity in a species-rich community
@@ -385,7 +403,7 @@ species from the regional pool that could not tolerate such envi-
 ronmental harshness
 
 
-----------------
+------------------------
 @Kefi2014
 
 If the patterns are non-periodic or irregular
@@ -403,3 +421,19 @@ that combine spatial patterns with their temporal dynamics could
 potentially offer new and potentially more reliable indicators of
 imminent transitions [66]
 
+------------------------
+@Newman2005
+
+What does it mean to say that a distribution has no
+finite mean? Surely we can take the data for real solar
+flares and calculate their average? Indeed we can, but
+this is only because the data set is of finite size. When α ≤
+2, the value of the mean x is dominated by the largest of
+the samples drawn from the distribution. For any data
+set of finite size this largest sample has a finite value
+and hence so does the mean. But the more samples we
+draw, the larger, on average, will be the largest of them,
+and hence the larger the mean as well. The divergence of
+Eq. (11) is telling us that as we go to larger and larger data
+sets, our estimate of the mean x will increase without
+bound. We discuss this more below.
