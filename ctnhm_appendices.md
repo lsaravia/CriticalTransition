@@ -38,6 +38,7 @@ Metacomm.  Metacomm.  Mean           $m$  $\rho_c\infty$  SE$\rho_c$
 
 Table: Critical points $\rho_c^\infty$ for infinite lattices. Where *Mean Dist.* is the mean dispersal distance,  $m$ is the migration parameter, and SE $p_c$ the standar error of the critical point.  
 
+\newpage
 
 -----------------------------------------------------------
  Metacomm.   Variable     Delta          Delta    Relative 
@@ -58,6 +59,7 @@ Table: Critical points $\rho_c^\infty$ for infinite lattices. Where *Mean Dist.*
 
 Table: Relative variation of the critical point for infinite lattices $\rho_c^\infty$. See methods for details about simulations and table 1 for the ranges of parameters. We used metacommunitis with two different species abundance distributions (SAD): *L* logseries SAD; and *U* uniform SAD.
 
+\newpage
 
 --------------------------------------
  model       type       n   Frequency 
@@ -79,6 +81,7 @@ PowExp  Other Spanning 60     0.15
 
 Table: Proportion of best models for patch size distributions from simulated neutral/niche model communities. We fitted 3 models to the patch distributions: exponential, power law (Pow) and power law with exponential cutoff (PowExp). The best model was selected using the Akaike information criteria. We made 10 simulations in a range of $\rho$ (see methods) and we used the following parameters: metacommunities have 64 species and two different species abundance distributions (SAD): logseries SAD; and uniform SAD; The size of the grid was 256*256 sites, migration=0.00016, and dispersal distance=26.66.
 
+\newpage
 
 -------------------------------------------------------------------------------
  Metacomm.    species      param   Tau   Value   Std. Error   t value   pvalue 
@@ -189,13 +192,13 @@ Table: Quantil regression of patch distribution model parameters vs. $\rho$, the
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/discExpSpan_T5000_64_256_meta.png}
-\caption{Power law exponent $\alpha$ for patch size distributions of spanning or most abundant species as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that are the most abundant (Abundant) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0015, for uniform metacommunities is 0.0014. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
+\caption{Power law exponent $\alpha$ for patch size distributions of spanning or most abundant species as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that are the most abundant (Abundant) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/discRateSpan_T5000_64_256_meta.png}
-\caption{Exponential decay rate $\lambda$ for patch size distributions of spanning or most abundant species as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that are the most abundant (Abundant) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0015, for uniform metacommunities is 0.0014. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
+\caption{Exponential decay rate $\lambda$ for patch size distributions of spanning or most abundant species as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that are the most abundant (Abundant) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
 \end{figure}
 
 
@@ -203,7 +206,7 @@ Table: Quantil regression of patch distribution model parameters vs. $\rho$, the
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/discExpOther_T5000_64_256_meta.png}
-\caption{Power law exponent $\alpha$ for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that are not the most abundant (Other abund.) or species that are not the spanning species (Other Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0015, for uniform metacommunities is 0.0014. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
+\caption{Power law exponent $\alpha$ for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that are not the most abundant (Other abund.) or species that are not the spanning species (Other Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
 \end{figure}
 
 

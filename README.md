@@ -1,8 +1,19 @@
-# The critical transition between hierarchical competition and neutrality in ecological communities
+# Biodiversity collapse in a phase transition between neutral and niche communities
 
 Markdown version of the manuscript and R source code for the data analysis. 
 
-You need to compile the following C++ program available at <https://github.com/lsaravia/Neutral>:
+**ctnhm.md** the manuscript in markdown 
+
+**ctnhm.bib** the bibliography
+
+**ctnhm.pdf** the pdf version without figures
+
+**ctnhm_figures.md** Manuscript figures
+
+**ctnhm_appendices.md** Apendices
+
+
+To reproduce the results you need to compile the following C++ program available at <https://github.com/lsaravia/Neutral>:
 
 + ipsNeutralCont: with power dispersal
 

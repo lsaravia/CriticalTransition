@@ -11,6 +11,8 @@ The most common species in a neutral community should coincide with the most com
 
 * Multispecies early indicators [@Dakos2014]
 
+* The most competitive species could be seem as non-habitable patch produced by deforestation, and the intensity of competition is a measure of growth rate of deforestation. It has been seen that deforested patches become abandoned due to economic crisis or changes reglamentations and management [@Haddad2015;Hansen2013]. Besides the growth and decay of unhabitable patches should be different from other species rates of invasions (here we assumed all equal) the qualitative features should be the same taking into account that near the percolation threshold the details of the models do not modify the behavior of the system. Thus based on these we can establish that about a 30% percent non-habitable patches can produce a biodiversity collapse if communities live near a critical interaction/competitive intensity. A similar approach taking into account the interplay between two dynamic processes: habitat loss/recuperation and 1 species population spread [@Oborny2007]. found a critical threshold on the same order: 27% of non-habitable patches. 
+
 # Fragments from papers
 
 1. Ostling AM (2012) Large-scale spatial synchrony and the stability of forest biodiversity revisited. Journal of Plant Ecology 5: 52–63. doi:10.1093/jpe/rtr035.
@@ -424,16 +426,10 @@ imminent transitions [66]
 ------------------------
 @Newman2005
 
-What does it mean to say that a distribution has no
-finite mean? Surely we can take the data for real solar
-flares and calculate their average? Indeed we can, but
-this is only because the data set is of finite size. When α ≤
-2, the value of the mean x is dominated by the largest of
-the samples drawn from the distribution. For any data
-set of finite size this largest sample has a finite value
-and hence so does the mean. But the more samples we
-draw, the larger, on average, will be the largest of them,
-and hence the larger the mean as well. The divergence of
-Eq. (11) is telling us that as we go to larger and larger data
-sets, our estimate of the mean x will increase without
-bound. We discuss this more below.
+What does it mean to say that a distribution has no finite mean? Surely we can take the data for real solar flares and calculate their average? Indeed we can, but this is only because the data set is of finite size. When α ≤ 2, the value of the mean x is dominated by the largest of the samples drawn from the distribution. For any data set of finite size this largest sample has a finite value and hence so does the mean. But the more samples we draw, the larger, on average, will be the largest of them, and hence the larger the mean as well. The divergence of Eq. (11) is telling us that as we go to larger and larger data sets, our estimate of the mean x will increase without bound. We discuss this more below.
+
+
+-------------------------------
+@Pigolotti2013
+
+The drastic assumptions of neutral theory favour mathematical tractability leading to analytical pre- dictions for ecological patterns such as species abundance distribution (see, e.g., Rosindell et al, 2011, and references therein). Such predictions, depending on few parameters, fit surprisingly well field data from tropical forests (see, e.g., Hubbell, 2001; Volkov et al., 2003, 2005). Due to its strong departure from traditional theoretical approaches, the neutral theory elicited a heated debate in community ecology about its validity and interpretation. A complication is that, in many cases, niche-based and neutral models yield similar fits of biodiversity patterns (see, e.g., Chave et al., 2002; McGill, 2003; Mouquet and Loreau, 2003; Tilman, 2004; McGill et al., 2006)
