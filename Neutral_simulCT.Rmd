@@ -840,12 +840,7 @@ time <- 5000
 
 k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 
-#filter(rhoCritSide,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
-#rhoCritSide <-filter(rhoCritSide,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
 rhoCritSide <- rbind(rhoCritSide,k$rCTs)
-
-#filter(rhoCrit,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
-#rhoCrit <- filter(rhoCrit,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
 
 rhoCrit <- rbind(rhoCrit,k$rCT)
 pandoc.table(rhoCrit,round=5)
@@ -1006,16 +1001,10 @@ time <- 5000
 
 k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 
-#filter(rhoCritSide,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
-#rhoCritSide <-filter(rhoCritSide,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
 rhoCritSide <- rbind(rhoCritSide,k$rCTs)
-
-#filter(rhoCrit,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
-#rhoCrit <- filter(rhoCrit,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
 
 rhoCrit <- rbind(rhoCrit,k$rCT)
 pandoc.table(rhoCrit,round=5)
-
 
 plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
 
@@ -1099,12 +1088,7 @@ time <- 5000
 
 k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 
-#filter(rhoCritSide,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
-#rhoCritSide <-filter(rhoCritSide,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
 rhoCritSide <- rbind(rhoCritSide,k$rCTs)
-
-#filter(rhoCrit,DispersalDistance==round(mean_power(alfa),2) & ColonizationRate==m & MetaNsp==nsp)
-#rhoCrit <- filter(rhoCrit,DispersalDistance!=round(mean_power(alfa),2) | ColonizationRate!=m | MetaNsp!=nsp)
 
 rhoCrit <- rbind(rhoCrit,k$rCT)
 pandoc.table(rhoCrit,round=5)
@@ -1125,31 +1109,6 @@ ggsave("figs/CritProb_Disp_T5000_64_meta.png", width=4,height=4,units="in",dpi=6
 g3 <- ggplot(filter(rhoCrit,round(ColonizationRate,9)==0.000159608,round(DispersalDistance,1)==26.7),aes(x=MetaNsp,y=pcrit,colour=MetaType)) + geom_point() + geom_errorbar(aes(ymin=pcrit-pcSE, ymax=pcrit+pcSE), width=.1)+ theme_bw() +xlab("Metacomm no. species") + ylab(bquote(rho[c]))  + scale_colour_discrete(name="Metacomm.\nType") + theme(legend.justification=c(1,0),legend.position=c(1,0))
 g3
 ggsave("figs/CritProb_MetaNsp_T5000_64_meta.png", width=4,height=4,units="in",dpi=600)
-
-
-
-# Juntar las 3 figuras en 1 en el pdf ************************************
-#
-
-# multiplot(g1,g2,g3,layout=matrix(c(1,2,3,4),nrow=2,byrow=T))
-#
-# library(gtable)
-# library(gridExtra)
-# 
-# gA <- ggplotGrob(g1)
-# gB <- ggplotGrob(g3)
-# gC <- ggplotGrob(g2)
-# 
-# # Set the widths
-# gA$widths <- gB$widths
-# gC$widths <- gB$widths
-# 
-# # Arrange the two charts.
-# # The legend boxes are centered
-# grid.newpage()
-# grid.arrange(gA, gC,gB, nrow = 2)
-# 
-# ggsave("figs/CritProb_Migr_Disp_Mnsp_T5000.png", width=6,height=6,units="in",dpi=600)
 
 plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
 

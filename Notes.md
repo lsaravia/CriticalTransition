@@ -433,3 +433,8 @@ What does it mean to say that a distribution has no finite mean? Surely we can t
 @Pigolotti2013
 
 The drastic assumptions of neutral theory favour mathematical tractability leading to analytical pre- dictions for ecological patterns such as species abundance distribution (see, e.g., Rosindell et al, 2011, and references therein). Such predictions, depending on few parameters, fit surprisingly well field data from tropical forests (see, e.g., Hubbell, 2001; Volkov et al., 2003, 2005). Due to its strong departure from traditional theoretical approaches, the neutral theory elicited a heated debate in community ecology about its validity and interpretation. A complication is that, in many cases, niche-based and neutral models yield similar fits of biodiversity patterns (see, e.g., Chave et al., 2002; McGill, 2003; Mouquet and Loreau, 2003; Tilman, 2004; McGill et al., 2006)
+
+--------------------------------
+@Stauffer1994
+
+The divergence of characteristic times (in our case the fire lifetime) at a critical point it is called "critical slowing down". For example for a temperature only slight below the liquid gas critical temperature, the fluid is quite unsure whether it wants to be liquid or vapour, and thus take a lot of time to make its choice. 
