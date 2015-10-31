@@ -323,6 +323,9 @@ Although many factors can promote increases in tree cover, acting alone or in ta
 ---------------
 @Manor2008 Facilitation, competition, and vegetation patchiness: From scale free distribution to patterns
 
+Recent reports (Scanlon et al., 2007; Kefi et al., 2007) have demonstrated power-law statistics of the patch size for vegetation ecosystems in the arid and semi-arid climatic zone across a wide range along the annual rainfall gradient. As pointed out in Scanlon et al. (2007) and Kefi et al. (2007), this phenomenon is actually puzzling.
+
+
 Another mechanism that yields power-laws and other fat-
 tailed distributions is multiplicative noise. This situation occurs
 when the random fluctuations that affect the system are
@@ -438,3 +441,9 @@ The drastic assumptions of neutral theory favour mathematical tractability leadi
 @Stauffer1994
 
 The divergence of characteristic times (in our case the fire lifetime) at a critical point it is called "critical slowing down". For example for a temperature only slight below the liquid gas critical temperature, the fluid is quite unsure whether it wants to be liquid or vapour, and thus take a lot of time to make its choice. 
+
+
+--------------
+@sole2007
+
+Such power laws occur in other types of ecosystem and are a fingerprint of self-organization: that is, they are the result of internal dynamic processes driven by local interactions. This principle applies to the field data reported by both Scanlon et al.4 and Kéfi et al.5. It indicates that plant interactions play a central role in shaping these ecosystems, which as a whole are characterized by productivity levels that largely depend on precipitation.
