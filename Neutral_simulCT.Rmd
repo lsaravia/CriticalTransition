@@ -1437,7 +1437,7 @@ nMdl <-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,Replacem
 #
 group_by(Models,model) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n))
 
-namType <- c("Spanning","Abundant","Other Abund","Other Spanning")
+namType <- c("Spanning","MaxPatch","Other MaxPatch","Other Spanning")
 namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other Species")
 
 mMdl <- group_by(Models,model,type) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])

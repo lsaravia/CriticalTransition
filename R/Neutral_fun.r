@@ -1486,10 +1486,15 @@ cdfplot_displ_exp <- function(x,exp0,exp1,exponent,rate,xmin=1,tit="")
   require(ggplot2)
   require(dplyr)
   x <- unique(x)
-  # Plot with base plot and poweRlaw package
+  
+  # Generate data.frames for ggplot2
   #
   tP1 <- data.frame(psize=x,powl=pzeta(x,xmin,exp0,F))
-  tP2 <- data.frame(psize=x,powl=pdiscpowerexp(x,exponent,rate,xmin))
+
+  # Shift to change PowExp origin in case xmin>1
+  shift <- max(filter(tP,x>=xmin)$y)
+  tP2 <- data.frame(psize=x,powl=pdiscpowerexp(x,exponent,rate,xmin)*shift)
+  
   tP2 <- mutate(tP2, powl = powl/max(powl)) # y <- y/max(y)
   tP3 <- data.frame(psize=x,powl=dist_cdf(m,x,lower_tail=F))
 #tP2 <-filter(tP2, powl>= min(tP$Rank))

@@ -1,0 +1,118 @@
+# BCI Data - The critical transition between neutral and competitive communities 
+
+I use BCI data to fit power law distribution of most abundant and not-most abundant species 
+
+
+
+```{r setup, eval=T }
+load(".RData")
+#simul  <- F # variable to perform or not the simulations
+
+oldcd <-getwd()
+source("R/Neutral_fun.r")
+source("R/BCI_fun.r")
+
+# Set the location of the binary 
+#
+hkBin <- "~/Dropbox/cpp/SpatialAnalysis/Clusters/hk"
+ClusterizeBin <- "~/Dropbox/cpp/SpatialAnalysis/XY2sed"
+
+#neuBin64<- "~/Dropbox/cpp/CaNew/Neutral/ipsNeutralP64"
+BCIwd <- "~/Dropbox/Data/BCI"
+
+require(pander)
+require(plyr)
+require(dplyr)
+panderOptions('table.split.table',Inf)
+panderOptions('table.style', 'multiline')
+options("scipen"=100, "digits"=6)
+```
+
+
+```{r BCI_patch,echo=FALSE, eval=TRUE}
+
+
+
+# pathnames <- list.files(pattern="[.]R$", path="R/", full.names=TRUE);
+# sapply(pathnames, FUN=source);
+
+# 1982
+#
+
+sa <-BCI_fit_plot('bci.full1.rdata','bci.full1',"BCI1982Sp", 1982,1000,500,1)
+BCIMdl <- sa$BCIMdl
+BCIhsize <- sa$BCIhsize
+
+
+# 1985
+#
+sa <-BCI_fit_plot('bci.full2.rdata','bci.full2',"BCI1985Sp", 1985,1000,500,1)
+BCIMdl <- rbind(BCIMdl,sa$BCIMdl)
+BCIhsize <- rbind(BCIhsize,sa$BCIhsize)
+
+
+# 1990
+#
+sa <-BCI_fit_plot('bci.full3.rdata','bci.full3',"BCI1990Sp", 1990,1000,500,1)
+BCIMdl <- rbind(BCIMdl,sa$BCIMdl)
+BCIhsize <- rbind(BCIhsize,sa$BCIhsize)
+
+
+## 1995
+#
+sa <-BCI_fit_plot('bci.full4.rdata','bci.full4',"BCI1995Sp", 1995,1000,500,1)
+BCIMdl <- rbind(BCIMdl,sa$BCIMdl)
+BCIhsize <- rbind(BCIhsize,sa$BCIhsize)
+
+
+# 2000
+#
+sa <-BCI_fit_plot('bci.full5.rdata','bci.full5',"BCI2000Sp", 2000,1000,500,1)
+BCIMdl <- rbind(BCIMdl,sa$BCIMdl)
+BCIhsize <- rbind(BCIhsize,sa$BCIhsize)
+
+
+# 2005
+#
+sa <-BCI_fit_plot('bci.full6.rdata','bci.full6',"BCI2005Sp", 2005,1000,500,1)
+BCIMdl <- rbind(BCIMdl,sa$BCIMdl)
+BCIhsize <- rbind(BCIhsize,sa$BCIhsize)
+
+## 2010
+#
+sa <-BCI_fit_plot('bci.full7.rdata','bci.full7',"BCI2010Sp", 2010,1000,500,1)
+BCIMdl <- rbind(BCIMdl,sa$BCIMdl)
+BCIhsize <- rbind(BCIhsize,sa$BCIhsize)
+
+
+save.image()
+
+# Select Power w/exponential cutoff - spanning or most abundant  sp
+#
+namType <- c("Spanning","MaxPatch","Other MaxPatch","Other Spanning")
+namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other Species")
+mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+mMdl <- ungroup(BCIMdl) %>%  filter(model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
+
+# Plot Exponential rate - lambda of spanning or  most abundant sp
+#
+g <-ggplot(mMdl,aes(x=Year,y=rate,colour=type)) + geom_point() +  theme_bw() + 
+	#scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  	theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(lambda)) + xlab("Year")+ scale_colour_manual(values=mc)#+
+  	g + stat_quantile(quantiles = 0.5) #+ coord_cartesian(ylim=c(-0.02,0.32))
+
+ggsave("figs/discRateSpan_BCI.png", width=7,height=4,units="in",dpi=600)
+
+# Quantile regression lambda
+#
+#
+rq1 <-group_by(mMdl,type) %>%
+      do(as.data.frame(do.call(rbind,
+                               lapply(summary(rq(rate~Year,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
+                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="lambda")
+
+rq1
+
+```
+

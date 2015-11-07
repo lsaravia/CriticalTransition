@@ -32,7 +32,7 @@ R/Neutral_fun.r: collection of functions used for the analysis
 R/powerlaw: code to fit powerlaws from <http://tuvalu.santafe.edu/~aaronc/powerlaws/> (by Cosma Shalizi)
 
 
-# License
+# License for software
 
 Unless explicitly stated in the source code or in a folder README the following applies:
 

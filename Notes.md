@@ -1,6 +1,7 @@
 # Notes
 
 ### percolation
+
 The simplest mechanism that produces scale invariance is percolation, physically describes the movement of a fluid through porous media. One can think about a two dimensional landscape where each site is connected to the others neighbors with some probability $p$. The landscape will be connected when $p$ reaches some threshold value . 
 
 
