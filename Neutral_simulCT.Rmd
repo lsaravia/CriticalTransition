@@ -1443,7 +1443,7 @@ namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other 
 mMdl <- group_by(Models,model,type) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
 
 mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc,name="Species",breaks=c("Spanning","Abundant","Other Spanning","Other Abund")) + scale_x_discrete(labels=c("No Model","Power","Power Exp.")) + theme_bw()
+ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc,name="Species",breaks=c("Spanning","MaxPatch","Other Spanning","Other MaxPatch")) + scale_x_discrete(labels=c("No Model","Power","Power Exp.")) + theme_bw()
 ggsave("figs/ClusModels_T5000_64_256_Logser.png", width=6,height=6,units="in",dpi=600)
 
 require(pander)

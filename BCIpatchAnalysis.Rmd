@@ -28,6 +28,11 @@ panderOptions('table.style', 'multiline')
 options("scipen"=100, "digits"=6)
 ```
 
+# Analysis of BCI data
+
+* Discretize  x,y data into a lattice
+* Fit patch distributions
+
 
 ```{r BCI_patch,echo=FALSE, eval=TRUE}
 
@@ -87,32 +92,99 @@ BCIhsize <- rbind(BCIhsize,sa$BCIhsize)
 
 save.image()
 
+```
+
+
+# Plots of Biggest patch species 
+
+We assume that BCI is at steady state and different studies point out that it should be close to a purely neutral dynamics [@Condit2012; @Seri2012; @Volkov2007]
+
+
+```{r BCI_PlotPatch,echo=FALSE, eval=TRUE}
+
 # Select Power w/exponential cutoff - spanning or most abundant  sp
 #
+
+require(ggplot2)
+
 namType <- c("Spanning","MaxPatch","Other MaxPatch","Other Spanning")
 namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other Species")
 mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 mMdl <- ungroup(BCIMdl) %>%  filter(model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
 
+
+# Plot of power exponent 
+#
+g <-ggplot(mMdl,aes(x=Year,y=alfa,colour=type)) + geom_point() +  theme_bw()+
+    ylab(bquote(alpha)) + xlab("Year")+ scale_colour_manual(values=mc,guide=F)#+
+
+g + stat_quantile(quantiles = 0.5) #+ coord_cartesian(ylim=c(-0.02,0.32))
+
+ggsave("figs/discExpSpan_BCI.png", width=6,height=4,units="in",dpi=600)
+
+
 # Plot Exponential rate - lambda of spanning or  most abundant sp
 #
-g <-ggplot(mMdl,aes(x=Year,y=rate,colour=type)) + geom_point() +  theme_bw() + 
-	#scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  	theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(lambda)) + xlab("Year")+ scale_colour_manual(values=mc)#+
-  	g + stat_quantile(quantiles = 0.5) #+ coord_cartesian(ylim=c(-0.02,0.32))
+g <-ggplot(mMdl,aes(x=Year,y=rate,colour=type)) + geom_point() +  theme_bw() +
+    ylab(bquote(lambda)) + xlab("Year") + scale_colour_manual(values=mc,guide=F)
 
-ggsave("figs/discRateSpan_BCI.png", width=7,height=4,units="in",dpi=600)
+g + stat_quantile(quantiles = 0.5) #+ coord_cartesian(ylim=c(-0.02,0.32))
+
+ggsave("figs/discRateSpan_BCI.png", width=6,height=4,units="in",dpi=600)
 
 # Quantile regression lambda
 #
 #
+require(quantreg)
+
+rq1 <-group_by(mMdl,type) %>%
+      do(as.data.frame(do.call(rbind,
+                               lapply(summary(rq(alfa~Year,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
+                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="alpha")
+
+rq1
+
+rqm <-group_by(mMdl,type) %>%
+      do(as.data.frame(do.call(rbind,
+                               lapply(summary(rq(rate~Year,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
+                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="lambda")
+
+rqm <- rbind(rq1,rqm)
+
+# Select Other MaxPatch
+#
+#
+mMdl <- ungroup(BCIMdl) %>%  filter(model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
+#mMdl <- ungroup(BCIMdl) %>%  filter(type==3 | type==4)
+# Plot Exponential rate - lambda of Other MaxPatch or spanning 
+#
+g <-ggplot(mMdl,aes(x=Year,y=rate,colour=as.factor(type))) + geom_point() +  theme_bw() + ylab(bquote(lambda)) + xlab("Year") + scale_y_log10()+guides(colour=FALSE)
+
+g + stat_quantile(quantiles = 0.5) #+ coord_cartesian(ylim=c(-0.02,0.32))
+
+ggsave("figs/discRateOther_BCI.png", width=7,height=4,units="in",dpi=600)
+
+
 rq1 <-group_by(mMdl,type) %>%
       do(as.data.frame(do.call(rbind,
                                lapply(summary(rq(rate~Year,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
                        ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="lambda")
 
-rq1
 
+rqm <-rbind(rqm,rq1)
+
+rq1 <-group_by(mMdl,type) %>%
+      do(as.data.frame(do.call(rbind,
+                               lapply(summary(rq(alfa~Year,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
+                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="alpha")
+
+rqm <-rbind(rqm,rq1)
+
+rqm$slope<-c(F,T)
+names(rqm)[5]<-"pvalue"
+rqm <- filter(rqm, slope==T ) %>% select(type,param,Tau,Value:pvalue)
+
+rqm
 ```
 

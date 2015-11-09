@@ -370,12 +370,20 @@ As a result, it is possible to drive a community between the niche and neutral p
 
 @Rosindell2009 Species-area curves, neutral models, and long-distance dispersal
 
+
+Condit et al. (2002) quote a range of
+m values between 4.8 3 10À8 and 1.7 3 10À14 for forests in
+Panama, Ecuador, and Peru,
+
+
 Speciation rates are estimated at mean=0.56 SE .17 species
 per million years (Baldwin and Sanderson 1998), which
 corresponded to rates from 2.3 10^-6  to 1.1 10^-5 per
 species per generation; note, however, that this figure
 needs to be divided by the number of individuals per
 species to give the speciation rate per birth m.
+
+
 
 
 ----------

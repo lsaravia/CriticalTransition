@@ -86,6 +86,6 @@ Table: Critical points $\rho_c$ and critical cluster size for the phase transiti
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/discRateOther_T5000_64_256_meta.png}
-\caption{Exponential decay rate $\lambda$ for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that are not the most abundant (Other abund.) or species that are not the spanning species (Other Spanning), the points are the value of $\lambda$ and the continuous lines are fitted median regressions. The dashed line connects the $\lambda$ median for each $\rho$.  
+\caption{Exponential decay rate $\lambda$ for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that does not have the biggest patch (Other MaxPatch) or species that are not the spanning species (Other Spanning), the points are the value of $\lambda$ and the continuous lines are fitted median regressions. The dashed line connects the $\lambda$ median for each $\rho$.  
 We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0015, for uniform metacommunities is 0.0014. The size of the grid was 256*256 sites and the other parameters used are migration=0.00016, dispersal distance=26.66.}
 \end{figure}

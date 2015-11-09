@@ -68,13 +68,13 @@ NoModel    Spanning    91     0.22
 
   Pow      Spanning    21     0.05    
 
-  Pow      Abundant    13     0.03    
+  Pow      MaxPatch    13     0.03    
 
 PowExp     Spanning    42      0.1    
 
-PowExp     Abundant    137    0.33    
+PowExp     MaxPatch    137    0.33    
 
-PowExp   Other Abund   47     0.11    
+PowExp  Other MaxPatch 47     0.11    
 
 PowExp  Other Spanning 60     0.15    
 --------------------------------------
@@ -87,17 +87,17 @@ Table: Proportion of best models for patch size distributions from simulated neu
  Metacomm.    species      param   Tau   Value   Std. Error   t value   pvalue 
  Type
 ---------- -------------- ------- ----- ------- ------------ --------- --------
-    L       Other Abund   lambda  0.25  -35.56     15.88       -2.24     0.03  
+    L      Other MaxPatch lambda  0.25  -35.56     15.88       -2.24     0.03  
 
-    L       Other Abund   lambda   0.5  -31.36     12.97       -2.42     0.02  
+    L      Other MaxPatch lambda   0.5  -31.36     12.97       -2.42     0.02  
 
-    L       Other Abund   lambda  0.75  -14.07      8.9        -1.58     0.12  
+    L      Other MaxPatch lambda  0.75  -14.07      8.9        -1.58     0.12  
 
-    U       Other Abund   lambda  0.25   -72.9     24.63       -2.96     0.01  
+    U      Other MaxPatch lambda  0.25   -72.9     24.63       -2.96     0.01  
 
-    U       Other Abund   lambda   0.5  -72.14      8.56       -8.42      0    
+    U      Other MaxPatch lambda   0.5  -72.14      8.56       -8.42      0    
 
-    U       Other Abund   lambda  0.75  -71.44     15.39       -4.64      0    
+    U      Other MaxPatch lambda  0.75  -71.44     15.39       -4.64      0    
 
     L      Other Spanning lambda  0.25   25.34      15.1       1.68      0.1   
 
@@ -111,17 +111,17 @@ Table: Proportion of best models for patch size distributions from simulated neu
 
     U      Other Spanning lambda  0.75   21.77      9.04       2.41      0.02  
 
-    L       Other Abund    alpha  0.25   0.96      18.64       0.05      0.96  
+    L      Other MaxPatch  alpha  0.25   0.96      18.64       0.05      0.96  
 
-    L       Other Abund    alpha   0.5   -5.6      34.99       -0.16     0.87  
+    L      Other MaxPatch  alpha   0.5   -5.6      34.99       -0.16     0.87  
 
-    L       Other Abund    alpha  0.75   53.34      26.1       2.04      0.05  
+    L      Other MaxPatch  alpha  0.75   53.34      26.1       2.04      0.05  
 
-    U       Other Abund    alpha  0.25   15.94     21.22       0.75      0.46  
+    U      Other MaxPatch  alpha  0.25   15.94     21.22       0.75      0.46  
 
-    U       Other Abund    alpha   0.5   61.92     28.37       2.18      0.04  
+    U      Other MaxPatch  alpha   0.5   61.92     28.37       2.18      0.04  
 
-    U       Other Abund    alpha  0.75   85.21     63.78       1.34      0.19  
+    U      Other MaxPatch  alpha  0.75   85.21     63.78       1.34      0.19  
 
     L      Other Spanning  alpha  0.25  -28.36     16.91       -1.68     0.1   
 
@@ -135,17 +135,17 @@ Table: Proportion of best models for patch size distributions from simulated neu
 
     U      Other Spanning  alpha  0.75  -19.96      7.92       -2.52     0.01  
 
-    L         Abundant     alpha  0.25   17.55      4.01       4.37       0    
+    L         MaxPatch     alpha  0.25   17.55      4.01       4.37       0    
 
-    L         Abundant     alpha   0.5   15.62      8.75       1.79      0.08  
+    L         MaxPatch     alpha   0.5   15.62      8.75       1.79      0.08  
 
-    L         Abundant     alpha  0.75   34.03     11.15       3.05       0    
+    L         MaxPatch     alpha  0.75   34.03     11.15       3.05       0    
 
-    U         Abundant     alpha  0.25   3.26      10.39       0.31      0.75  
+    U         MaxPatch     alpha  0.25   3.26      10.39       0.31      0.75  
 
-    U         Abundant     alpha   0.5   15.79     13.29       1.19      0.24  
+    U         MaxPatch     alpha   0.5   15.79     13.29       1.19      0.24  
 
-    U         Abundant     alpha  0.75   36.25     26.98       1.34      0.18  
+    U         MaxPatch     alpha  0.75   36.25     26.98       1.34      0.18  
 
     L         Spanning     alpha  0.25   9.07      40.38       0.22      0.82  
 
@@ -159,17 +159,17 @@ Table: Proportion of best models for patch size distributions from simulated neu
 
     U         Spanning     alpha  0.75   145.5     213.2       0.68      0.5   
 
-    L         Abundant    lambda  0.25   -8.73      3.68       -2.37     0.02  
+    L         MaxPatch    lambda  0.25   -8.73      3.68       -2.37     0.02  
 
-    L         Abundant    lambda   0.5  -12.58      5.21       -2.41     0.02  
+    L         MaxPatch    lambda   0.5  -12.58      5.21       -2.41     0.02  
 
-    L         Abundant    lambda  0.75   -6.11      7.65       -0.8      0.43  
+    L         MaxPatch    lambda  0.75   -6.11      7.65       -0.8      0.43  
 
-    U         Abundant    lambda  0.25  -67.67      7.76       -8.72      0    
+    U         MaxPatch    lambda  0.25  -67.67      7.76       -8.72      0    
 
-    U         Abundant    lambda   0.5  -75.12     17.14       -4.38      0    
+    U         MaxPatch    lambda   0.5  -75.12     17.14       -4.38      0    
 
-    U         Abundant    lambda  0.75  -64.21      7.85       -8.18      0    
+    U         MaxPatch    lambda  0.75  -64.21      7.85       -8.18      0    
 
     L         Spanning    lambda  0.25   0.17       1.77        0.1      0.92  
 
@@ -184,21 +184,36 @@ Table: Proportion of best models for patch size distributions from simulated neu
     U         Spanning    lambda  0.75   6.66      29.32       0.23      0.82  
 -------------------------------------------------------------------------------
 
-Table: Quantil regression of patch distribution model parameters vs. $\rho$, the intensity of competition.  We fitted a power law with exponential cutoff to patch size distribution which has two parameters: *alpha* is the power expoent, and *lambda* is the exponential decay rate (See methods for functional formulae). We fitted the model to patches of species that are the most abundant (Abundant), species that form a spanning cluster (Spanning), all the species that are not the most abundant (Other abund.) and all species that are not the spanning species (Other Spanning). We fitted 3 quantiles *Tau*=0.25,0.50 and 0.75 and we used a bootstraping procedure to assess significance. We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
-\end{figure}  
+Table: Quantile regression of patch distribution model parameters vs. $\rho$, the intensity of competition.  We fitted a power law with exponential cutoff to patch size distribution which has two parameters: *alpha* is the power exponent, and *lambda* is the exponential decay rate (See methods for functional formulas). We fitted the model to patches of the species that has the biggest patch (MaxPatch), species that form a spanning cluster (Spanning), all the species that are not the MaxPatch (Other MaxPatch) and all species that are not the spanning species (Other Spanning). We fitted 3 quantiles *Tau*=0.25,0.50 and 0.75 and we used a bootstraping procedure to assess significance. We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.
+
+
+--------------------------------------------------------------------
+     type       param   Tau   Value   Std. Error   t value   pvalue 
+-------------- ------- ----- ------- ------------ --------- --------
+   MaxPatch     alpha   0.5     0        0.04       0.03      0.98  
+
+   MaxPatch    lambda   0.5     0        0.01       -0.21     0.84  
+
+Other MaxPatch lambda   0.5     0         0           0        1    
+
+Other MaxPatch  alpha   0.5   0.01       0.01       1.25      0.27  
+--------------------------------------------------------------------
+
+Table: Median regression of patch distribution model parameters vs. Year for BCI data.  We fitted a power law with exponential cutoff to patch size distribution which has two parameters: *alpha* is the power exponent, and *lambda* is the exponential decay rate (See methods for functional formulas). We fitted the model to patches of the species that has the biggest patch (MaxPatch), and all the species that are not the MaxPatch (Other MaxPatch). We used a bootstraping procedure to assess significance. 
+
 
 ## Appendix Figures
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/discExpSpan_T5000_64_256_meta.png}
-\caption{Power law exponent $\alpha$ for patch size distributions of spanning or most abundant species as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that are the most abundant (Abundant) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
+\caption{Power law exponent $\alpha$ for patch size distributions of spanning or most abundant species as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that has the biggest patch (MaxPatch) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/discRateSpan_T5000_64_256_meta.png}
-\caption{Exponential decay rate $\lambda$ for patch size distributions of spanning or most abundant species as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that are the most abundant (Abundant) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
+\caption{Exponential decay rate $\lambda$ for patch size distributions of spanning or most abundant species as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that has the biggest patch (MaxPatch) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
 \end{figure}
 
 
@@ -206,7 +221,7 @@ Table: Quantil regression of patch distribution model parameters vs. $\rho$, the
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/discExpOther_T5000_64_256_meta.png}
-\caption{Power law exponent $\alpha$ for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that are not the most abundant (Other abund.) or species that are not the spanning species (Other Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
+\caption{Power law exponent $\alpha$ for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that does not have the biggest patch (Other MaxPatch) or species that are not the spanning species (Other Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
 \end{figure}
 
 
