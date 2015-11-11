@@ -111,6 +111,16 @@ namType <- c("Spanning","MaxPatch","Other MaxPatch","Other Spanning")
 namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other Species")
 mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
+
+# Proportion of best models by model only
+#
+group_by(BCIMdl,model) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n))
+mMdl <- group_by(BCIMdl,model,type) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
+mMdl
+
+# Max Cluster Size proportion
+ungroup(BCIMdl) %>% filter(type==2,DeltaAIC==0) %>% mutate(maxPatch = ClusterSize/(1000*500)) %>% summarise(maxPatchMean=mean(maxPatch))
+
 mMdl <- ungroup(BCIMdl) %>%  filter(model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
 
 
@@ -185,6 +195,9 @@ rqm$slope<-c(F,T)
 names(rqm)[5]<-"pvalue"
 rqm <- filter(rqm, slope==T ) %>% select(type,param,Tau,Value:pvalue)
 
-rqm
+require(pander)
+pandoc.table(rqm,round=2)
 ```
+
+All slopes are non-significative
 
