@@ -1,4 +1,4 @@
-OPTS= -H margins.sty --bibliography ctnhm.bib --csl=plos.csl 
+OPTS= -H margins.sty --bibliography ctnhm.bib --csl=ecology-letters.csl 
 
 
 %.pdf: %.md 
