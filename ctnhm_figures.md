@@ -65,23 +65,6 @@ Table: Critical points $\rho_c$ and critical cluster size for the phase transiti
 \caption{Richness and critical point for simulated neutral/niche model communities as a function of the intensity of competition $\rho$. The columns represent different metacommunity types and the rows different grid *side*, where the total size of the grid is *side x side*. Points are repeated simulations of a the spatial model (n=30) and the vertical line is the critical point were the phase transition occurs}
 \end{figure}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=6.5in]{figs/SAD_T5000_64_512_meta.png}
-\caption{Rank abundance diagrams (RADs) for simulated neutral/niche model communities as a function of the intensity of competition $\rho$. Except for $\rho=0$ the values in the legend are upper limits. The RADs are averages of 30 simulations. Metacommunities have 64 species and two different species abundance distributions (SAD): logseries SAD (L); and uniform SAD (U); the critical point for logseries is 0.0013 and 0.0011 for uniform metacommunities. The size of the grid was 256*256 sites and the other parameters used are migration=0.00016, dispersal distance=26.66.}
-\end{figure}
-
-
-\begin{figure}[H]
-\centering
-\begin{tabular}{cc}
-\subfloat{\includegraphics[width=3.3in]{figs/CritProb_Migr_T5000_64_meta.png}} &
-\subfloat{\includegraphics[width=3.3in]{figs/CritProb_Disp_T5000_64_meta.png}} \\
-\subfloat{\includegraphics[width=3.3in]{figs/CritProb_MetaNsp_T5000_64_meta.png}} &
-\end{tabular}
-\caption{Critical point for infinite lattices $\rho_c^\infty$ in function of migration from metacommunity,local dispersal distance and number of species in the metacommunity. The parameters used in the simulations are specified in table 1. Two kinds of metacommunities with different species abundance distributions (SAD) were used: *L*, logseries SAD; and *U*, uniform SAD.}
-\end{figure}
-
 
 \begin{figure}[H]
 \centering

@@ -4,7 +4,7 @@ OPTS= -H margins.sty --bibliography ctnhm.bib --csl=ecology-letters.csl
 %.pdf: %.md 
 	pandoc  -V geometry:margin=1cm  --latex-engine=xelatex $^ -o $@
 
-all: ctnhm.pdf ctnhm_figures.pdf ctnhm_appendices.pdf  ctnhm.docx
+all: ctnhm.pdf ctnhm_figures.pdf ctnhm_appendices.pdf ctnhm.docx
 
 
 SomeResults.pdf: SomeResults.md
@@ -24,3 +24,7 @@ ctnhm.docx: ctnhm.md
 ctnhm_figures.pdf: ctnhm_figures.md
 	pandoc -H ctnhm_figures.sty ctnhm_figures.md -o ctnhm_figures.pdf 
 	evince ctnhm_figures.pdf		
+
+ctnhm_appendices.pdf: ctnhm_appendices.md
+	pandoc -H ctnhm_appendices.sty ctnhm_appendices.md -o ctnhm_appendices.pdf 
+	evince ctnhm_appendices.pdf		

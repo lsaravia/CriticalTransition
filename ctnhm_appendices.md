@@ -1,5 +1,18 @@
 # Appendices 
 
+## Appendix 1: Barro colorado Island forest plot discretization procedure
+
+To analyze the patch distribution of BCI plot we first have to discretized the positions of the trees to fit them in a lattice. In each position only one individual of a particular species can be present, this is the same assumption that we made for the model that we use in the paper above. 
+
+We have to choose a length scale to make the discretization, if we intend to fit all the individuals of all species in a different site the scale should be around 0.10 m for this plot, as the plot has 1000m x 500 m, that would result in an big lattice of 10000x5000 sites with a great proportion of empty places. This will result in a majority of isolated sites with almost no patches. If we use a bigger scale e.g. of 0.5 m, more than 1 individual of possibly different species get in some of the sites, in these cases we have to decide which one will occupy the site. We establish that the one with greater dbh, no matter the species, will be the one that occupies the site, thus we are favoring the more mature individuals.
+
+In this process we have to find the scale that give us the maximal occupation of the lattice without loosing the species structure of the community. Then the criteria to stop enlarging the scale is that the species abundance distribution (SAD) of the discretized lattice has not to be statistically different from the original SAD. To test this we use the Anderson-Darling statistic with a randomization procedure using the R package kSamples [1], this statistic has been proved powerful to detect different kinds of communities [2]. Using this procedure we obtained a scale of 1 m, thus we used a lattice of 1000x500 sites. 
+
+1. Scholz F, Zhu A (2015) kSamples: K-Sample Rank Tests and their Combinations. Available: http://cran.r-project.org/package=kSamples.
+
+1. Saravia LA (2015) A new method to analyse species abundances in space using generalized dimensions. Methods Ecol Evol 6: 1298–1310. Available: http://doi.wiley.com/10.1111/2041-210X.12417.
+
+
 ## Appendix Tables 
 
 
@@ -84,104 +97,104 @@ Table: Proportion of best models for patch size distributions from simulated neu
 \newpage
 
 -------------------------------------------------------------------------------
- Metacomm.    species      param   Tau   Value   Std. Error   t value   pvalue 
+ Metacomm.  param    species       Tau   Value   Std. Error   t value   pvalue 
  Type
----------- -------------- ------- ----- ------- ------------ --------- --------
-    L      Other MaxPatch lambda  0.25  -35.56     15.88       -2.24     0.03  
+---------- ------ --------------  ----- ------- ------------ --------- --------
+    L      lambda Other MaxPatch  0.25  -35.56     15.88       -2.24     0.03  
 
-    L      Other MaxPatch lambda   0.5  -31.36     12.97       -2.42     0.02  
+    L                              0.5  -31.36     12.97       -2.42     0.02  
 
-    L      Other MaxPatch lambda  0.75  -14.07      8.9        -1.58     0.12  
+    L                             0.75  -14.07      8.9        -1.58     0.12  
 
-    U      Other MaxPatch lambda  0.25   -72.9     24.63       -2.96     0.01  
+    U                             0.25   -72.9     24.63       -2.96     0.01  
 
-    U      Other MaxPatch lambda   0.5  -72.14      8.56       -8.42      0    
+    U                              0.5  -72.14      8.56       -8.42      0    
 
-    U      Other MaxPatch lambda  0.75  -71.44     15.39       -4.64      0    
+    U                             0.75  -71.44     15.39       -4.64      0    
 
-    L      Other Spanning lambda  0.25   25.34      15.1       1.68      0.1   
+    L             Other Spanning  0.25   25.34      15.1       1.68      0.1   
 
-    L      Other Spanning lambda   0.5   27.48     12.44       2.21      0.03  
+    L                              0.5   27.48     12.44       2.21      0.03  
 
-    L      Other Spanning lambda  0.75   35.46     12.45       2.85      0.01  
+    L                             0.75   35.46     12.45       2.85      0.01  
 
-    U      Other Spanning lambda  0.25   30.89      4.51       6.86       0    
+    U                             0.25   30.89      4.51       6.86       0    
 
-    U      Other Spanning lambda   0.5   23.52      6.9        3.41       0    
+    U                              0.5   23.52      6.9        3.41       0    
 
-    U      Other Spanning lambda  0.75   21.77      9.04       2.41      0.02  
+    U                             0.75   21.77      9.04       2.41      0.02  
 
-    L      Other MaxPatch  alpha  0.25   0.96      18.64       0.05      0.96  
+    L       alpha Other MaxPatch  0.25   0.96      18.64       0.05      0.96  
 
-    L      Other MaxPatch  alpha   0.5   -5.6      34.99       -0.16     0.87  
+    L                              0.5   -5.6      34.99       -0.16     0.87  
 
-    L      Other MaxPatch  alpha  0.75   53.34      26.1       2.04      0.05  
+    L                             0.75   53.34      26.1       2.04      0.05  
 
-    U      Other MaxPatch  alpha  0.25   15.94     21.22       0.75      0.46  
+    U                             0.25   15.94     21.22       0.75      0.46  
 
-    U      Other MaxPatch  alpha   0.5   61.92     28.37       2.18      0.04  
+    U                              0.5   61.92     28.37       2.18      0.04  
 
-    U      Other MaxPatch  alpha  0.75   85.21     63.78       1.34      0.19  
+    U                             0.75   85.21     63.78       1.34      0.19  
 
-    L      Other Spanning  alpha  0.25  -28.36     16.91       -1.68     0.1   
+    L             Other Spanning  0.25  -28.36     16.91       -1.68     0.1   
 
-    L      Other Spanning  alpha   0.5  -28.58      13.2       -2.17     0.04  
+    L                              0.5  -28.58      13.2       -2.17     0.04  
 
-    L      Other Spanning  alpha  0.75  -20.06     13.44       -1.49     0.14  
+    L                             0.75  -20.06     13.44       -1.49     0.14  
 
-    U      Other Spanning  alpha  0.25  -25.49     12.39       -2.06     0.04  
+    U                             0.25  -25.49     12.39       -2.06     0.04  
 
-    U      Other Spanning  alpha   0.5  -23.13      10.6       -2.18     0.03  
+    U                              0.5  -23.13      10.6       -2.18     0.03  
 
-    U      Other Spanning  alpha  0.75  -19.96      7.92       -2.52     0.01  
+    U                             0.75  -19.96      7.92       -2.52     0.01  
 
-    L         MaxPatch     alpha  0.25   17.55      4.01       4.37       0    
+    L       alpha    MaxPatch     0.25   17.55      4.01       4.37       0    
 
-    L         MaxPatch     alpha   0.5   15.62      8.75       1.79      0.08  
+    L                              0.5   15.62      8.75       1.79      0.08  
 
-    L         MaxPatch     alpha  0.75   34.03     11.15       3.05       0    
+    L                             0.75   34.03     11.15       3.05       0    
 
-    U         MaxPatch     alpha  0.25   3.26      10.39       0.31      0.75  
+    U                             0.25   3.26      10.39       0.31      0.75  
 
-    U         MaxPatch     alpha   0.5   15.79     13.29       1.19      0.24  
+    U                              0.5   15.79     13.29       1.19      0.24  
 
-    U         MaxPatch     alpha  0.75   36.25     26.98       1.34      0.18  
+    U                             0.75   36.25     26.98       1.34      0.18  
 
-    L         Spanning     alpha  0.25   9.07      40.38       0.22      0.82  
+    L                Spanning     0.25   9.07      40.38       0.22      0.82  
 
-    L         Spanning     alpha   0.5   36.98     67.01       0.55      0.58  
+    L                              0.5   36.98     67.01       0.55      0.58  
 
-    L         Spanning     alpha  0.75   151.7      97.7       1.55      0.13  
+    L                             0.75   151.7      97.7       1.55      0.13  
 
-    U         Spanning     alpha  0.25   151.4     47.05       3.22       0    
+    U                             0.25   151.4     47.05       3.22       0    
 
-    U         Spanning     alpha   0.5   214.3      86.5       2.48      0.02  
+    U                              0.5   214.3      86.5       2.48      0.02  
 
-    U         Spanning     alpha  0.75   145.5     213.2       0.68      0.5   
+    U                             0.75   145.5     213.2       0.68      0.5   
 
-    L         MaxPatch    lambda  0.25   -8.73      3.68       -2.37     0.02  
+    L      lambda    MaxPatch     0.25   -8.73      3.68       -2.37     0.02  
 
-    L         MaxPatch    lambda   0.5  -12.58      5.21       -2.41     0.02  
+    L                              0.5  -12.58      5.21       -2.41     0.02  
 
-    L         MaxPatch    lambda  0.75   -6.11      7.65       -0.8      0.43  
+    L                             0.75   -6.11      7.65       -0.8      0.43  
 
-    U         MaxPatch    lambda  0.25  -67.67      7.76       -8.72      0    
+    U                             0.25  -67.67      7.76       -8.72      0    
 
-    U         MaxPatch    lambda   0.5  -75.12     17.14       -4.38      0    
+    U                              0.5  -75.12     17.14       -4.38      0    
 
-    U         MaxPatch    lambda  0.75  -64.21      7.85       -8.18      0    
+    U                             0.75  -64.21      7.85       -8.18      0    
 
-    L         Spanning    lambda  0.25   0.17       1.77        0.1      0.92  
+    L                Spanning     0.25   0.17       1.77        0.1      0.92  
 
-    L         Spanning    lambda   0.5   -1.41      5.17       -0.27     0.79  
+    L                              0.5   -1.41      5.17       -0.27     0.79  
 
-    L         Spanning    lambda  0.75   -1.41     11.11       -0.13     0.9   
+    L                             0.75   -1.41     11.11       -0.13     0.9   
 
-    U         Spanning    lambda  0.25   2.92       2.78       1.05      0.3   
+    U                             0.25   2.92       2.78       1.05      0.3   
 
-    U         Spanning    lambda   0.5   8.36       6.99        1.2      0.24  
+    U                              0.5   8.36       6.99        1.2      0.24  
 
-    U         Spanning    lambda  0.75   6.66      29.32       0.23      0.82  
+    U                             0.75   6.66      29.32       0.23      0.82  
 -------------------------------------------------------------------------------
 
 Table: Quantile regression of patch distribution model parameters vs. $\rho$, the intensity of competition.  We fitted a power law with exponential cutoff to patch size distribution which has two parameters: *alpha* is the power exponent, and *lambda* is the exponential decay rate (See methods for functional formulas). We fitted the model to patches of the species that has the biggest patch (MaxPatch), species that form a spanning cluster (Spanning), all the species that are not the MaxPatch (Other MaxPatch) and all species that are not the spanning species (Other Spanning). We fitted 3 quantiles *Tau*=0.25,0.50 and 0.75 and we used a bootstraping procedure to assess significance. We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.
@@ -206,14 +219,33 @@ Table: Median regression of patch distribution model parameters vs. Year for BCI
 
 \begin{figure}[H]
 \centering
+\includegraphics[width=6.5in]{figs/SAD_T5000_64_512_meta.png}
+\caption{Rank abundance diagrams (RADs) for simulated neutral/niche model communities as a function of the intensity of competition $\rho$. Except for $\rho=0$ the values in the legend are upper limits. The RADs are averages of 30 simulations. Metacommunities have 64 species and two different species abundance distributions (SAD): logseries SAD (L); and uniform SAD (U); the critical point for logseries is 0.0013 and 0.0011 for uniform metacommunities. The size of the grid was 256*256 sites and the other parameters used are migration=0.00016, dispersal distance=26.66.}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{cc}
+\subfloat{\includegraphics[width=3.3in]{figs/CritProb_Migr_T5000_64_meta.png}} &
+\subfloat{\includegraphics[width=3.3in]{figs/CritProb_Disp_T5000_64_meta.png}} \\
+\subfloat{\includegraphics[width=3.3in]{figs/CritProb_MetaNsp_T5000_64_meta.png}} &
+\end{tabular}
+\caption{Critical point for infinite lattices $\rho_c^\infty$ in function of migration from metacommunity,local dispersal distance and number of species in the metacommunity. The parameters used in the simulations are specified in table 1. Two kinds of metacommunities with different species abundance distributions (SAD) were used: *L*, logseries SAD; and *U*, uniform SAD.}
+\end{figure}
+
+
+
+\begin{figure}[H]
+\centering
 \includegraphics[width=6.5in]{figs/discExpSpan_T5000_64_256_meta.png}
-\caption{Power law exponent $\alpha$ for patch size distributions of spanning or most abundant species as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that has the biggest patch (MaxPatch) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
+\caption{Power law exponent $\alpha$ for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that has the biggest patch (MaxPatch) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/discRateSpan_T5000_64_256_meta.png}
-\caption{Exponential decay rate $\lambda$ for patch size distributions of spanning or most abundant species as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that has the biggest patch (MaxPatch) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
+\caption{Exponential decay rate $\lambda$ for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that has the biggest patch (MaxPatch) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 256*256 sites and the other parameters used were migration=0.00016, dispersal distance=26.66.}
 \end{figure}
 
 
