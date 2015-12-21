@@ -10,11 +10,13 @@ all: ctnhm.pdf ctnhm_figures.pdf ctnhm_appendices.pdf ctnhm.docx
 SomeResults.pdf: SomeResults.md
 	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" ctnhm.bib
 	pandoc $< -o $@ $(OPTS)
+	pdftk ctnhm.pdf ctnhm_figures.pdf output ctnhm_figs.pdf
 	evince SomeResults.pdf		
 
 ctnhm.pdf: ctnhm.md 
 	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" ctnhm.bib
 	pandoc $< -o $@ $(OPTS)
+	pdftk ctnhm.pdf ctnhm_figures.pdf output ctnhm_figs.pdf
 	evince ctnhm.pdf		
 
 ctnhm.docx: ctnhm.md 
