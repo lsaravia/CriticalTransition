@@ -1,10 +1,10 @@
-OPTS= -H margins.sty --bibliography ctnhm.bib --csl=ecology-letters.csl 
+OPTS= -H margins.sty --bibliography ctnhm.bib --csl=ecology.csl 
 
 
 %.pdf: %.md 
 	pandoc  -V geometry:margin=1cm  --latex-engine=xelatex $^ -o $@
 
-all: ctnhm.pdf ctnhm_figures.pdf ctnhm_appendices.pdf ctnhm.docx
+all: ctnhm.pdf ctnhm_figures.pdf ctnhm_appendices.pdf 
 
 
 SomeResults.pdf: SomeResults.md

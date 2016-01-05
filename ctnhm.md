@@ -20,28 +20,8 @@ The dynamics of ecological communities can be described by two contrasting model
 
 *Short title:* A spatial phase transition between neutral and niche communities
 
-*keywords:* Continuous critical transitions; Percolation; Neutral-niche communities; spatial stochastic models; Biodiversity  
+*keywords:* Continuous critical transitions; Percolation; Neutral-niche communities; spatial stochastic models; Biodiversity collapse 
 
-
-*Type of article:* Letters
-
-*Abstract no. words:* 317
-
-*Main text no. words:* 5747
-
-*No. references:* 66
-
-*No. figures & tables:* 6
-
-*Corresponding author:*
-
-		Dr. Leonardo A. Saravia
-		Área Biología y Bioinformática
-		Instituto de Ciencias
-		Universidad Nacional de General Sarmiento
-		J.M. Gutierrez 1159 (1613) Los Polvorines
-		Buenos Aires Argentina
-		Tel: 54 11 4469-7533
 
 
 \newpage

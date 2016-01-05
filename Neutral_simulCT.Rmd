@@ -1584,3 +1584,65 @@ saveGIF(simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",1600,10,1350,"U",T,F)
 ```
 
 
+## Calculation of the Suvival Time of the most abundant species (Species=1) and density for side=512 time=5000 uniform metacomunity   
+
+Survival of 1 = P(t) ~ t ^-delta
+Number of 1 = N(t) ~ t^theta
+
+```{r survivalTimel512_64_U5_T5000, eval=F,echo=F,message=F,warning=F}
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.0001596079
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.009,0.01,0.02,0.03,0.05,0.07,0.1,0.2,0.3,0.6,1)
+time <- 5000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N")
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N")
+}
+
+# Correct CT add variable metatype
+#CT <- mutate(CT,MetaType="U")
+CT1$Time <- time
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+# Calculate averages by simulations 
+
+require(dplyr)
+require(ggplot2)
+mct <- group_by(CT,Repl,MetaType) %>% summarize(meanRich = mean(meanRich),meanH=mean(meanH),
+                                       TMaxH=mean(TMaxH),TMaxRich=mean(TMaxRich),
+                                       MaxH=mean(MaxH),MaxRich=mean(MaxRich),
+                                       meanEven=mean(meanEven))
+
+# Plots of all simulations and averages H & Richness
+
+
+plot_simul_timeRH(CT,mct)
+
+rm(kk,CT1)
+save.image()
+
+```
