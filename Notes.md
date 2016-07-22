@@ -1,5 +1,20 @@
 # Notes
 
+### Ecology reviewer 1
+
+More model repetitions to estimate critical point--> 100?
+
+More repetitions to study de patch distributions --> 100?
+
+5000 iterations are enough to get a steady state? Add an algorithm to estimate steady states using H?
+
+Using exponential decay for early warning transitions does not convice (Also JBonachela)  
+
+The exponential tail being may not be a result of the finite space in the simulation, so better not mention it as an e
+
+Delete quantil regressions
+
+
 ### percolation
 
 The simplest mechanism that produces scale invariance is percolation, physically describes the movement of a fluid through porous media. One can think about a two dimensional landscape where each site is connected to the others neighbors with some probability $p$. The landscape will be connected when $p$ reaches some threshold value . 
@@ -322,6 +337,9 @@ Value of m
 
 A fuller theory of scaling behaviour is required to provide firmer connections between predicted and observed patterns of desertification---and so to provide a better understanding of the nature of transitions between green and desert phases. These belong to the family of non-equilibrium phase transitions seen in several different fields of research8,9. There is a great opportunity here for interdisciplinary work that would have potentially far-reaching consequences in conservation biology.
 
+Such power laws occur in other types of ecosystem and are a fingerprint of self-organization: that is, they are the result of internal dynamic processes driven by local interactions. This principle applies to the field data reported by both Scanlon et al.4 and Kéfi et al.5. It indicates that plant interactions play a central role in shaping these ecosystems, which as a whole are characterized by productivity levels that largely depend on precipitation.
+
+
 ---------------
 @Abades2014 Fire, percolation thresholds and the savanna forest transition: a neutral model approach
 
@@ -459,6 +477,33 @@ The divergence of characteristic times (in our case the fire lifetime) at a crit
 
 
 --------------
-@sole2007
 
-Such power laws occur in other types of ecosystem and are a fingerprint of self-organization: that is, they are the result of internal dynamic processes driven by local interactions. This principle applies to the field data reported by both Scanlon et al.4 and Kéfi et al.5. It indicates that plant interactions play a central role in shaping these ecosystems, which as a whole are characterized by productivity levels that largely depend on precipitation.
+@Sole2002a
+
+This occurs at the percolation value D ∗ ≈ 0.41 (i.e. when the proportion of avail- able sites is 1 − D ∗ ≈ 0.59) where it can be shown that the largest available patch cannot longer be connected and splits into many sub-patches. The same effect has been found in our system. In Fig. 5(a), we show the biodiversity decay linked to the presence of a percolation phenomenon in the spatially-explicit landscape. As we can see, there is a steady decay in the number of species present as D increases, with a rapid decay as D ∗ is approached. A different view of the decay can be obtained by plotting the Shannon entropy (Fig. 5(c)). We can see that it first increases as the best colonizers become less and less abundant (and the species-abundance distribution becomes more uniform). At D ∗ the effective loss of diversity reduces the value of the entropy which drops rapidly. As it was shown by the MF model, the average colonization rate also decreases (Fig. 5(b)). As D ∗ is approached, the average colonization rate goes down.
+
+
+---------
+@Stauffer1979
+
+Thus percolation can be used as a guide to clustering phenomena at other phase transitions. Of course
+there is no guarantee that other phase transitions will have the same cluster properties as the simple
+percolation problem; but it seems plausible that a complete understanding of simple clusters (i.e.
+percolation) is helpful for a better understanding of more complicated clusters (e.g. fluids, magnets).
+
+
+----------
+@Sornette2009
+
+Several previous works [560, 774] have used a method to determine the
+critical percolation concentration which uses a similar feedback procedure
+(D. Stauffer, private communication): occupy a lattice with some probabil-
+ity p and check if it percolates. If yes, decrease p by δp, if not increase p by
+δp. Then, occupy the lattice again using the same sequence of random num-
+bers and the new p. Then check and decrease δp by a factor 2, and change
+p again by the new δp. Thus, in a square site problem (p c = 0.593...), one
+may obtain the sequence (starting with p = 1/2, δp = 1/4): p = 1/2, no;
+p = 3/4, yes; p = 5/8, yes; p = 9/16, no... This is an exponentially efficient
+iteration to determine p c for one fixed configuration. The method has been
+called “Hunting the Lion” by A. Aharony: you move in the direction where
+you hear the lion roar, the lion being here the “infinite” percolating cluster.

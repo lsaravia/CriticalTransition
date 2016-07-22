@@ -38,6 +38,36 @@ genPomacParms <- function(fname,GrowthR,MortR,DispD,ColonR,ReplaceR,numRep=1)
 }
 
 
+# Generates an initial conditions for simulations using a sed file
+# 
+#
+genInitialSed<- function(fname,numSp,side,prob=0,type="SP"){
+  A = matrix( 0,
+       nrow=side,              # number of rows 
+       ncol=side,              # number of columns 
+       byrow = TRUE)
+
+  if(length(prob)==1){ 
+    s1<-round(sqrt(numSp))
+    s2<-numSp/s1
+    ss = matrix(1:numSp,nrow=s1,ncol=s2)
+    a1<-(side - s1)/2
+    a2<-(side - s2)/2
+    A[a1:(a1+s1-1),a2:(a2+s2-1)]<-ss
+  } else {
+    n_prob <- sort(round(prob*side*side))
+    if(sum(n_prob)>side*side){
+      di<-sum(n_prob)-side*side
+      li<-sample(numSp,di)
+      n_prob[li] <- n_prob[li]-1 
+    }
+    n_sp <-lapply(1:numSp,function(x) rep(x,n_prob[x]))
+    A <- do.call(c, n_sp)
+    A <- matrix(sample(A),nrow=side,ncol=side )
+  }
+  save_matrix_as_sed(A,fname,type)
+}
+
 # Calculate Ranks for every parameter combination, for ggplot2  
 #
 calcRankSAD  <- function(den)
@@ -137,8 +167,109 @@ pairwiseAD_Dif <- function(denl,vv,parms){
 }
 
 
+# Windowed Anderson-darling tests for windows of 100 records (1000 time steps) plot several graphics about stationarity
+#
+# Data needed to read the simulation files:
+# nsp
+# side 
+# disp
+# nsp,side,alfa,m,ReplRate[i],F,timemigr
+# repl
+#  
+#  
+#  
+ts_ADTest_PlotTime <- function(nsp,side,disp,migr,repl,time=1000,meta="U",tile=100,graph=FALSE) {
+  
+  if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
+  op <- options()
+  options("scipen"=0, "digits"=4)
+  
+  if(toupper(meta)=="L") {
+    neuParm <- paste0("fishP",nsp,"_",side,"R", repl)
+    bname <- paste0("neuFish",nsp,"_",side,"R", repl)
+  } else {
+    neuParm <- paste0("unifP",nsp,"_",side,"R", repl)
+    bname <- paste0("neuUnif",nsp,"_",side,"R", repl)
+  }
+  pname <- paste0("pomacR",repl,".lin")
+  
+  # Add the start and end time to simulation output
+  #
+  old_bname <- bname
+  bname <- paste0(bname ,"T0-", time )         
+  
 
+  den <-readWideDensityOut(bname)
+  if(den==-1)   den <-readWideDensityOut(old_bname)
 
+  sims <- max(den$Rep)
+  
+  require(plyr)
+  require(dplyr)
+  
+  require(ggplot2)
+  if(sims>5)  
+    den <- filter(den,Rep %in%  sample(1:sims,5)) 
+  
+  if(graph)
+  {
+    print(ggplot(den, aes(x=Time, y=H,color=factor(Rep))) +
+        geom_line() + theme_bw() +  ggtitle(paste("Side:",side,"Ro:",repl)))
+  
+    require(tidyr)
+    den_l<- gather(den,species,prop,starts_with("X")) %>% group_by(Rep,species) %>% filter(mean(prop)>0.01) #%>% filter(Time>tini) 
+    print(ggplot(den_l, aes(x=Time, y=prop,color=species)) + facet_wrap(~Rep, ncol=2 ) + #guides(color=FALSE) +
+            geom_line() + theme_bw() +  ggtitle(paste("Side:",side,"Ro:",repl)))
+
+  }
+  d5 <-den %>%  group_by(Rep,windw=ntile(Time,tile))
+
+  # d6 <- split(den$H,den$Rep)
+  # d6 <- lapply(d6,mcmc)
+  # d6 <-mcmc.list(d6)
+  # print(gelman.diag(d6))
+  # print(gelman.plot(d6))
+  
+  # d5 <-den %>%  group_by(Rep,windw=ntile(Time,tile)) %>% top_n(3,Time) 
+  # d5$ad_group<- ifelse((d5$windw %% 2)==1, d5$windw+1, d5$windw)
+  # d5 <- d5 %>% ungroup() %>% group_by(Rep,ad_group)
+
+  require(kSamples)
+  require(tseries)
+
+  doTtest<-function(da){
+#       n1 <-nrow(da)/2
+#       n2 <- n1+1
+#       n3 <-nrow(da)
+#       tt <-t.test(da$H[1:n1],da$H[n2:n3],paired=T)
+#       ks <- ad.test(da$H[1:n1],da$H[n2:n3])
+      if(nrow(da)>=50){
+        pp <- pp.test(da$H)
+        kp <- kpss.test(da$H)
+        rpp <- pp.test(da$Richness)
+        rkp <- kpss.test(da$Richness)
+      } else {
+        pp <- kp<- rpp<- rkp<- list()
+        pp$p.value <- NA
+        kp$p.value <- NA
+        rpp$p.value <- NA
+        rkp$p.value <- NA
+      }
+      d6 <- da %>% dplyr::select( starts_with("X"))
+      d6 <-d6[, colSums(d6 != 0) > 0]
+      
+      #kd<-ad.test(as.list(as.data.frame(t(d6))),Nsim = 1000)
+      kd<-ad.test(list(t(d6[1,]),t(d6[nrow(d6),])),Nsim = 1000)
+
+     
+      #      data.frame(Tstat=tt$statistic,degf=tt$parameter,Tpval=tt$p.value, ADpval=ks$ad[2,4],PPpval=af$p.value,KPSSpval=kp$p.value)
+      data.frame(T_ini=min(da$Time),H_PPpval=pp$p.value,H_KPSSpval=kp$p.value,R_PPpval=rpp$p.value,R_KPSSpval=rkp$p.value,SAD_ADpval=kd$ad[2,3])
+  }
+  
+  d5<-do(d5, doTtest(.))
+  return(d5)
+
+}
 
 # Read simulation output and change from wide to long format NO TIME
 #
@@ -170,6 +301,7 @@ meltDensityOut_NT <- function(fname,num_sp,colRate=0,dispDist=0,time=0){
 #
 readWideDensityOut <- function(fname){
   if(!grepl("Density.txt",fname)) fname <- paste0(fname,"Density.txt")
+  if(file.access(fname)==-1) return(-1)
   den <- read.delim(fname,stringsAsFactors = F)
   names(den)[1:5]<-c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate")
   names(den)[7] <- unlist(strsplit(names(den)[7],".",fixed=T))[1]
@@ -178,7 +310,7 @@ readWideDensityOut <- function(fname){
   else
     eTime <- (max(den$Time)/(den$Time[3]-den$Time[2]))+1
   
-  if(  eTime < nrow(den) ){
+  if(  eTime <= nrow(den) ){
     den$Rep <- rep( 1:(nrow(den)/eTime),each=eTime)
   }
   return(den)
@@ -391,9 +523,9 @@ calcDqTeor <- function(q,p1) {
 
 # Save a matrix as a sed file with type BI (floating point)
 #
-save_matrix_as_sed <- function(mat,fname)
+save_matrix_as_sed <- function(mat,fname,type)
 {
-  header <- paste(nrow(mat),ncol(mat),"\nBI")
+  header <- paste0(nrow(mat)," ",ncol(mat),"\n",type)
   write.table(header,file=fname,row.names=F,col.names=F,quote=F)
   write.table(mat,file=fname,row.names=F,col.names=F,quote=F,append=T)
 }
@@ -810,23 +942,35 @@ brayCurtis <- function (x, y)
 # meta: U= uniform metacommunity
 #       L= logseries metacommunity
 #
-simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,mf="N",meta="U",clus="S",sav="S") {
+simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,mf="N",meta="U",clus="S",sedIni=FALSE) {
+  
   if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
-
+  op <- options()
+  options("scipen"=0, "digits"=4)
+  
   if(toupper(meta)=="L") {
-    prob <- genFisherSAD(nsp,side)
+    if(simul) prob <- genFisherSAD(nsp,side)
     neuParm <- paste0("fishP",nsp,"_",side,"R", repl)
     bname <- paste0("neuFish",nsp,"_",side,"R", repl)
   } else {
-    prob <- rep(1/nsp,nsp)  
+    if(simul) prob <- rep(1/nsp,nsp)  
     neuParm <- paste0("unifP",nsp,"_",side,"R", repl)
     bname <- paste0("neuUnif",nsp,"_",side,"R", repl)
   }
   pname <- paste0("pomacR",repl,".lin")
-
+  
+  # Add the start and end time to simulation output
+  #
+  old_bname <- bname
+  bname <- paste0(bname ,"T0-", time )         
+  
   if(simul){
 
     genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,repl)
+
+    if(sedIni){
+      genInitialSed(paste0(neuParm,".sed"),nsp,side,prob)
+    }
 
     # Delete old simulations
     system(paste0("rm ",bname,"m*.txt")) # MultiFractal mf
@@ -840,7 +984,7 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
     par[par$V1=="inter",]$V2 <- 10 # interval to measure Density and Diversity
     par[par$V1=="init",]$V2 <- 1  # Firs time of measurement = interval
     par[par$V1=="modType",]$V2 <- 4 # Hierarchical saturated
-    par[par$V1=="sa",]$V2 <- sav # Save a snapshot of the model
+    par[par$V1=="sa",]$V2 <- "N" # Save a snapshot of the model
     par[par$V1=="baseName",]$V2 <- bname# Time = 100 
     par[par$V1=="mfDim",]$V2 <- mf
     par[par$V1=="minBox",]$V2 <- 2
@@ -857,15 +1001,29 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
     genPomacParms(pname,1,c(0.2),disp,migr,repl,sims)
   
     # copy pomExp.lin to pomac.lin
-    #system("cp pomExp.lin pomac.lin")
+    # Get kind of OS 32 or 64Bits 
     s <- system("uname -a",intern=T)
-    if(grepl("i686",s)) {
-      system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+
+    if(sedIni){
+      if(grepl("i686",s)) {
+          system(paste(neuBin,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+        } else {
+          system(paste(neuBin64,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+        }
+
     } else {
-      system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
-    }
+      if(grepl("i686",s)) {
+        system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+      } else {
+        system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+      }
   }
+  }
+
   den <-readWideDensityOut(bname)
+  if(den==-1)   den <-readWideDensityOut(old_bname)
+
+  sims <- max(den$Rep)
   
   require(plyr)
   require(dplyr)
@@ -876,13 +1034,20 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
       den <- filter(den,Rep %in%  sample(1:sims,10)) 
 
     print(ggplot(den, aes(x=Time, y=H,color=factor(Rep))) +
-        geom_line() + theme_bw() +  ggtitle(paste(side,repl)))
+        geom_line() + theme_bw() +  ggtitle(paste("Side:",side,"Ro:",repl)))
 
 #     print(ggplot(den, aes(x=Time, y=Richness,color=factor(Rep))) +
-#         geom_line() + theme_bw() + ggtitle(paste(side,repl))) 
+#         geom_line() + theme_bw() + ggtitle(paste("Side:",side,"Ro:",repl))) 
+    require(tidyr)
+    den_l<- gather(den,species,prop,starts_with("X")) %>% group_by(Rep,species) %>% filter(mean(prop)>0.01) #%>% filter(Time>tini) 
+    print(ggplot(den_l, aes(x=Time, y=prop,color=species)) + facet_wrap(~Rep, ncol=2 ) +  guides(color=FALSE) +
+            geom_line() + theme_bw() +  ggtitle(paste("Side:",side,"Ro:",repl)))
+
   }
  
-
+  # Make averages each 100 time steps of H=Shannon R=Richness
+  #
+  
   th <-function(x,tt,...){
     tt[which.max(x)]
   }
@@ -890,10 +1055,39 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
   d1 <- den %>% group_by(Rep) %>% summarize(MaxH=max(H),TMaxH=th(H,Time),
                   MaxRich=max(Richness),TMaxRich=th(Richness,Time))
   
+  # Make averages each 100 time steps
+  
   lInt <- max(den$Time)/(den$Time[3]-den$Time[2])/10
   
-  d2 <- den %>%  group_by(Rep) %>% mutate(nt=ntile(Rep,lInt)) %>%  group_by(Rep,nt) %>% summarize(meanH=mean(H),sdH=sd(H),meanRich=mean(Richness),sdRich=sd(Richness)) %>% 
-    mutate(nt=nt*100)
+  d2 <- den %>%  group_by(Rep) %>% mutate(nt=ntile(Rep,lInt)) %>%  group_by(Rep,nt) %>% summarize(meanH=mean(H),sdH=sd(H),varH=var(H),meanRich=mean(Richness),sdRich=sd(Richness)) %>% 
+    mutate(nt=nt*100) # %>% mutate(Tstat= (lag(meanH)-meanH)/sqrt(varH/10+lag(varH)/10),degf=(varH/10+lag(varH)/10)^2/(((varH/10)^2)/9 + ((lag(varH)/10)^2)/9), pval=2*pt(ifelse(Tstat>0,-Tstat,Tstat),degf)) %>% mutate(difH= ifelse(Tstat>0, (meanH+sdH)>(lag(meanH)-lag(sdH)),(lag(meanH)+lag(sdH))>(meanH-sdH)))
+
+  d5 <-den %>%  group_by(Rep) %>% top_n(400,Time)
+  
+  require(kSamples)
+  require(tseries)
+
+  doTtest<-function(da){
+#       n1 <-nrow(da)/2
+#       n2 <- n1+1
+#       n3 <-nrow(da)
+#       tt <-t.test(da$H[1:n1],da$H[n2:n3],paired=T)
+#       ks <- ad.test(da$H[1:n1],da$H[n2:n3])
+      pp <- pp.test(da$H)
+      kp <- kpss.test(da$H)
+      rpp <- pp.test(da$Richness)
+      rkp <- kpss.test(da$Richness)
+      d6 <- da %>% top_n(100,Time) %>%  dplyr::select( starts_with("X"))
+      d6 <-d6[, colSums(d6 != 0) > 0]
+      
+      #kd<-ad.test(as.list(as.data.frame(t(d6))),Nsim = 1000)
+      kd<-ad.test(list(t(d6[1,]),t(d6[nrow(d6),])),Nsim = 1000)
+      
+      #      data.frame(Tstat=tt$statistic,degf=tt$parameter,Tpval=tt$p.value, ADpval=ks$ad[2,4],PPpval=af$p.value,KPSSpval=kp$p.value)
+      data.frame(H_PPpval=pp$p.value,H_KPSSpval=kp$p.value,R_PPpval=rpp$p.value,R_KPSSpval=rkp$p.value,ADpval=kd$ad[2,3])
+  }
+  
+  d5<-do(d5, doTtest(.))
 
   if(!simul) {
     if(sims>10)  
@@ -901,22 +1095,27 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
     else
       d3 <- d2
     
-#    print(ggplot(d3, aes(x=nt, y=meanH, color=factor(Rep))) +
+#     print(ggplot(d3, aes(x=nt, y=meanH, color=factor(Rep))) +
 #              geom_errorbar(aes(ymin=meanH-sdH, ymax=meanH+sdH), width=.1,colour="gray") +
-#              geom_line() + theme_bw() + ggtitle(paste(side,repl)))
-
+#              geom_line() + theme_bw() + ggtitle(paste("Side:",side,"Ro:",repl)))
+# 
     print(ggplot(d3, aes(x=nt, y=meanRich, color=factor(Rep))) +
               geom_errorbar(aes(ymin=meanRich-sdRich, ymax=meanRich+sdRich), width=.1,colour="gray") +
-              geom_line() + theme_bw() + ggtitle(paste(side,repl)))
+              geom_line() + theme_bw() + ggtitle(paste("Side:",side,"Ro:",repl)))
   }
 
   d2 <- d2 %>%  group_by(Rep) %>% summarise_each(funs(last))
 
+  # Restore options
+  options(op) 
+  
   return(data.frame(MetaNsp=nsp,Side=side,Disp=disp,Migr=migr,Repl=repl,MetaType=meta,
              TMaxH=d1$TMaxH,MaxH=d1$MaxH,TMaxRich=d1$TMaxRich,MaxRich=d1$MaxRich,
              meanH=d2$meanH,sdH=d2$sdH,meanRich=d2$meanRich,sdRich=d2$sdRich,
-             meanEven=d2$meanH/log(d2$meanRich)))
-  
+             meanEven=d2$meanH/log(d2$meanRich),
+             H_PPpval=d5$H_PPpval,H_KPSSpval=d5$H_KPSSpval, R_PPpval=d5$R_PPpval,R_KPSSpval=d5$R_KPSSpval,SAD_ADpval=d5$ADpval))
+
+
 }
 
 # Plot average H and Richnes of neutral simulations (Time=2900-3000) 
