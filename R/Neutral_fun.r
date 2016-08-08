@@ -21,7 +21,7 @@ genNeutralParms <- function(fname,side,mprob,birth,mortality,dispersal,colonizat
   nff <- S+3
   parm$text[4:nff] <-   with(parm[4:nff,], paste(n,z,z,z,format(sort(prob),scientific=F),sep="\t"))                    
   if(!grepl(".inp",fname)) fname <-paste0(fname,".inp")
-
+  genInitialSed
   write.table(parm$text,fname,sep="\t",row.names=F,col.names=F,quote=F)
 }
 
@@ -39,7 +39,9 @@ genPomacParms <- function(fname,GrowthR,MortR,DispD,ColonR,ReplaceR,numRep=1)
 
 
 # Generates an initial conditions for simulations using a sed file
-# 
+# prob:  0  one square in the center filled with one individual per species 
+#        1  one square in the center filled with species 1 
+#        vector of frecuencies of length >1 fill all the site with the distribution given by prob
 #
 genInitialSed<- function(fname,numSp,side,prob=0,type="SP"){
   A = matrix( 0,
@@ -47,10 +49,14 @@ genInitialSed<- function(fname,numSp,side,prob=0,type="SP"){
        ncol=side,              # number of columns 
        byrow = TRUE)
 
-  if(length(prob)==1){ 
+  if(length(prob)==1){
     s1<-round(sqrt(numSp))
     s2<-numSp/s1
-    ss = matrix(1:numSp,nrow=s1,ncol=s2)
+    if(prob==0)
+      ss = matrix(1:numSp,nrow=s1,ncol=s2)
+    else
+      ss = matrix(rep(1,numSp),nrow=s1,ncol=s2)
+    
     a1<-(side - s1)/2
     a2<-(side - s2)/2
     A[a1:(a1+s1-1),a2:(a2+s2-1)]<-ss
@@ -942,7 +948,12 @@ brayCurtis <- function (x, y)
 # meta: U= uniform metacommunity
 #       L= logseries metacommunity
 #
-simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,mf="N",meta="U",clus="S",sedIni=FALSE) {
+# sedIni: 0 empty initial conditions, 
+#         1 one individual of each species in the center 
+#         2 Filled lattice with metacommunity frequency  
+#         3 center with species nro 1 (a square of nsp individuals)
+#
+simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,mf="N",meta="U",clus="S",sedIni=0) {
   
   if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
   op <- options()
@@ -963,13 +974,19 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
   #
   old_bname <- bname
   bname <- paste0(bname ,"T0-", time )         
-  
-  if(simul){
 
+  # make simulations 
+  if(simul){
+    
     genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,repl)
 
-    if(sedIni){
+
+    if(sedIni==1){
+      genInitialSed(paste0(neuParm,".sed"),nsp,side,0)
+    } else if(sedIni==2) {
       genInitialSed(paste0(neuParm,".sed"),nsp,side,prob)
+    } else {
+      genInitialSed(paste0(neuParm,".sed"),nsp,side,1)
     }
 
     # Delete old simulations
@@ -981,26 +998,24 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
     par <- read.table("sim.par",quote="",stringsAsFactors=F)
 
     par[par$V1=="nEvals",]$V2 <- time
-    par[par$V1=="inter",]$V2 <- 10 # interval to measure Density and Diversity
-    par[par$V1=="init",]$V2 <- 1  # Firs time of measurement = interval
-    par[par$V1=="modType",]$V2 <- 4 # Hierarchical saturated
-    par[par$V1=="sa",]$V2 <- "N" # Save a snapshot of the model
-    par[par$V1=="baseName",]$V2 <- bname# Time = 100 
+    par[par$V1=="inter",]$V2 <- 10        # interval to measure Density and Diversity
+    par[par$V1=="init",]$V2 <- 1          # Firs time of measurement = interval
+    par[par$V1=="modType",]$V2 <- 4       # Hierarchical saturated
+    par[par$V1=="sa",]$V2 <- "N"          # Save a snapshot of the model
+    par[par$V1=="baseName",]$V2 <- bname  # Base name for output 
     par[par$V1=="mfDim",]$V2 <- mf
     par[par$V1=="minBox",]$V2 <- 2
-    par[par$V1=="pomac",]$V2 <- 1 # 0:one set of parms 
-                                  # 1:several simulations with pomac.lin parameters 
-    par[par$V1=="pomacFile",]$V2 <- pname # 0:one set of parms 
+    par[par$V1=="pomac",]$V2 <- 1         # 0:one set of parms 
+                                          # 1:several simulations with pomac.lin parameters 
+    par[par$V1=="pomacFile",]$V2 <- pname  
     par[par$V1=="minProp",]$V2 <- 0
     par[par$V1=="clusters",]$V2 <- clus       # Calculate max cluster size
-   
     
     parfname <- paste0("sim",nsp,"_",side,"R", repl,".par")
     write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
 
     genPomacParms(pname,1,c(0.2),disp,migr,repl,sims)
   
-    # copy pomExp.lin to pomac.lin
     # Get kind of OS 32 or 64Bits 
     s <- system("uname -a",intern=T)
 
@@ -1017,7 +1032,7 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
       } else {
         system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
       }
-  }
+    }
   }
 
   den <-readWideDensityOut(bname)
@@ -1034,14 +1049,18 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
       den <- filter(den,Rep %in%  sample(1:sims,10)) 
 
     print(ggplot(den, aes(x=Time, y=H,color=factor(Rep))) +
-        geom_line() + theme_bw() +  ggtitle(paste("Side:",side,"Ro:",repl)))
+          geom_line() + theme_bw() +  ggtitle(paste("Side:",side,"Ro:",repl,"m:",migr)) + scale_color_discrete(name="Run")) 
 
+    print(ggplot(filter(den,Time>10), aes(x=Time, y=H,color=factor(Rep))) +
+            geom_line() + theme_bw() +  ggtitle(paste("Side:",side,"Ro:",repl,"m:",migr)) + scale_color_discrete(name="Run") + 
+            scale_x_log10() + scale_y_log10()) 
+    
 #     print(ggplot(den, aes(x=Time, y=Richness,color=factor(Rep))) +
 #         geom_line() + theme_bw() + ggtitle(paste("Side:",side,"Ro:",repl))) 
     require(tidyr)
     den_l<- gather(den,species,prop,starts_with("X")) %>% group_by(Rep,species) %>% filter(mean(prop)>0.01) #%>% filter(Time>tini) 
     print(ggplot(den_l, aes(x=Time, y=prop,color=species)) + facet_wrap(~Rep, ncol=2 ) +  guides(color=FALSE) +
-            geom_line() + theme_bw() +  ggtitle(paste("Side:",side,"Ro:",repl)))
+            geom_line() + theme_bw() +  ggtitle(paste("Side:",side,"Ro:",repl,"m:",migr)))
 
   }
  
@@ -1059,10 +1078,11 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
   
   lInt <- max(den$Time)/(den$Time[3]-den$Time[2])/10
   
-  d2 <- den %>%  group_by(Rep) %>% mutate(nt=ntile(Rep,lInt)) %>%  group_by(Rep,nt) %>% summarize(meanH=mean(H),sdH=sd(H),varH=var(H),meanRich=mean(Richness),sdRich=sd(Richness)) %>% 
+  d2 <- den %>%  group_by(Rep) %>% mutate(nt=ntile(Rep,lInt)) %>%  group_by(Rep,nt) %>% summarize(meanH=mean(H),sdH=sd(H),meanRich=mean(Richness),sdRich=sd(Richness)) %>% 
     mutate(nt=nt*100) # %>% mutate(Tstat= (lag(meanH)-meanH)/sqrt(varH/10+lag(varH)/10),degf=(varH/10+lag(varH)/10)^2/(((varH/10)^2)/9 + ((lag(varH)/10)^2)/9), pval=2*pt(ifelse(Tstat>0,-Tstat,Tstat),degf)) %>% mutate(difH= ifelse(Tstat>0, (meanH+sdH)>(lag(meanH)-lag(sdH)),(lag(meanH)+lag(sdH))>(meanH-sdH)))
 
-  d5 <-den %>%  group_by(Rep) %>% top_n(400,Time)
+  l1000 <- 1000/(den$Time[3]-den$Time[2])              # Last 1000
+  d5 <-den %>%  group_by(Rep) %>% top_n(l1000,Time)
   
   require(kSamples)
   require(tseries)
@@ -1073,15 +1093,38 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
 #       n3 <-nrow(da)
 #       tt <-t.test(da$H[1:n1],da$H[n2:n3],paired=T)
 #       ks <- ad.test(da$H[1:n1],da$H[n2:n3])
-      pp <- pp.test(da$H)
-      kp <- kpss.test(da$H)
-      rpp <- pp.test(da$Richness)
-      rkp <- kpss.test(da$Richness)
-      d6 <- da %>% top_n(100,Time) %>%  dplyr::select( starts_with("X"))
+      pp <- try(pp.test(da$H))
+      if(class(pp) == "try-error")
+      {
+        pp<-list(p.value=NA)
+      }
+      
+      kp <- try(kpss.test(da$H))
+      if(class(kp) == "try-error")
+      {
+        kp<-list(p.value=NA)
+      }
+      
+      
+      rpp <- try(pp.test(da$Richness))
+      if(class(rpp) == "try-error")
+      {
+        rpp<-list(p.value=NA)
+      }
+      rkp <- try(kpss.test(da$Richness))
+      if(class(rkp) == "try-error")
+      {
+        rkp<-list(p.value=NA)
+      }
+      d6 <- da %>%  dplyr::select( starts_with("X"))  # Last 1000 time steps
       d6 <-d6[, colSums(d6 != 0) > 0]
       
       #kd<-ad.test(as.list(as.data.frame(t(d6))),Nsim = 1000)
-      kd<-ad.test(list(t(d6[1,]),t(d6[nrow(d6),])),Nsim = 1000)
+      kd<-try(ad.test(list(t(d6[1,]),t(d6[nrow(d6),])),Nsim = 1000))
+      if(class(kd) == "try-error")
+      {
+        kd<-list(ad=matrix(NA,nrow=2,ncol=3))
+      }
       
       #      data.frame(Tstat=tt$statistic,degf=tt$parameter,Tpval=tt$p.value, ADpval=ks$ad[2,4],PPpval=af$p.value,KPSSpval=kp$p.value)
       data.frame(H_PPpval=pp$p.value,H_KPSSpval=kp$p.value,R_PPpval=rpp$p.value,R_KPSSpval=rkp$p.value,ADpval=kd$ad[2,3])
@@ -1101,7 +1144,7 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
 # 
     print(ggplot(d3, aes(x=nt, y=meanRich, color=factor(Rep))) +
               geom_errorbar(aes(ymin=meanRich-sdRich, ymax=meanRich+sdRich), width=.1,colour="gray") +
-              geom_line() + theme_bw() + ggtitle(paste("Side:",side,"Ro:",repl)))
+              geom_line() + theme_bw() + ggtitle(paste("Side:",side,"Ro:",repl,"m:",migr)))
   }
 
   d2 <- d2 %>%  group_by(Rep) %>% summarise_each(funs(last))
@@ -1117,6 +1160,55 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
 
 
 }
+
+
+call_simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,mf="N",meta="U",clus="S",sedIni=0) 
+{
+
+  require(doParallel)
+  cn <-detectCores()
+  cl <- makeCluster(cn)
+  registerDoParallel(cl)
+
+  CT1 <- data.frame()
+
+
+  CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+  {
+      simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",0)
+  }
+  stopCluster(cl)
+
+  rm(cn,cl)
+  for(i in 1:length(ReplRate)){
+    kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+  }
+
+
+  # Calculation of stationarity statistics with a window 
+  #
+#  wps <-data.frame()
+#  for(i in 1:length(ReplRate)){
+#    kk<-ts_ADTest_PlotTime(nsp,side,alfa,m,ReplRate[i],time,"L",10,TRUE)              
+#    wps <- rbind(w_prop_stationary,kk) 
+#  }
+
+
+  # Correct CT add Time
+  CT1$Time <- time
+  if(sedIni==0)
+    CT1$IniCond <- "Empty"    # Empty Lattice 
+  else if(sedIni==1)
+    CT1$IniCond <- "Onebysp"   # One individual by species in the center 
+  else if(sedIni==2)
+    CT1$IniCond <- "Filled"   # Lattice filled with metacommunity SAD
+  else if(sedIni==3)
+    CT1$IniCond <- "Ones"     # A square of nsp Ones in the center
+
+  return(CT1)
+
+}
+
 
 # Plot average H and Richnes of neutral simulations (Time=2900-3000) 
 # 
@@ -1147,12 +1239,22 @@ plot_simul_timeRH <- function(CT,mct)
 
 
 # Simulations of the model with output of one time 
-# if delo=T make new simulations and delete old ones
-#    delo=F read files generated by previous simulations
 #
-simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=10,simulate=T,mf="N",meta="U",delo=T,ssed="N") 
+# delo:   T make new simulations and delete old ones
+#         F read files generated by previous simulations
+#
+# sedIni: 0 empty initial conditions, 
+#         1 one individual of each species in the center 
+#         2 Filled lattice with metacommunity frequency  
+#         3 center with species nro 1 (a square of nsp individuals)
+#
+
+simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=10,simulate=T,mf="N",meta="U",delo=T,sedIni=0) 
 {
+  if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
+  op <- options()
   options("scipen"=0, "digits"=4)
+
   if(toupper(meta)=="L") {
     if(simulate) prob <- genFisherSAD(nsp,side)
     neuParm <- paste0("fishP",nsp,"_",side,"R", repl)
@@ -1170,10 +1272,22 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
   if(simulate)
   {
     # Delete old simulations
-    if(delo)
-      system(paste0("rm ",bname,"*.txt"))
+    if(delo){
+      system(paste0("rm ",bname,"m*.txt")) # MultiFractal mf
+      system(paste0("rm ",bname,"D*.txt")) # Density
+      system(paste0("rm ",bname,"C*.txt")) # Clusters
+    }
+
 
     genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,repl)
+
+    if(sedIni==1){
+      genInitialSed(paste0(neuParm,".sed"),nsp,side,0)
+    } else if(sedIni==2) {
+      genInitialSed(paste0(neuParm,".sed"),nsp,side,prob)
+    } else {
+      genInitialSed(paste0(neuParm,".sed"),nsp,side,1)
+    }
 
     par <- read.table("sim.par",quote="",stringsAsFactors=F)
 
@@ -1181,7 +1295,7 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
     par[par$V1=="inter",]$V2 <- time          # interval to measure Density and Diversity
     par[par$V1=="init",]$V2 <- time           # Firs time of measurement = interval
     par[par$V1=="modType",]$V2 <- 4           # Hierarchical saturated
-    par[par$V1=="sa",]$V2 <- ssed              # Save a snapshot of the model
+    par[par$V1=="sa",]$V2 <- "N"              # Save a snapshot of the model
     par[par$V1=="baseName",]$V2 <- bname      # Base name for output
     par[par$V1=="mfDim",]$V2 <- mf
     par[par$V1=="minBox",]$V2 <- 2
@@ -1196,21 +1310,27 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
 
     genPomacParms(pname,1,c(0.2),disp,migr,repl,sims)
 
-    # copy pomExp.lin to pomac.lin
-    #system("cp pomExp.lin pomac.lin")
+    # Get kind of OS 32 or 64Bits 
     s <- system("uname -a",intern=T)
-    if(grepl("i686",s)) {
-      system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+
+    if(sedIni){
+      if(grepl("i686",s)) {
+          system(paste(neuBin,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+        } else {
+          system(paste(neuBin64,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+        }
+
     } else {
-      system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+      if(grepl("i686",s)) {
+        system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+      } else {
+        system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+      }
     }
   }
 
-  #den <- meltDensityOut_NT(bname,nsp)
   require(plyr)
   require(dplyr)
-  #den <-mutate(den, Species=substring(as.character(Species),2))
-  #den <- group_by(den, rep) %>% select(Species,value) %>% top_n(n=1) 
   
   den <-readWideDensityOut(bname)
   den <-den[, c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate","Time", 
@@ -2363,7 +2483,7 @@ calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
   k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)                                                 
      
    
-  k1$MetaType <- c("L","U") 
+  k1$MetaType <- unique(k$MetaType) # c("L","U") 
   k1$iSide <- 0 
   k1$DispersalDistance<-round(mean_power(alfa),2)
   k1$ColonizationRate <- m
@@ -2394,8 +2514,14 @@ return(list(rCTs=rhoCTSide,rCT=rhoCT))
 
 # Simulates and saves snapshots of the model each *inter* time intervals up to *time*
 #
+# modType : 1=Non saturated neutral model, 2=Neutral saturated (zero-sum) model, 
+#    3=Hierarchical non saturated, 4=Hierarchical saturated.
 #
-simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,inter=10,init=1,meta="L",delo=F,sim=T) {
+# sedIni: 0=No initial seed
+#         1=1 individual of each species in the center of the lattice
+#         2=Filled lattice with metacommunity frequency
+#
+simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,inter=10,init=1,meta="L",delo=F,sim=T,sedIni=0,modType=4,death=0.2,birth=1,colPal=0) {
   if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
   if(!require(untb))  stop("Untb package not installed")
   require(ggplot2)
@@ -2417,8 +2543,14 @@ simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,int
     pname <- paste0("pomacR",repl[i],".lin")
     
   if(sim) {
-      genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,repl[i])
+      genNeutralParms(neuParm,side,prob,birth,death,disp,migr,repl[i])
 
+
+      if(sedIni==1){
+        genInitialSed(paste0(neuParm,".sed"),nsp,side,0)
+      } else {
+        genInitialSed(paste0(neuParm,".sed"),nsp,side,prob)
+      }
 
       # Delete old simulations
       if(delo){
@@ -2434,7 +2566,7 @@ simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,int
       par[par$V1=="nEvals",]$V2 <- time
       par[par$V1=="inter",]$V2 <- inter # interval to measure Density and Diversity
       par[par$V1=="init",]$V2 <- init # Firs time of measurement = interval
-      par[par$V1=="modType",]$V2 <- 4 # Hierarchical saturated
+      par[par$V1=="modType",]$V2 <- modType # Hierarchical saturated
       par[par$V1=="sa",]$V2 <- "S" # Save a snapshot of the model
       par[par$V1=="baseName",]$V2 <- bname 
       par[par$V1=="mfDim",]$V2 <- "N"
@@ -2451,11 +2583,22 @@ simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,int
       write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
 
       s <- system("uname -a",intern=T)
-      if(grepl("i686",s)) {
-        system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+
+      if(sedIni){
+        if(grepl("i686",s)) {
+            system(paste(neuBin,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+          } else {
+            system(paste(neuBin64,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+          }
+
       } else {
-        system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+        if(grepl("i686",s)) {
+          system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+        } else {
+          system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+        }
       }
+
 
       #fname <- paste0("neuFish",nsp,"Density.txt")
       #sad1 <- meltDensityOut_NT(fname,nsp)
@@ -2471,9 +2614,20 @@ simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,int
       clu<- filter(clu,Time>=init)
       spanSp <- clu$SpanningSpecies
       clusSp <- clu$MaxClusterSize
-      mc <- c("#b35806","#e08214","#fdb863","#fee0b6","#f7f7f7","#d8daeb","#b2abd2","#8073ac","#542788")
-      tra<-seq(init,time,by=inter)
-
+      
+      if(length(colPal)==1)
+        mc <- c("#b35806","#e08214","#fdb863","#fee0b6","#f7f7f7","#d8daeb","#b2abd2","#8073ac","#542788")
+      else
+        mc <- colPal
+      
+      if(init>1)
+        tra<-seq(init,time,by=inter)
+      else {
+        if(inter==1)
+          tra<-seq(1,time,by=inter)
+        else
+          tra<-seq(0,time,by=inter); tra[1]<-1 
+      }
       for(t in 1:length(tra)) {
         fname <- paste0(bname,"-",formatC(tra[t],width=4,flag=0),".sed")
         #spa <- read_sed(fname)
@@ -2481,8 +2635,9 @@ simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,int
         sp1 <-group_by(spa,v) %>% summarize(n=n())
         mc1 <-colorRampPalette(mc)(nrow(sp1))
         if(spanSp[t]>0){
-          mc1[which(sp1$v==spanSp[t])]<- "#000000"
-          #mc1[which(sp1$v!=spanSp[t])]<- "#FF6666"
+          #mc1[which(sp1$v==spanSp[t])]<- "#000000"     
+          mc1[which(sp1$v==spanSp[t])]<- "#228B22"    # Spanning species
+          #mc1[which(sp1$v!=spanSp[t])]<- "#228B22"    # Not spanning Forest green
         }
         require(grid)
         g <- ggplot(spa, aes(x, y, fill = factor(v))) + geom_raster(hjust = 0, vjust = 0) + 

@@ -29,301 +29,34 @@ panderOptions('table.style', 'multiline')
 options("scipen"=100, "digits"=6)
 ```
 
-## Neutral Simulations to reach steady state
+# Determination of the critical point using probability of spanning cluster
+
+## Simulations for Uniform and Logseries side =100,256,512 species=64 1T=20000 
 
 
-Now I will simulate the model wiht side=100 64 sp to Time=3000 with  
-Differnt ReplacementRate and 30 repetitions 
+The critical probability is very low around 0.0005 thus most communities should be in a "niche" state but the transient time is very long unless rho is relatively high.
 
 
-```{r gensimul100_64_U5_T20000, eval=F,echo=F,message=F,warning=F}
+
+```{r gensimul_clu_side_64_meta30_T20000m0001, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
-# Ver Neutral_Model_BCI.Rmd por parametros
-#
-m =  0.0001596079
-alfa=2.038974
-side <- 100
-nsp <- 64
-nSimul <- 5
-ReplRate <- c(0,0.001,0.005,0.01,0.05,0.1,0.5,1)
-time <- 20000
 
-# loop con do paralell 
-
-
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
-
-CT1 <- data.frame()
-
-
-CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
-{
-    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],TRUE,time,nSimul,"N","L","N",TRUE)
-}
-stopCluster(cl)
-
-rm(cn,cl)
-for(i in 1:length(ReplRate)){
-  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],FALSE,time,nSimul,"N","L")
-  CT1 <-rbind(CT1,kk)
-}
-
-# Calculation of stationarity statistics with a window 
-#
-wps<-data.frame()
-for(i in 1:length(ReplRate)){
-  kk<-ts_ADTest_PlotTime(nsp,side,alfa,m,ReplRate[i],time,"L",10,TRUE)              
-  wps <- rbind(wps,kk) 
-}
-
-
-# Correct CT add Time, variable metatype
-CT1$Time <- time
-CT1$IniCond <- "Filled"   # Lattice filled with metacommunity SAD
-
-#CT <- CT %>% mutate(IniCond=ifelse(TMaxH==1,"Filled","Empty"))
-
-CT <- rbind(CT,CT1)
-
-setwd(oldcd)
-
-prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
-
-rm(kk,CT1,wps)
-save.image()
-
-
-```
-
-## Time series simulations for side=256 time=20000 logseries metacomunity   
-
-```{r plotsimul256_64_L5_T20000, eval=F,echo=F,message=F,warning=F}
-setwd("Simul")
-
-# Ver Neutral_Model_BCI.Rmd por parametros
-#
-m =  0.0001596079
-alfa=2.038974
-side <- 256
-nsp <- 64
-nSimul <- 5
-ReplRate <- c(0,0.001,0.005,0.01,0.05,0.1,0.5,1)
-time <- 20000
-# loop con do paralell 
-
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
-
-CT1 <- data.frame()
-
-
-CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
-{
-    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",TRUE)
-}
-stopCluster(cl)
-
-rm(cn,cl)
-for(i in 1:length(ReplRate)){
-  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
-}
-
-
-# Calculation of stationarity statistics with a window 
-#
-wps <-data.frame()
-for(i in 1:length(ReplRate)){
-  kk<-ts_ADTest_PlotTime(nsp,side,alfa,m,ReplRate[i],time,"L",10,TRUE)              
-  wps <- rbind(w_prop_stationary,kk) 
-}
-
-
-# Correct CT add Time
-CT1$Time <- time
-CT1$IniCond <- "Filled"   # Lattice filled with metacommunity SAD
-
-CT <- rbind(CT,CT1)
-
-setwd(oldcd)
-
-
-# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
-# 
-#
-prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
-
-rm(kk,CT1)
-save.image()
-```
-
-## Time series simulations : Side 512, time=20000 metacommunity=L
-
-```{r plotsimul512_64_L5_T20000, eval=F,echo=T,message=T,warning=T}
-
-setwd("Simul")
-
-# Ver Neutral_Model_BCI.Rmd por parametros
-#
-m =  0.0001596079
+m =  0.0001                  # Ver @Condit2012 
 alfa=2.038974
 side <- 512
 nsp <- 64
-nSimul <- 5
-ReplRate <- c(0,0.001,0.005,0.01,0.05,0.1,0.5,1)
-time <- 20000                                     # aprox 1.8 min per simulation 
+nSimul <- 10
 
-# Make simulations 
-#
-# loop con do paralell 
+#ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
 
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
+# Not done yet
 
-CT1 <- data.frame()
+ReplRate <- c(0.0000,0.0001,0.0002,0.0003,0.0004,0.0005,0.0006,0.0007,0.0008,0.0010,0.0015,0.0020,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
 
-CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
-{
-    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",TRUE)
-}
-stopCluster(cl)
-rm(cn,cl)
-
-# Make the plots!
-#
-for(i in 1:length(ReplRate)){
-  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
-#  CT1 <- bind_rows(CT1,kk)
-}
-
-# Calculation of stationarity statistics with a window 
-#
-# 
-# for(i in 1:length(ReplRate)){
-#   kk<-ts_ADTest_PlotTime(nsp,side,alfa,m,ReplRate[i],time,"L",10,TRUE)              
-#   wps <- rbind(wps,kk) 
-# }
-
-
-# Correct CT add Time
-CT1$Time <- time
-CT1$IniCond <- "Filled"   # Lattice filled with metacommunity SAD
-CT <- bind_rows(CT,CT1)
-
-setwd(oldcd)
-
-
-#
-# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
-# 
-# H_PPVal has to be less than 0.05, to reject non-stationarity
-# H_KPSSpval has to be >0.05 to accept stationarity
-# 
-#
-prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time,IniCond) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
-
-
-rm(kk,CT1)
-save.image()
-
-```
-
-
-## Time series simulations for side=512 time=20000 uniform metacomunity   
-
-
-```{r plotsimul512_64_U5_T20000, eval=T,echo=F,message=F,warning=F}
-
-setwd("Simul")
-
-# Ver Neutral_Model_BCI.Rmd por parametros
-#
-m =  0.0001596079
-alfa=2.038974
-side <- 512
-nsp <- 64
-nSimul <- 5
-ReplRate <- c(0,0.001,0.005,0.01,0.05,0.1,0.5,1)
 time <- 20000
-# loop con do paralell 
 
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
-
-CT1 <- data.frame()
-
-CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
-{
-    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","U","N",TRUE)
-}
-stopCluster(cl)
-
-rm(cn,cl)
-for(i in 1:length(ReplRate)){
-  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","U")
-}
-
-
-# Calculation of stationarity statistics with a window 
-#
-# 
-# for(i in 1:length(ReplRate)){
-#   kk<-ts_ADTest_PlotTime(nsp,side,alfa,m,ReplRate[i],time,"L",10,TRUE)              
-#   w_prop_stationary <- rbind(w_prop_stationary,kk) 
-# }
-
-# Correct CT add Time 
-CT1$Time <- time
-CT1$IniCond <- "Filled"   
-CT <- rbind(CT,CT1)
-
-setwd(oldcd)
-
-# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
-# 
-#
-prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time,IniCond) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
-
-rm(kk,CT1)
-save.image()
-```
-
-
-
-## Simulations for Uniform and Logseries side =100,256,512 species=64 1T=3000
-
-
-The critical probability is very low around 0.002 thus most communities should be in a "niche" state but the transient time is very long unless rho is relatively high.
-
-## Conclusions if a species have a spanning cluster of about 30% of the total area, they are near the critical point.
-
-
-## Simulations to Time=5000 
-
-```{r gensimul_clu_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
-setwd("Simul")
-
-
-m =  0.0001596079
-alfa=2.038974
-side <- 512
-nsp <- 64
-nSimul <- 30
-
-ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
-
-time <- 5000
-
-p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(100,256,512),meta=c("L")) 
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(100,256,512),meta=c("L","U")) 
 
 
 require(doParallel)
@@ -336,7 +69,7 @@ registerDoParallel(cl)
 Clu <- data.frame()
 Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
 {
-    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"N",p$meta[i])
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",time,nSimul,T,"S",p$meta[i])
 }
 
 # Clu <- data.frame()
@@ -356,99 +89,17 @@ rm(cn,cl,Clu)
 save.image()
 ```
 
-# Calculation of the critical point T=3000
-
-```{r logfit_clu_side_64_meta30, eval=F,echo=F,message=T,warning=T}
-
-m <-  round(0.0001596079,9)
-alfa<-round(2.038974,5)
-side <- 512
-nsp <- 64
-nSimul <- 30
-
-require(plyr)
-require(dplyr)
-
-mClusters <- filter(Clusters, Time==3000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
-
-require(ggplot2)
-
-#
-# Calculates the probability of spanning cluster
-#
-
-k <- group_by(mClusters, MetaType,Side) %>% mutate(near=abs(SpanningProb-0.5),n=n()) %>% arrange(near) %>% filter(near<0.35)
-
-k <-group_by(mClusters, MetaType,Side) %>% filter(ReplacementRate>0  & ReplacementRate<0.004) 
-# DELETE RECORDS 
-k <- k[-c(3,13,16),]
-
-k <- k %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
-
-require(pander)
-pandoc.table(k,round=5)
-
-#
-# finite size scaling to determine pcrit for infinite lattices
-#
-k1 <- group_by(k,MetaType) %>% mutate(iSide=1/(Side*Side) ) %>% do(model=lm(pcrit ~ iSide, data=.)) %>% summarise(pcrit=predict(model,newdata=data.frame(iSide=0)),pcSE=predict(model,newdata=data.frame(iSide=0),se.fit=T)$se.fit)            
-   
-k1$MetaType <- c("L","U") 
-k1$iSide <- 0 
-k1
-
-ggplot(k,aes(x=1/(Side*Side),y=pcrit,colour=MetaType)) + geom_point() + theme_bw() +stat_smooth(method=lm,se=F) + geom_point(data=k1,aes(x=iSide,y=pcrit),shape=21)
-
-#
-# Spaninng probability vs rho
-#
-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green")
-
-# Select Time and change label of MetaType
-#
-tClusters <- Clusters %>% filter(Time==3000)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
-k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
-
-
-#
-# Shannon diversity vs rho
-#
-ggplot(tClusters, aes(x=ReplacementRate, y=H)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green")
-ggsave("figs/HvsRepl_T3000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
-
-#
-# Richness vs rho
-#
-ggplot(tClusters, aes(x=ReplacementRate, y=Richness)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y") +xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green")
-ggsave("figs/RichvsRepl_T3000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
-
-
-##
-# Proportion of Selected models 
-# 
-
-tot_fit_by_model <- all_fit %>% group_by(region,subregion,model_set,model_name) %>% mutate(tot_by_model=n()) %>% 
-	filter(delta_AICc==0) %>% summarise(best_model_prop=n()/max(tot_by_model)) %>% select(model_name,best_model_prop) %>% arrange(desc(best_model_prop)) %>% filter(model_set=="Estimated Xmin") 
-
-
-# Plot of Spanning clusters sizes with critical probability
-#
-ggplot(tClusters, aes(x=ReplacementRate, y=SpanningClust)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType ) + ylab("Spanning Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green")
-
-ggsave("figs/SpanClusRepl_T3000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
-
-```
 
 # Calculation of the critical point T=5000 DispersalDistance=26 m=0.00016 (Add side=150)
 
 ```{r pcT5000_clu_side_64_meta30, eval=F,echo=F,message=T,warning=T}
 
-m   <-round(0.0001596079,9)
+m   <-0.0001
 alfa <-round(2.03897,5)
 side <- 512
 nsp <- 64
 nSimul <- 30
-time <- 5000
+time <- 20000
 
 require(plyr)
 require(dplyr)
@@ -461,19 +112,24 @@ require(ggplot2)
 require(pander)
 
 # Create data frame to store Pc for lattices with different sides
-rhoCritSide <- data_frame()
+#rhoCritSide <- data_frame()
 
 # Update table after recalculation of critical points
 #rhoCritSide <- filter(rhoCritSide,DispersalDistance!=26.66 | ColonizationRate!=0.000159608 | MetaNsp!=64)
-rhoCritSide <- rbind(rhoCritSide,k$rCTs)
+#rhoCritSide$Time <-5000
+kk <- k$rCTs
+kk$Time <- 20000  
+rhoCritSide <- bind_rows(rhoCritSide,kk)
 pandoc.table(rhoCritSide,round=5)
 
 # Create data frame to store Pc for infinite lattices
-rhoCrit <- data_frame()
+# rhoCrit <- data_frame()
+# rhoCrit$Time <-5000
 # 
 #rhoCrit <- filter(rhoCrit,DispersalDistance!=26.66 | ColonizationRate!=0.000159608 | MetaNsp!=64)
-
-rhoCrit <- rbind(rhoCrit,k$rCT)
+kk <- k$rCT
+kk$Time <- 20000  
+rhoCrit <- bind_rows(rhoCrit,kk)
 pandoc.table(rhoCrit,round=5)
 
 # Make with different sides filter side=150
@@ -481,7 +137,7 @@ pandoc.table(rhoCrit,round=5)
 k<-filter(rhoCritSide,MetaNsp==nsp,DispersalDistance==round(mean_power(alfa),2),ColonizationRate==m,Side!=150)
 k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
 
-mClusters <- filter(Clusters, Time==5000,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m,Side!=150) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))  %>% ungroup() %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
+mClusters <- filter(Clusters, Time==time,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m,Side!=150) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))  %>% ungroup() %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
 
 #
 # Spaninng probability vs rho
@@ -499,7 +155,7 @@ ggsave("figs/SpanPvsRepl_T5000_64_side_meta_lin.png", width=6,height=6,units="in
 #
 # Shannon diversity vs rho
 #
-tClusters <- Clusters %>% filter(Time==5000,MetaNsp==64)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
+tClusters <- Clusters %>% filter(Time==time,MetaNsp==64)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
 
 
 tClusters <- Clusters %>% filter(Time==time,MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m,Side!=150)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
@@ -523,6 +179,8 @@ ggsave("figs/HvsRepl_T5000_64_side_meta_lin.png", width=6,height=6,units="in",dp
 #
 ggplot(tClusters, aes(x=ReplacementRate, y=Richness)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y") +xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green")
 ggsave("figs/RichvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
+ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+ReplRate <- c(0.0000,0.0005,0.0006,0.0007,0.0008,0.0010,0.0011,0.0012,0.0013,0.0014,0.0015,0.0016,0.0017,0.0018,0.0019,0.0020,0.0022,0.0026,0.0028,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
 
 #
 # Richness vs rho linear scale

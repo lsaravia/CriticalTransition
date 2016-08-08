@@ -1,0 +1,1034 @@
+# The critical transition between neutral and competitive communities 
+
+## Time series simulations to determine steady state
+
+I use here the following neutral/hierarchical model with power dispersal kernel, uniform and a logseries metacommunity distribution
+
+<https://github.com/lsaravia/Neutral>
+
+I performed simulations with diferent initial conditions 0= empty initial conditions, this mimics the actual succession path
+1=One individual of each species in the center, 2=lattice filled with metacommunity frequency, 3= center with species 1.
+
+The option 3 produces a faster fixation of the most competitive species, but the most realistic is the option=0
+
+
+## Setup
+
+```{r setup, eval=T }
+load(".RData")
+#simul  <- F # variable to perform or not the simulations
+
+oldcd <-getwd()
+source("R/Neutral_fun.r")
+
+# Set the location of the binary 
+#
+neuBin <- "~/Dropbox/cpp/CaNew/Neutral/ipsNeutralPow"
+neuBin64<- "~/Dropbox/cpp/CaNew/Neutral/ipsNeutralP64"
+
+
+require(pander)
+require(plyr)
+require(dplyr)
+
+panderOptions('table.split.table',Inf)
+panderOptions('table.style', 'multiline')
+options("scipen"=100, "digits"=6)
+```
+
+
+## Time series simulations for side=256 time=20000 logseries metacomunity empty initial conditions   m=0.1  
+
+```{r plotsimul256_64_L5_T20000Empty1, eval=F,echo=F,message=F,warning=F}
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.1
+alfa=2.038974
+side <- 256
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 20000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",0)
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time
+CT1$Time <- time
+CT1$IniCond <- "Empty"   # Lattice 
+
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
+
+rm(kk,CT1)
+save.image()
+```
+
+
+## Time series simulations for side=256 time=20000 logseries metacomunity empty initial conditions  m=0.01
+
+```{r plotsimul256_64_L5_T20000Empty01, eval=F,echo=F,message=F,warning=F}
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.01
+alfa=2.038974
+side <- 256
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 20000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",0)
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time
+CT1$Time <- time
+CT1$IniCond <- "Empty"   # Lattice
+
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
+
+rm(kk,CT1)
+save.image()
+```
+
+
+## Time series simulations for side=256 time=20000 logseries metacomunity empty initial conditions  m=0.001
+
+```{r plotsimul256_64_L5_T20000Empty0001, eval=F,echo=F,message=F,warning=F}
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.0001
+alfa=2.038974
+side <- 256
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 20000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",0)
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time
+CT1$Time <- time
+CT1$IniCond <- "Empty"   # Lattice 
+
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
+
+rm(kk,CT1)
+save.image()
+```
+
+## Time series simulations for side=256 time=20000 logseries metacomunity filled initial conditions   m=0.1  
+
+```{r plotsimul256_64_L5_T20000Filled1, eval=F,echo=F,message=F,warning=F}
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.1
+alfa=2.038974
+side <- 256
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 20000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",2)
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time
+CT1$Time <- time
+CT1$IniCond <- "Filled"   # Lattice 
+
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
+
+rm(kk,CT1)
+save.image()
+```
+
+
+## Time series simulations for side=256 time=20000 logseries metacomunity filled initial conditions   m=0.01  
+
+```{r plotsimul256_64_L5_T20000Filled01, eval=F,echo=F,message=F,warning=F}
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.01
+alfa=2.038974
+side <- 256
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 20000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",2)
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time
+CT1$Time <- time
+CT1$IniCond <- "Filled"   # Lattice filled with metacommunity
+
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
+
+rm(kk,CT1)
+save.image()
+```
+
+## Time series simulations for side=256 time=20000 logseries metacomunity filled initial conditions   m=0.0001  
+
+```{r plotsimul256_64_L5_T20000Filled0001, eval=F,echo=F,message=F,warning=F}
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.0001
+alfa=2.038974
+side <- 256
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 20000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",2)
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time
+CT1$Time <- time
+CT1$IniCond <- "Filled"   # Lattice filled with metacommunity
+
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
+
+rm(kk,CT1)
+save.image()
+```
+
+
+## Time series simulations for side=256 time=20000 logseries metacomunity filled initial conditions   m=0.0  
+
+```{r plotsimul256_64_L5_T20000Filled0, eval=F,echo=F,message=F,warning=F}
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.000
+alfa=2.038974
+side <- 256
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 20000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",2)
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time
+CT1$Time <- time
+CT1$IniCond <- "Filled"   # Lattice filled with metacommunity
+
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
+
+rm(kk,CT1)
+save.image()
+```
+
+## Time series simulations for side=256 time=20000 logseries metacomunity filled initial conditions   m=0.001    
+
+```{r plotsimul256_64_L5_T20000Filled001, eval=T,echo=F,message=F,warning=F}
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.001
+alfa=2.038974
+side <- 256
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 20000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",2)
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time
+CT1$Time <- time
+CT1$IniCond <- "Filled"   # Lattice filled with metacommunity
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
+
+rm(kk,CT1)
+save.image()
+```
+
+## Time series simulations for side=512 time=3000 uniform metacomunity, Filled initial conditions
+
+```{r plotsimul512_64_U5_T3000Filled0001, eval=F,echo=F,message=F,warning=F}
+
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.0001
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 3000
+
+# loop con do paralell 
+#
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",2) # Filled initial conditions 
+}
+stopCluster(cl)
+rm(cn,cl)
+
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time 
+CT1$Time <- time
+CT1$IniCond <- "Filled"   
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time,IniCond) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n(), meanH=mean(meanH),meanRich=mean(meanRich)) 
+
+rm(kk,CT1)
+save.image()
+```
+
+## Time series simulations for side=512 time=5000 Logseries metacomunity, Filled initial conditions
+
+```{r plotsimul512_64_L5_T5000Filled0001, eval=F,echo=F,message=F,warning=F}
+
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.0001
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05)
+time <- 5000
+
+# loop con do paralell 
+#
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",2) # Filled initial conditions 
+}
+stopCluster(cl)
+rm(cn,cl)
+
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time 
+CT1$Time <- time
+CT1$IniCond <- "Filled"   
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time,IniCond) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n(), meanH=mean(meanH),meanRich=mean(meanRich)) 
+
+rm(kk,CT1)
+save.image()
+```
+
+## Time series simulations for side=512 time=20000 uniform metacomunity, filled initial conditions
+
+```{r plotsimul512_64_U5_T20000Filled, eval=F,echo=F,message=F,warning=F}
+
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.0001596079
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 20000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","U","N",2)
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","U")
+}
+
+
+# Correct CT add Time 
+CT1$Time <- time
+CT1$IniCond <- "Filled"   
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+# H_PPVal has to be less than 0.05, to reject non-stationarity
+# H_KPSSpval has to be >0.05 to accept stationarity
+# 
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time,IniCond) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n(), meanH=mean(meanH),meanRich=mean(meanRich)) 
+
+rm(kk,CT1)
+save.image()
+```
+
+## Time series simulations for side=512 time=20000 uniform metacomunity, empty initial conditions
+
+```{r plotsimul512_64_U5_T3000Empty0001, eval=F,echo=F,message=F,warning=F}
+
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.0001
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 3000
+
+# loop con do paralell 
+#
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",0) # Empty initial conditions 
+}
+stopCluster(cl)
+rm(cn,cl)
+
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time 
+CT1$Time <- time
+CT1$IniCond <- "Empty"   
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time,IniCond) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n(), meanH=mean(meanH),meanRich=mean(meanRich)) 
+
+rm(kk,CT1)
+save.image()
+```
+
+## Time series simulations for side=512 time=5000 uniform metacomunity, empty initial conditions
+
+```{r plotsimul512_64_U5_T5000Empty0001, eval=F,echo=F,message=F,warning=F}
+
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.0001
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05)
+time <- 5000
+
+# loop con do paralell 
+#
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",0) # Empty initial conditions 
+}
+stopCluster(cl)
+rm(cn,cl)
+
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time 
+CT1$Time <- time
+CT1$IniCond <- "Empty"   
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time,IniCond) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n(), meanH=mean(meanH),meanRich=mean(meanRich)) 
+
+rm(kk,CT1)
+save.image()
+```
+
+## Time series simulations for side=512 time=3000 logseries metacomunity, initial conditions: 8x8 square of ones, m=0.0001 
+
+```{r plotsimul512_64_L5_T3000_Ones_0001, eval=F,echo=F,message=T,warning=T}
+setwd("Simul")
+
+
+m =  0.0001                  # Ver @Condit2012 
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 3000
+
+# loop con do paralell 
+#
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",3)
+}
+stopCluster(cl)
+rm(cn,cl)
+
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time 
+CT1$Time <- time
+CT1$IniCond <- "Ones"   
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
+
+
+
+rm(kk,CT1)
+save.image()
+
+
+
+```
+
+
+## Time series simulations for side=512 time=5000 logseries metacomunity, initial conditions: 8x8 square of ones, m=0.0001 
+
+```{r plotsimul512_64_L5_T5000_Ones_0001, eval=F,echo=F,message=T,warning=T}
+setwd("Simul")
+
+
+m =  0.0001                  # Ver @Condit2012 
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 5000
+
+# loop con do paralell 
+#
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",3)
+}
+stopCluster(cl)
+rm(cn,cl)
+
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+# Correct CT add Time 
+CT1$Time <- time
+CT1$IniCond <- "Ones"   
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n())
+
+
+rm(kk,CT1)
+save.image()
+
+```
+
+## Time series simulations for side=512 time=20000 logseries metacomunity, initial conditions: Ones, migration rate = 0.0001 
+
+```{r plotsimul512_64_L5_T20000Ones0001, eval=F,echo=F,message=F,warning=F}
+
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por pcoord_cartesian(xlim=c(0, 0.01))coord_cartesian(xlim=c(0, 0.01))arametros
+#
+m =  0.0001
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.0001,0.0005,0.001,0.005,0.01,0.05,0.1,0.5,1)
+time <- 20000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N","L","N",3)
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N","L")
+}
+
+
+# Correct CT add Time 
+CT1$Time <- time
+CT1$IniCond <- "Ones"   
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+# Calculate a summary with the proportion of runs with stationarity (prop_SAD_AD)
+# 
+#
+prop_stationary <- CT %>% group_by(MetaNsp,Side,Disp,Migr,Repl,MetaType,Time,IniCond) %>% mutate(num_SAD_AD=(SAD_ADpval>0.05),num_H_PP=(H_PPpval<0.05),num_H_KPSS=(H_KPSSpval>0.05),num_H_both=(H_PPpval<0.05)&(H_KPSSpval>0.05)) %>% summarise(prop_H_KPSS=sum(num_H_KPSS)/n(),prop_H_PP=sum(num_H_PP)/n(),prop_H_both=sum(num_H_both)/n(),prop_SAD_AD=sum(num_SAD_AD)/n(), meanH=mean(meanH),meanRich=mean(meanRich)) 
+
+rm(kk,CT1)
+save.image()
+```
+
+# Plots to check steady state
+
+```{r plotsimul_meanH_rho, eval=F,echo=F,message=F,warning=F}
+require(ggplot2)
+
+
+ggplot(filter(CT,Side==512,Migr<=0.001), aes(x=Repl, y=meanH)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Time ~ IniCond,scales="free_y" )+xlab(bquote(rho))  
+
+ggplot(filter(CT,Side==256), aes(x=Repl, y=meanH)) + geom_point(alpha=.2) + theme_bw() +  stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Migr ~ IniCond,scales="free_y" )+xlab(bquote(rho)) + scale_x_log10(breaks=c(0.0001,0.001,0.01,0.1,1))
+ggsave("figs/HvsRho_T20000_64_256_L_IniCond.png", width=6,height=6,units="in",dpi=600)
+
+#coord_cartesian(xlim=c(0, .01)) 
+
+ggplot(filter(CT,Side==256), aes(x=Repl, y=meanRich)) + geom_point(alpha=.2) + theme_bw() +  stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Migr ~ IniCond,scales="free_y" )+xlab(bquote(rho)) + scale_x_log10(breaks=c(0.003,0.02,0.1,1))
+
+ggplot(filter(CT,MetaType=="L",IniCond=="Filled"), aes(x=Repl, y=meanH)) + geom_point(alpha=.2) + theme_bw() + coord_cartesian(xlim=c(0, 0.01))+ stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid( Side ~ Time,scales="free_y" )+xlab(bquote(rho))  
+
+
+ggplot(filter(CT,IniCond=="Empty"), aes(x=Repl, y=meanH)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_wrap( MetaType ~ Time,scales="free_y" )+xlab(bquote(rho))  
+
+ggplot(filter(CT,MetaType=="L",IniCond=="Ones"), aes(x=Repl, y=meanH)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_wrap( Side ~ Time,scales="free_y" )+xlab(bquote(rho))  
+
+
+ggplot(filter(CT,MetaType=="L",Side==512), aes(x=Repl, y=meanH)) + geom_point(alpha=.2) + theme_bw() +  facet_grid( Time ~ Side)+xlab(bquote(rho))  + coord_cartesian(xlim=c(0, 0.01))
+
+ggplot(filter(CT,MetaType=="L",Side==512,IniCond=="Filled"), aes(x=Repl, y=meanH)) + geom_point(alpha=.2) + theme_bw() + stat_summary(fun.y=mean,geom="line",colour="red") + facet_grid( Time ~ Migr)+xlab(bquote(rho))  + coord_cartesian(xlim=c(0, 0.005))
+
+
+ggplot(filter(CT,MetaType=="L",Migr==0.1), aes(x=Repl, y=meanH)) + geom_point(alpha=.2) + theme_bw() + stat_summary(fun.y=mean,geom="line",colour="red") + facet_grid( Time ~ Migr)+xlab(bquote(rho))  + coord_cartesian(xlim=c(0, 0.005))
+
+```
+## Results of time series steady state analysis
+
+Visualizing time series and using the AD test for the last 1000 time steps the model reach steady state in all the cases using empty initial conditions, using filled initial conditions seems to enlarge transient time.
+
+
+# Determination of the critical point using probability of spanning cluster
+
+## Simulations for Uniform and Logseries side =100,256,512 species=64 1T=20000 
+
+
+The critical probability is very low around 0.002 thus most communities should be in a "niche" state but the transient time is very long unless rho is relatively high.
+
+
+
+
+# Simulations to make a video of percolation
+
+```{r gensimul_spat_256_32_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+setwd("Simul")
+
+m =  0.0001596079
+alfa=2.038974
+side <- 256
+nsp <- 32
+nSimul <- 1
+
+
+ReplRate <- c(0.0011)
+time <- 3000
+
+require(animation)
+simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",time,10,100,"L",T,T)
+
+saveGIF(simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",1000,10,800,"L",T,F), 
+        interval = .3, 
+        movie.name=paste0("neuL",nsp,"_",side,"R", ReplRate,".gif")
+)
+
+
+ReplRate <- c(0.0029)
+time <- 3000
+simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",time,10,10,"L",T,T)
+
+saveGIF(simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",1100,10,850,"L",T,F), 
+        interval = .5, 
+        movie.name=paste0("neuL",nsp,"_",side,"R", ReplRate,".gif")
+)
+
+time <- 3000
+simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",time,10,100,"U",T,T)
+
+saveGIF(simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",1600,10,1350,"U",T,F), 
+        interval = .5, 
+        movie.name=paste0("neuU",nsp,"_",side,"R", ReplRate,".gif")
+)
+
+
+```
+
+
+## Calculation of the Suvival Time of the most abundant species (Species!=1) and density for side=512 time=5000 uniform metacomunity   
+
+Survival of 1 = P(t) ~ t ^-delta
+Number of 1 = N(t) ~ t^theta
+
+```{r survivalTimel512_64_U5_T5000, eval=F,echo=F,message=F,warning=F}
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.0001
+alfa=2.038974
+side <- 512
+nsp <- 64
+nSimul <- 5
+ReplRate <- c(0,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.009,0.01,0.02,0.03,0.05,0.07,0.1,0.2,0.3,0.6,1)
+time <- 5000
+# loop con do paralell 
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+CT1 <- data.frame()
+
+CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N")
+}
+stopCluster(cl)
+
+rm(cn,cl)
+for(i in 1:length(ReplRate)){
+  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N")
+}
+
+# Correct CT add variable metatype
+#CT <- mutate(CT,MetaType="U")
+CT1$Time <- time
+CT <- rbind(CT,CT1)
+
+setwd(oldcd)
+
+# Calculate averages by simulations 
+
+require(dplyr)
+require(ggplot2)
+mct <- group_by(CT,Repl,MetaType) %>% summarize(meanRich = mean(meanRich),meanH=mean(meanH),
+                                       TMaxH=mean(TMaxH),TMaxRich=mean(TMaxRich),
+                                       MaxH=mean(MaxH),MaxRich=mean(MaxRich),
+                                       meanEven=mean(meanEven))
+
+# Plots of all simulations and averages H & Richness
+
+
+plot_simul_timeRH(CT,mct)
+
+rm(kk,CT1)
+save.image()
+
+```

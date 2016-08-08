@@ -484,7 +484,7 @@ This occurs at the percolation value D ∗ ≈ 0.41 (i.e. when the proportion of
 
 
 ---------
-@Stauffer1979
+@Stauffer1979 Scaling theory of percolation clusters
 
 Thus percolation can be used as a guide to clustering phenomena at other phase transitions. Of course
 there is no guarantee that other phase transitions will have the same cluster properties as the simple
@@ -507,3 +507,20 @@ p = 3/4, yes; p = 5/8, yes; p = 9/16, no... This is an exponentially efficient
 iteration to determine p c for one fixed configuration. The method has been
 called “Hunting the Lion” by A. Aharony: you move in the direction where
 you hear the lion roar, the lion being here the “infinite” percolating cluster.
+
+
+------------
+@Windus2007
+
+Finding the critical exponents through steady state simulations is notoriously difficult
+due to critical slowing down, finite-size effects, large fluctuations and the difficulties
+that arise in finding the critical point. A much more effective method is that of time-
+dependent simulations, which has proved to be a very efficient way of determining the
+critical exponents and the critical point for models exhibiting absorbing phase transitions
+[13]
+
+
+------------
+@Bregman2015
+
+Here, we use phylogenetic and functional trait data to test whether communities of two ecologically important guilds of tropical birds (frugivores and insectivores) are structured by species interactions in a fragmented Amazonian forest landscape. In both guilds, we found that forest patch size, quality, and degree of isolation influence the phylogenetic and functional trait structure of communities, with small, degraded, or isolated forest patches having an increased signature of competition (i.e., phylogenetic and functional trait overdispersion in relation to null models). These results suggest that local extinctions in the context of fragmentation are nonrandom, with a consistent bias toward more densely occupied regions of niche space. We conclude that the loss of biodiversity in fragmented landscapes is mediated by niche-based competitive interactions among species, with potentially far-reaching implications for key ecosystem processes, including seed dispersal and plant damage by phytophagous insects.
