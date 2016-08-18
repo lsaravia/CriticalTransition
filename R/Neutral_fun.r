@@ -1347,9 +1347,9 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
                mutate( MetaNsp=nsp, Side=side, MetaType=as.character(meta),MaxClusterProp = MaxClusterSize/(side*side),MaxClusterSpProp=MaxClusterSize/MaxSpeciesAbund,
                 SpanningClust=ifelse(SpanningSpecies>0,MaxClusterProp,0)) # %>% sample_n(30)
 
-  if(nrow(clu)>sims){
-    clu <- clu %>% sample_n(30)
-  }
+  # if(nrow(clu)>sims){
+  #   clu <- clu %>% sample_n(30)
+  # }
   
   if(nrow(clu)<sims){
     warning("Simulations ", nrow(clu), " rho ", clu$ReplacementRate[1])
@@ -1362,7 +1362,8 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
 # Simulates up to time and saves a snapshot of the model 
 #
 #
-simul_NeutralSAD <- function(nsp,side,disp,migr,ReplRate,clus="S",time=1000,meta="L",delo=F) {
+simul_NeutralSAD <- function(nsp,side,disp,migr,ReplRate,clus="S",time=1000,meta="L",delo=F,sedIni=0) 
+{
   if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
   if(!require(untb))  stop("Untb package not installed")
 
@@ -1380,10 +1381,7 @@ simul_NeutralSAD <- function(nsp,side,disp,migr,ReplRate,clus="S",time=1000,meta
       neuParm <- paste0("unifP",nsp,"_",side,"R", ReplRate[i])
       bname <- paste0("neuUnif",nsp,"_",side,"R", ReplRate[i])
     }
-    pname <- paste0("pomacR",repl,".lin")
-
-    genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,ReplRate[i])
-
+    pname <- paste0("pomacR",ReplRate[i],".lin")
 
     # Delete old simulations
     if(delo){
@@ -1391,8 +1389,22 @@ simul_NeutralSAD <- function(nsp,side,disp,migr,ReplRate,clus="S",time=1000,meta
       system(paste0("rm ",bname,"D*.txt")) # Density
       system(paste0("rm ",bname,"C*.txt")) # Clusters
     }
+
+    # Always delete spatial patterm sed file
+    #
     system(paste0("rm ",bname,"-",formatC(time,width=4,flag=0),".sed"))
     
+
+    genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,ReplRate[i])
+
+    if(sedIni==1){
+        genInitialSed(paste0(neuParm,".sed"),nsp,side,0)
+    } else if(sedIni==2) {
+        genInitialSed(paste0(neuParm,".sed"),nsp,side,prob)
+    } else {
+        genInitialSed(paste0(neuParm,".sed"),nsp,side,1)
+    }
+
 
     par <- read.table("sim.par",quote="",stringsAsFactors=F)
     # Change base name
@@ -1412,17 +1424,25 @@ simul_NeutralSAD <- function(nsp,side,disp,migr,ReplRate,clus="S",time=1000,meta
     par[par$V1=="clusters",]$V2 <- clus       # Calculate max cluster size
    
     
-    parfname <- paste0("sim",nsp,"_",side,"R", repl,".par")
-    write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
-
-    #genPomacParms(pname,1,c(0.2),disp,migr,repl,sims)
     parfname <- paste0("sim",nsp,"_",side,"_",ReplRate[i],".par")
     write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
+
+    # Get kind of OS 32 or 64Bits 
     s <- system("uname -a",intern=T)
-    if(grepl("i686",s)) {
-      system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+
+    if(sedIni){
+      if(grepl("i686",s)) {
+          system(paste(neuBin,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+        } else {
+          system(paste(neuBin64,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+        }
+
     } else {
-      system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+      if(grepl("i686",s)) {
+        system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+      } else {
+        system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+      }
     }
 
     #fname <- paste0("neuFish",nsp,"Density.txt")
@@ -2250,24 +2270,27 @@ R2Neutral_Dq<-function(side,time=500,meta="L")
 #  local=T : plots the average of local RAD
 #        F : plots metacommunity RAD
 #
-plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T,cpal="",m=0.000159608,alfa=2.08107)
+plotNeutral_SAD_1T<-function(nsp,side,repl,time,m,alfa,meta="U",local=T,cpal="")
 {
   require(ggplot2)
   require(plyr)
   require(dplyr)
+  op <- options()
+  options("scipen"=0, "digits"=4)
+  
   den<- data.frame()
   if(nsp!=0){
     den1 <- data.frame()
-    for(r in repl){
+    for(r in 1:length(repl)){
       if(toupper(meta)=="L") {
-        bname <- paste0("neuFish",nsp,"_",side,"R", r)
+        bname <- paste0("neuFish",nsp,"_",side,"R", repl[r])
       } else {
-        bname <- paste0("neuUnif",nsp,"_",side,"R", r)
+        bname <- paste0("neuUnif",nsp,"_",side,"R", repl[r])
       }
-      fname <- paste0(bname ,"T", time, "Density.txt")
+      fname <- paste0(bname ,"T", time[r], "Density.txt")
       
       # Select simulations 
-      den <- meltDensityOut_NT(fname,nsp,m,alfa,time)
+      den <- meltDensityOut_NT(fname,nsp,m,alfa,time[r])
       if(local) {
         den <- calcRankSAD_by(den,"value",1:5)
         #den <- rename(den,Freq=value)
@@ -2313,6 +2336,10 @@ plotNeutral_SAD_1T<-function(nsp,side,repl,time,meta="U",local=T,cpal="",m=0.000
     g <- g + facet_wrap(~ metaLbl, scales="free",ncol=2)
   }
   print(g)
+  
+  # Restore options
+  options(op) 
+  
   return(den1)
 }
 
@@ -2441,7 +2468,7 @@ mean_power <-function(alfa,x=1) abs(((alfa-1)/(alfa-2)*x))
 
 # Calculates critical probabilities for different side (rCTs) 
 # and critical probability for infinite lattices (rCT)
-# Interpolates linearly between the 4 nearest points of the spanning cluster prob=0.5
+# Interpolates using a logistic linear model the spanning cluster prob=0.5
 #
 calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
 {
@@ -2449,26 +2476,38 @@ calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
   require(dplyr)
   require(ggplot2)
 
-  mClusters <- filter(Clusters, Time==time,MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+  mClusters <- filter(Clusters, MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
   #
   # Calculates the probability of spanning cluster
   #
-  #k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.050 & SpanningProb<0.75)
-  
-  # Select 2 records with probability>0.5
-  k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.50) %>% arrange(SpanningProb) %>% slice(1:2)
-  # Select 2 records with probability<=0.5  
-  k <- rbind(k,group_by(mClusters, MetaType,Side) %>% filter(SpanningProb<=0.50) %>% arrange(desc(SpanningProb)) %>% slice(1:2))
 
-  # if SpanningProb>0.5 for all recs get more rows 
-  kk <-summarize(k,n=n()) %>% filter(n<4)
-  if(nrow(kk)>0){
-    k1<-inner_join(mClusters,kk,by=c("Side", "MetaType")) %>% select(MetaNsp:MaxClusterProp,n=n.x,SpanningProb,SpanningClust) %>% ungroup()
+  # Select 2 records with probability>0.5
+  # k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.50) %>% arrange(SpanningProb) %>% slice(1:2)
+  # # Select 2 records with probability<=0.5  
+  # k <- rbind(k,group_by(mClusters, MetaType,Side) %>% filter(SpanningProb<=0.50) %>% arrange(desc(SpanningProb)) %>% slice(1:2))
+  # 
+  # # if SpanningProb>0.5 for all recs get more rows 
+  # kk <-summarize(k,n=n()) %>% filter(n<4)
+  # if(nrow(kk)>0){
+  #   k1<-inner_join(mClusters,kk,by=c("Side", "MetaType")) %>% select(MetaNsp:MaxClusterProp,n=n.x,SpanningProb,SpanningClust) %>% ungroup()
+  #   
+  #   k <- bind_rows(k,group_by(k1, MetaType,Side) %>% filter(SpanningProb>0.50) %>% arrange(SpanningProb) %>% slice(1:4))  
+  # }
+  # # Interpolate  
+  # k <- k %>% group_by(MetaType,Side) %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
+
+  lg_fun<-function(x){
+    lf <-glm(SpanningProb ~ ReplacementRate, family=binomial(logit), data = x)
+    pcrit=- (lf$coefficients[1] / lf$coefficients[2])
     
-    k <- bind_rows(k,group_by(k1, MetaType,Side) %>% filter(SpanningProb>0.50) %>% arrange(SpanningProb) %>% slice(1:4))  
+    lf <-glm(SpanningProb ~ SpanningClust, family=binomial(logit), data = x)
+    critClust=- (lf$coefficients[1] / lf$coefficients[2])
+
+    if(pcrit<0) pcrit<-0
+
+    return(data.frame(pcrit,critClust))
   }
-  # Interpolate  
-  k <- k %>% group_by(MetaType,Side) %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
+  k <- mClusters %>% group_by(MetaType,Side) %>% do(lg_fun(.) )
   k$DispersalDistance<-round(mean_power(alfa),2) # 26.67 
   k$ColonizationRate <- m
 
@@ -2494,18 +2533,19 @@ calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
   rhoCT$MetaNsp<-metaNsp
 
   #pandoc.table(rhoCrit,round=5)
-
+  require(RColorBrewer)
+  colp <-brewer.pal(8,"Paired")
   g<-ggplot(k,aes(x=1/(Side*Side),y=pcrit,colour=MetaType)) + geom_point() + theme_bw() +stat_smooth(method=lm,se=F) + geom_point(data=k1,aes(x=iSide,y=pcrit),shape=21)
-  print(g)
+  print(g) 
   #
   # Spaninng probability vs rho
   #
-  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green")
+  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[4])
   print(g)
   #
   # The same Plot in linear x scale 
   #
-  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + xlim(0,0.02) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green") + ylab("Probability of Spanning cluster")
+  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + xlim(0,0.02) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[4]) + ylab("Probability of Spanning cluster")
   print(g)
   #ggsave("figs/SpanPvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
 return(list(rCTs=rhoCTSide,rCT=rhoCT))
