@@ -1331,7 +1331,7 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
 
   require(plyr)
   require(dplyr)
-  
+  cat("Reading ", bname, "\n")
   den <-readWideDensityOut(bname)
   den <-den[, c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate","Time", 
                 "Richness","H")]
@@ -2561,7 +2561,8 @@ return(list(rCTs=rhoCTSide,rCT=rhoCT))
 #         1=1 individual of each species in the center of the lattice
 #         2=Filled lattice with metacommunity frequency
 #
-simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,inter=10,init=1,meta="L",delo=F,sim=T,sedIni=0,modType=4,death=0.2,birth=1,colPal=0) {
+simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,inter=10,init=1,meta="L",delo=F,sim=T,sedIni=0,modType=4,death=0.2,birth=1,colPal=0) 
+{
   if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
   if(!require(untb))  stop("Untb package not installed")
   require(ggplot2)
@@ -2585,11 +2586,12 @@ simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,int
   if(sim) {
       genNeutralParms(neuParm,side,prob,birth,death,disp,migr,repl[i])
 
-
       if(sedIni==1){
-        genInitialSed(paste0(neuParm,".sed"),nsp,side,0)
+          genInitialSed(paste0(neuParm,".sed"),nsp,side,0)    # One individual of each species in the center
+      } else if(sedIni==2) {
+          genInitialSed(paste0(neuParm,".sed"),nsp,side,prob) # Filled with metacommunity frequency
       } else {
-        genInitialSed(paste0(neuParm,".sed"),nsp,side,prob)
+          genInitialSed(paste0(neuParm,".sed"),nsp,side,1)    # a square of 1 in the center, size=nsp
       }
 
       # Delete old simulations
@@ -2696,4 +2698,10 @@ simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,int
       }
     }
   }
+}
+
+
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
 }
