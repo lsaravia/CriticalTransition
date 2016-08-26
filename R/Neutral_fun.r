@@ -1343,13 +1343,13 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
   }
   clu$Richness <- den$Richness 
   clu$H <- den$H
-  clu <-rename(clu,MaxSpeciesAbund=TotalSpecies) %>%
+  clu <-filter(clu, ColonizationRate==migr) %>% rename(MaxSpeciesAbund=TotalSpecies) %>%
                mutate( MetaNsp=nsp, Side=side, MetaType=as.character(meta),MaxClusterProp = MaxClusterSize/(side*side),MaxClusterSpProp=MaxClusterSize/MaxSpeciesAbund,
                 SpanningClust=ifelse(SpanningSpecies>0,MaxClusterProp,0)) # %>% sample_n(30)
 
-  # if(nrow(clu)>sims){
-  #   clu <- clu %>% sample_n(30)
-  # }
+  if(nrow(clu)>sims){
+     clu <- clu %>% slice((n()-sims+1):n())
+  }
   
   if(nrow(clu)<sims){
     warning("Simulations ", nrow(clu), " rho ", clu$ReplacementRate[1])
