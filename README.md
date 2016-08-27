@@ -20,10 +20,15 @@ To reproduce the results you need to compile the following C++ program available
 
 ## R Markdown files:
 
-I usually run this chunk by chunk because there are long simulations, and save ".RData" to keep the results.
+I usually run Rmd files chunk by chunk because there are long simulations, and save ".RData" to keep the results.
   
-Neutral_simulCT.Rmd: Simulations to find critical values, and plots of results.
+**Neutral_steadyState.Rmd** Simulations to determine the time to reach steady state
 
+**Neutral_simulCT.Rmd** Simulations to find critical values, and plots H vs Rho vs Migration
+
+**Neutral_EarlyWarnings_Smax.Rmd** Early warnings of the critical transition based on Maximun Patch Smax
+
+**BCIpatchAnalysis.Rmd** Barro Colorado Island analysis 
 
 ## R functions
 

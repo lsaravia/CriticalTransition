@@ -1,5 +1,7 @@
 # The critical transition between neutral and competitive communities 
 
+## Calculation of the critical point using the probability of spanning cluster
+
 I use here the following neutral model with power dispersal kernel:
 
 <https://github.com/lsaravia/Neutral>
@@ -434,9 +436,9 @@ rm(kk,k,k1,p,mClusters,tClusters,Clu,rank)
 ```
 
 
-## Determine critical point for m=0.1
+## Simulatios to Determine critical point for m=0.1
 
-```{r gensimul_clu_side_64_meta40_T20000m1, eval=T,echo=F,message=T,warning=T}
+```{r gensimul_clu_side_64_meta_T20000m1, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
 m =  0.1                  # Ver @Condit2012 
@@ -449,10 +451,6 @@ ReplRate <- c(0.0000,0.0001,0.0005,0.0010,0.0050,0.0100,0.0200,0.0300, 0.0400, 0
 time<-      c(10000,  10000, 10000, 10000, 10000, 10000, 20000, 20000,  20000,  20000,  20000,  20000,  20000,  20000,  20000,  20000,   5000,  5000,  5000,  5000,  5000,5000)
 
 p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(128,192,256),meta=c("L","U")) 
-
-ReplRate <- 0.0001
-time <- 10000
-p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(192),meta=c("L")) 
 
 
 time <-rep(time, times=nrow(p)/length(time))
@@ -683,6 +681,59 @@ ggplot(tClusters, aes(x=ReplacementRate, y=Richness)) + geom_point(alpha=.1) + t
 ggsave("figs/RichvsRepl_T20000_64_256_meta_m_lin.png", width=6,height=6,units="in",dpi=600)
 
 ```
+
+
+## Simulations to Determine critical point for m=0.1 Species=320
+
+```{r gensimul_clu_side_320_meta_T20000m1, eval=T,echo=F,message=T,warning=T}
+setwd("Simul")
+
+m =  0.1                  # Ver @Condit2012 
+alfa=2.038974
+side <- 256
+nsp <- 320
+nSimul <- 20
+
+ReplRate <- c(0.0000,0.0001,0.0005,0.0010,0.0050,0.0100,0.0200,0.0300, 0.0400, 0.0500, 0.0550, 0.0600, 0.0650, 0.0700, 0.0750, 0.0800, 0.0900,0.1000,0.3000,0.6000,0.9000,1) 
+time<-      c(10000,  10000, 10000, 10000, 10000, 10000, 20000, 20000,  20000,  20000,  20000,  20000,  20000,  20000,  20000,  20000,   5000,  5000,  5000,  5000,  5000,5000)
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(128,192,256),meta=c("L","U")) 
+
+time <-rep(time, times=nrow(p)/length(time))
+
+p <-cbind(p,time)
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+Clu <- data.frame()
+Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,T,"N",p$meta[i],F,2)
+}
+
+# To reconstruct the data frame Clusters from the output files  
+#
+# Clu <- data.frame()
+# for(i in 1:nrow(p))
+#   {
+#   Clu <- rbind(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,F,"N",p$meta[i]))
+#   }
+
+
+stopCluster(cl)
+
+Clusters <-rbind(Clusters,Clu)
+setwd(oldcd)
+
+rm(cn,cl,Clu)
+
+save.image()
+```
+
+
 
 ## Regenerate Clusters data.frame from files in Simul folder DON'T RUN it without revision
 
@@ -1409,275 +1460,26 @@ pandoc.table(senRhoCri,round=2)
 With 16 species and logseries community the most abundant species have a nonzero probability to form a spanning cluster, if we take out neutral communities we can still calculate a critical point.
 
 
-
-# Simulate to estimate distributions of patch sizes statistics
-
-```{r simuldisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
-setwd(oldcd)
-source("R/powerlaw/discpowerexp.R")
-source("R/powerlaw/discexp.R")
-source("R/powerlaw/powerexp.R")
-source("R/powerlaw/exp.R")
-source("R/powerlaw/pareto.R")
-source("R/powerlaw/zeta.R")
-
-setwd("Simul")
-
-
-m <-  0.0001596079
-alfa <- 2.038974
-side <- 256
-nsp <- 64
-nSimul <- 10
-time <- 5000
-#time <- 100
-ReplRate <- c(0.0000,0.0005,0.0010,0.0020,0.0030,0.004,0.005,0.01)
-p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(256),meta=c("U","L")) 
-
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
-Models <- data.frame()
-Mdl <- data.frame()
-Mdl <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
-{
-    simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",time,nSimul,F,"N",p$meta[i],F)
-}
-
-stopCluster(cl)
-setwd(oldcd)
-
-Models <- rbind(Models,Mdl)
-
-rm(cn,cl,Mdl,p)
-
-save.image()
-
-```
-
-
-# Plot the cluster sizes with fitted functions
- 
-```{r plotFitdisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
-source("R/powerlaw/discpowerexp.R")
-source("R/powerlaw/discexp.R")
-source("R/powerlaw/powerexp.R")
-source("R/powerlaw/exp.R")
-source("R/powerlaw/pareto.R")
-source("R/powerlaw/zeta.R")
-
-setwd("Simul")
-
-
-m <-  0.0001596079
-alfa <- 2.038974
-side <- 256
-nsp <- 64
-nSimul <- 10
-time <- 5000
-ReplRate <- c(0.0000,0.0005,0.0010,0.0020,0.0030,0.004,0.005,0.01)
-p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(256),meta=c("U","L")) 
-
-for(i in 1:nrow(p)){
-  plotNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],time,p$meta[i],Models)
-}
-setwd(oldcd)
-
-```
-
-# Plot relation of power exponent/ exponential rate with ReplacementRate
-
-```{r plotdisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
-setwd(oldcd)
-
-#
-# Hacer grafico con proporcion de ajustes 
-require(ggplot2)
-require(plyr)
-require(dplyr)
-Models <- ungroup(Models)
-
-
-# Power laws best models 
-#
-nMdl <-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep) %>% filter(DeltaAIC>0, model=="PowExp")
-
-# Proportion of best models by model only
-#
-group_by(Models,model) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n))
-
-namType <- c("Spanning","MaxPatch","Other MaxPatch","Other Spanning")
-namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other Species")
-
-mMdl <- group_by(Models,model,type) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
-
-mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc,name="Species",breaks=c("Spanning","MaxPatch","Other Spanning","Other MaxPatch")) + scale_x_discrete(labels=c("No Model","Power","Power Exp.")) + theme_bw()
-ggsave("figs/ClusModels_T5000_64_256_Logser.png", width=6,height=6,units="in",dpi=600)
-
-require(pander)
-pandoc.table(mMdl,round=2)
-
-
-# Select Power w/exponential cutoff other sp most abundant or other spanning
-#
-mMdl <- filter(Models,model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-
-# Plot lambda - exponential decay rate
-#
-ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(lambda)) + xlab(bquote(rho))+ scale_colour_manual(values=mc) +stat_quantile(alpha=0.5) + coord_cartesian(ylim=c(-0.02,0.65))
-ggsave("figs/discRateOther_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
-
-# Quantile regression lambda
-#
-#
-rqm <-group_by(mMdl,type,MetaType) %>%
-      do(as.data.frame(do.call(rbind,
-                               lapply(summary(rq(rate~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
-                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="lambda")
-
-
-# Plot power exponent alpha
-#
-mMdl <- filter(Models,model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(alpha)) + xlab(bquote(rho))+ scale_colour_manual(values=mc)+stat_quantile(alpha=0.5)+ coord_cartesian(ylim=c(1.1,2.1))
-
-ggsave("figs/discExpOther_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
-
-
-# Quantile regression alpha
-#
-#
-rq1 <-group_by(mMdl,type,MetaType) %>%
-      do(as.data.frame(do.call(rbind,
-                               lapply(summary(rq(alfa~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
-                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="alpha")
-
-rqm <- rbind(rqm,rq1)
-
-# Select Power w/exponential cutoff - spanning or most abundant  sp
-#
-mMdl <- filter(Models,model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-
-
-# Plot Power exponent - alpha  of spanning or most abundant  sp
-#
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(alpha)) + xlab(bquote(rho)) + scale_colour_manual(values=mc)+stat_quantile(alpha=0.5)+ coord_cartesian(ylim=c(1.5,3.6))
-ggsave("figs/discExpSpan_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
-
-# Quantile regression alpha
-#
-#
-rq1 <-group_by(mMdl,type,MetaType) %>%
-      do(as.data.frame(do.call(rbind,
-                               lapply(summary(rq(alfa~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
-                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="alpha")
-
-rqm <- rbind(rqm,rq1)
-
-# Select Power w/exponential cutoff - spanning or most abundant  sp
-#
-mMdl <- filter(Models,model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-
-# Plot Exponential rate - lambda of spanning or  most abundant sp
-#
-ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(lambda)) + xlab(bquote(rho))+ scale_colour_manual(values=mc)+stat_quantile(alpha=0.5)+ coord_cartesian(ylim=c(-0.02,0.32))
-ggsave("figs/discRateSpan_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
-
-# Quantile regression lambda
-#
-#
-rq1 <-group_by(mMdl,type,MetaType) %>%
-      do(as.data.frame(do.call(rbind,
-                               lapply(summary(rq(rate~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
-                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="lambda")
-
-rqm <- rbind(rqm,rq1)
-rqm$slope<-c(F,T)
-names(rqm)[6]<-"pvalue"
-rqm <- filter(rqm, slope==T ) %>% #rename(species=type) %>%
-  select(MetaType,species,param,Tau,Value:pvalue)
-
-require(pander)
-pandoc.table(rqm,round=2)
-group_by(rqm,MetaType,type,param) %>% filter(pvalue<0.05) %>% summarise(n=n())
-
-
-```
-
-# Simulations to make a video of percolation
-
-```{r gensimul_spat_256_32_meta30_T5000, eval=F,echo=F,message=T,warning=T}
-setwd("Simul")
-
-m =  0.0001596079
-alfa=2.038974
-side <- 256
-nsp <- 32
-nSimul <- 1
-
-
-ReplRate <- c(0.0011)
-time <- 3000
-
-require(animation)
-# simul_NeutralSpatPatt <- function(nsp,side,disp,migr,repl,clus="S",time=1000,inter=10,init=1,meta="L",delo=F,sim=T,sedIni=0,modType=4,death=0.2,birth=1,colPal=0) 
-
-simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",time,10,100,"L",T,T,2)
-
-saveGIF(simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",1000,10,800,"L",T,F), 
-        interval = .3, 
-        movie.name=paste0("neuL",nsp,"_",side,"R", ReplRate,".gif")
-)
-
-
-ReplRate <- c(0.0029)
-time <- 3000
-simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",time,10,10,"L",T,T)
-
-saveGIF(simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",1100,10,850,"L",T,F), 
-        interval = .5, 
-        movie.name=paste0("neuL",nsp,"_",side,"R", ReplRate,".gif")
-)
-
-time <- 3000
-simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",time,10,100,"U",T,T)
-
-saveGIF(simul_NeutralSpatPatt(nsp,side,alfa,m,ReplRate,"S",1600,10,1350,"U",T,F), 
-        interval = .5, 
-        movie.name=paste0("neuU",nsp,"_",side,"R", ReplRate,".gif")
-)
-
-# Plot simulations
-# Make video
-
-
-```
-
-
 ## Calculation of the Suvival Time of the most abundant species (Species=1) and density for side=512 time=5000 uniform metacomunity   
 
 Survival of 1 = P(t) ~ t ^-delta
 Number of 1 = N(t) ~ t^theta
 
+To do this the model should be non saturated !!!!!!!!!!!!!!!
+
 ```{r survivalTimel512_64_U5_T5000, eval=F,echo=F,message=F,warning=F}
+
 setwd("Simul")
 
 # Ver Neutral_Model_BCI.Rmd por parametros
 #
-m =  0.0001596079
+m =  0.1
 alfa=2.038974
 side <- 512
 nsp <- 64
 nSimul <- 5
 ReplRate <- c(0,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.009,0.01,0.02,0.03,0.05,0.07,0.1,0.2,0.3,0.6,1)
-time <- 5000
+time <- 20000
 # loop con do paralell 
 
 require(doParallel)
