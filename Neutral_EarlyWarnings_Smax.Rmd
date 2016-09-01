@@ -11,7 +11,6 @@ I generate parameter files for the simulation of neutral/hierarchical model usin
 
 ```{r setup, eval=T }
 load(".RData")
-#simul  <- F # variable to perform or not the simulations
 
 oldcd <-getwd()
 source("R/Neutral_fun.r")
@@ -152,7 +151,7 @@ colp <-brewer.pal(8,"Dark2")
 ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterProp)) + geom_point() + theme_bw() + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Mean of max cluster size")+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
 ggsave("figs/SmaxvsRepl_T20000_64_side_meta_m.png", width=6,height=6,units="in",dpi=600)
 
-ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterVar)) + geom_point() + theme_bw() + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Mean of max cluster size")+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
+ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterVar)) + geom_point() + theme_bw() + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Variance of max cluster size")+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
 ggsave("figs/VarSmaxvsRepl_T20000_64_side_meta_m.png", width=6,height=6,units="in",dpi=600)
 
 

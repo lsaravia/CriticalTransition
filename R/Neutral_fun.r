@@ -1336,14 +1336,15 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
   den <-den[, c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate","Time", 
                 "Richness","H")]
   clu <-readClusterOut(bname)
-  if(nrow(den)<nrow(clu))
+  if(nrow(den)<nrow(clu)) {
     clu <- clu[1:nrow(den),]
-  else if(nrow(den)>nrow(clu)) {
+  } else if(nrow(den)>nrow(clu)) {
     den <- den[1:nrow(clu),]
   }
   clu$Richness <- den$Richness 
   clu$H <- den$H
-  clu <-filter(clu, ColonizationRate==migr) %>% rename(MaxSpeciesAbund=TotalSpecies) %>%
+  disp <- round(2.03897,5)
+  clu <-filter(clu, ColonizationRate==migr,DispersalDistance==disp) %>% rename(MaxSpeciesAbund=TotalSpecies) %>%
                mutate( MetaNsp=nsp, Side=side, MetaType=as.character(meta),MaxClusterProp = MaxClusterSize/(side*side),MaxClusterSpProp=MaxClusterSize/MaxSpeciesAbund,
                 SpanningClust=ifelse(SpanningSpecies>0,MaxClusterProp,0)) # %>% sample_n(30)
 
@@ -2481,21 +2482,6 @@ calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
   # Calculates the probability of spanning cluster
   #
 
-  # Select 2 records with probability>0.5
-  # k <- group_by(mClusters, MetaType,Side) %>% filter(SpanningProb>0.50) %>% arrange(SpanningProb) %>% slice(1:2)
-  # # Select 2 records with probability<=0.5  
-  # k <- rbind(k,group_by(mClusters, MetaType,Side) %>% filter(SpanningProb<=0.50) %>% arrange(desc(SpanningProb)) %>% slice(1:2))
-  # 
-  # # if SpanningProb>0.5 for all recs get more rows 
-  # kk <-summarize(k,n=n()) %>% filter(n<4)
-  # if(nrow(kk)>0){
-  #   k1<-inner_join(mClusters,kk,by=c("Side", "MetaType")) %>% select(MetaNsp:MaxClusterProp,n=n.x,SpanningProb,SpanningClust) %>% ungroup()
-  #   
-  #   k <- bind_rows(k,group_by(k1, MetaType,Side) %>% filter(SpanningProb>0.50) %>% arrange(SpanningProb) %>% slice(1:4))  
-  # }
-  # # Interpolate  
-  # k <- k %>% group_by(MetaType,Side) %>% summarise(pcrit=approx(SpanningProb,ReplacementRate,xout=0.5)[["y"]],critClust=approx(SpanningProb,SpanningClust,xout=0.5)[["y"]])
-
   lg_fun<-function(x){
     lf <-glm(SpanningProb ~ ReplacementRate, family=binomial(logit), data = x)
     pcrit=- (lf$coefficients[1] / lf$coefficients[2])
@@ -2545,7 +2531,7 @@ calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
   #
   # The same Plot in linear x scale 
   #
-  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + xlim(0,0.02) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[4]) + ylab("Probability of Spanning cluster")
+  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + xlim(0,1) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[4]) + ylab("Probability of Spanning cluster")
   print(g)
   #ggsave("figs/SpanPvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
 return(list(rCTs=rhoCTSide,rCT=rhoCT))
