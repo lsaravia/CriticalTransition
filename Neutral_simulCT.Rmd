@@ -478,11 +478,6 @@ Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
 
 stopCluster(cl)
 
-# Correct, eliminate first 50 Simulations
-#
-alfa <-round(2.03897,5)
-Clusters %>% filter(ColonizationRate==m,DispersalDistance==alfa,MetaNsp==nsp)  
-Clusters <-rbind(Clusters,Clu)
 setwd(oldcd)
 
 rm(cn,cl,Clu)
@@ -917,7 +912,7 @@ save.image()
 
 ## Simulations to determine critical point, Time=20000 migration=0.1 dispersal=13
 
-```{r gensimul_disp13_clu_side_64_meta_T20000m1, eval=T,echo=F,message=T,warning=T}
+```{r gensimul_disp13_clu_side_64_meta_T20000m1, eval=F,echo=F,message=T,warning=T}
 
 # Calculate dispersal parameter for half the mean distance from @Anand2010 DispersalDistance=13
 #
@@ -989,8 +984,8 @@ require(dplyr)
 
 # Calculates critical probabilities for differnt side (rCTs) and critical probability for infinite lattices (rCT)
 #
-Clu <- filter(Clusters, Side!=64)
-k <-calcCritical_prob(Clu,time,nsp,alfa,m)
+Clusters <- filter(Clusters, Side!=64)
+k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 
 require(ggplot2)
 require(pander)
@@ -1017,10 +1012,10 @@ pandoc.table(rhoCrit,round=5)
 
 # Make with different sides filter side=150
 # 
-k<-filter(rhoCritSide,Time==time,MetaNsp==nsp,DispersalDistance==round(mean_power(alfa),2),ColonizationRate==m,Side!=64)
+k<-filter(rhoCritSide,Time==time,MetaNsp==nsp,DispersalDistance==round(mean_power(alfa),2),ColonizationRate==m)
 k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
 
-mClusters <- filter(Clusters, MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m,Side!=64) %>%  group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))  %>% ungroup() %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
+mClusters <- filter(Clusters, MetaNsp==nsp,DispersalDistance==alfa,ColonizationRate==m) %>%  group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))  %>% ungroup() %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
 
 #
 # Spaninng probability vs rho
@@ -1053,36 +1048,66 @@ ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterProp)) + geom_point(alpha=.
 
 ```
 
+There seem to be no big changes in critical point with regard to dispersal distance 
 
 
-# Calculation of the critical point T=5000 migration=0.00016 dispersal=13  (Add Side=150)
+## Simulations to determine critical point, Time=20000 migration=0.1 dispersal=52
 
-```{r pcT5000_clu_side_64_disp13, eval=F,echo=F,message=T,warning=T}
+```{r gensimul_disp52_clu_side_64_meta_T20000m1, eval=T,echo=F,message=T,warning=T}
 
-m <-  round(0.0001596079,9)
-alfa <- round(2.081069,5)
+# Calculate dispersal parameter for half the mean distance from @Anand2010 DispersalDistance=13
+#
+# ana <- read.table("Data/Anand2010_DD.dat", header=T)
+# m_DD <-mean(ana$DD)
+# m_DD <- m_DD*2
+# mean_power_opt <-function(alfa,x=1) abs(((alfa-1)/(alfa-2)*x)-m_DD)
+# optimize(mean_power_opt,c(2,4))
+# mean_power(2.01911)
+
+setwd("Simul")
+
+m <-  0.1
+alfa <- 2.01911
 side <- 512
 nsp <- 64
-nSimul <- 30
-time <- 5000
+nSimul <- 50
 
-k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
+ReplRate <- c(0.0000,0.0001,0.0005,0.0010,0.0050,0.0100,0.0200,0.0300, 0.0400, 0.0500, 0.0550, 0.0600, 0.0650, 0.0700, 0.0750, 0.0800, 0.0900,0.1000,0.3000,0.6000,0.9000,1) 
+time<-      c(10000,  10000, 10000, 10000, 10000, 10000, 20000, 20000,  20000,  20000,  20000,  20000,  20000,  20000,  20000,  20000,   5000,  5000,  5000,  5000,  5000,5000)
 
-rhoCritSide <- rbind(rhoCritSide,k$rCTs)
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(128,192,256),meta=c("L","U")) 
+time <-rep(time, times=nrow(p)/length(time))
+p <-cbind(p,time)
 
-rhoCrit <- rbind(rhoCrit,k$rCT)
-pandoc.table(rhoCrit,round=5)
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+Clu <- data.frame()
+Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,T,"N",p$meta[i],F,2)
+}
+
+# To reconstruct the data frame Clusters from the output files  
+#
+# Clu <- data.frame()
+# for(i in 1:nrow(p))
+#   {
+#   Clu <- rbind(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,F,"N",p$meta[i]))
+#   }
 
 
+stopCluster(cl)
 
-plotCritical_Clusters(Clusters,5000,nsp,alfa,m,k)
+Clusters <-rbind(Clusters,Clu)
+setwd(oldcd)
 
-rm(k,k1)
+rm(cn,cl,Clu)
+
 save.image()
-
 ```
-
-There seem to be no big changes in critical point with regard to dispersal distance 
 
 
 ## Simulations to Time=5000 with side=100-512, dispersal=26 migration=0.0001596079 species=16 
