@@ -521,7 +521,7 @@ critical exponents and the critical point for models exhibiting absorbing phase 
 
 
 ------------
-@Bregman2015
+@Bregman2015 Species interactions regulate the collapse of biodiversity and ecosystem function in tropical forest fragments
 
 Here, we use phylogenetic and functional trait data to test whether communities of two ecologically important guilds of tropical birds (frugivores and insectivores) are structured by species interactions in a fragmented Amazonian forest landscape. In both guilds, we found that forest patch size, quality, and degree of isolation influence the phylogenetic and functional trait structure of communities, with small, degraded, or isolated forest patches having an increased signature of competition (i.e., phylogenetic and functional trait overdispersion in relation to null models). These results suggest that local extinctions in the context of fragmentation are nonrandom, with a consistent bias toward more densely occupied regions of niche space. We conclude that the loss of biodiversity in fragmented landscapes is mediated by niche-based competitive interactions among species, with potentially far-reaching implications for key ecosystem processes, including seed dispersal and plant damage by phytophagous insects.
 
