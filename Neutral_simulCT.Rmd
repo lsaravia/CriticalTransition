@@ -266,6 +266,13 @@ pandoc.table(rhoCrit,round=5)
 
 plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
 
+filter(rhoCritSide,Side==side,ColonizationRate==m)
+
+time<-      c(20000,  20000, 30000, 30000, 20000, 20000, 20000,  5000, 5000)
+ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010,0.0050,0.0100,0.1000,1)
+
+plotCritical_SAD(nsp,side,alfa,m,time,ReplRate,3)
+
 ```
 
 ## Calculation of the critical point T=20000 DispersalDistance=26 m=0.1 no. species=320
