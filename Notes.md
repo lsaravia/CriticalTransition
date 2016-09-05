@@ -31,6 +31,10 @@ The most common species in a neutral community should coincide with the most com
 
 * Evolution: we could start with a neutral community and let species mutate to modify its interaction by individual
 
+
+Fangliang He,
+Stephen P. Hubbell
+
 # Fragments from papers
 
 
@@ -537,3 +541,42 @@ The effects of habitat fragmentation and their implications for biodiversity is 
 The classical competition niche theory (CCNT) based on the Lotka-Volterra competition equations and Hutchinson’s multidi- mensional niche [1,2]
 
 Being far from equilibrium, fitting detailed snapshots of tropical forest data can only describe transitory configurations but cannot help to understand the mechanisms underlying the observed dynamics. The second problem of both CCNT and NTB is the reliance on mean-field approximations stemming from the ‘‘well-mixed’’ assumption that clearly fails when applied to sessile individuals like trees having largely local recruitment and potentially suffering from local interference competition for resources. Thus, neither CCNT nor NTB are suitable for the realistic, parsimonious modelling of tropical forest dynamics, nor can they predict the large array of metrics characterizing the spatio-temporal dynamics of these forest communities.
+
+
+--------------
+
+Chisholm2009c   Linking dispersal, immigration and scale in the neutral theory of biodiversity
+
+the mean dispersal
+distance d, based on seed-trap data for 81 tree species in the
+plot, is 39.5 m and the 95% confidence interval for d is (32.8,
+46.7) (confidence interval estimated by bootstrap-resampling
+raw data in Muller-Landau 2001; see also Condit et al. 2002)
+
+Although m is useful for analytical purposes, such as
+deriving the theoretical functional forms of SADs (e.g.,
+Volkov et al. 2003), we propose that the mean dispersal
+distance d is a more suitable fundamental parameter because
+it is scale invariant, biologically meaningful and easily related
+to m analytically
+
+The predictions of spatially implicit neutral theory appear
+robust to violations of the assumption that all species in a
+community have the same dispersal kernel: our main
+approximation (2) holds even when different species have
+different dispersal kernels and exert different propagule
+pressures, provided that the mean dispersal distance d is
+calculated as the average of the mean dispersal distances of
+different species (weighted by the speciesÕ relative abun-
+dances and propagule pressures; see Appendix S2). This is
+important, because the assumption that species have
+identical dispersal kernels is patently false
+
+Our
+finding of robustness to interspecific variation in dispersal
+kernels provides some justification for a fundamental
+premise of neutral theory, which is that inter and intraspe-
+cific trait variation averages out statistically at large scales
+and is not important for predicting macroscopic patterns of
+diversity (Chave 2004, p250–251).
+

@@ -74,6 +74,18 @@ genInitialSed<- function(fname,numSp,side,prob=0,type="SP"){
   save_matrix_as_sed(A,fname,type)
 }
 
+
+# Calculates the mean distance dispersal from the exponent of a power law
+#
+#
+mean_power_opt <-function(alfa,x=1) abs(((alfa-1)/(alfa-2)*x)-m_DD)
+
+# Calculate m from dispersal distance and side from [@Chisholm2009c] eqn 2
+# requires that side > 5*meanDispersal
+#
+m_from_dispersalDistance <-function(meanDispersal,side) side*4*meanDispersal/(side*side*pi)
+
+
 # Calculate Ranks for every parameter combination, for ggplot2  
 #
 calcRankSAD  <- function(den)
@@ -2373,73 +2385,73 @@ plotNeutral_SAD_aux<-function(nsp,side,time=500,meta="L")
 # m: migration rate
 # k: table with critical points by side
 #
-plotCritical_Clusters<-function(Clusters,time,metaNsp,alfa,m, k,exclude_side=0,sav=F)
+plotCritical_Clusters<-function(Clusters,time,metaNsp,alfa,m, k,limx=0.01,exclude_side=0,sav=F)
 {
-  require(plyr)
   require(dplyr)
   require(ggplot2)
 
-  mClusters <- filter(Clusters, Time==time,MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust)) %>% ungroup() %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
+  mClusters <- filter(Clusters, MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust)) %>% ungroup() %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
 
-  k <- filter(k,MetaNsp==metaNsp,DispersalDistance==round(mean_power(alfa),2),ColonizationRate==m)
+  k <- filter(k,Time==time,MetaNsp==nsp,DispersalDistance==round(mean_power(alfa),2),ColonizationRate==m)
+
   k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
 
   # Filter Clusters data.frame
   #
-  tClusters <- Clusters %>% filter(Time==time,MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
+  tClusters <- Clusters %>% filter(MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
   
   if(exclude_side>0){
     mClusters <- filter(mClusters,Side!=exclude_side)
     tClusters <- filter(tClusters,Side!=exclude_side)
     k <- filter(k,Side!=exclude_side)
   }
+
+  require(RColorBrewer)
+  colp <-brewer.pal(8,"Dark2")
+
   #
   # Spaninng probability vs rho
   #
-  print(ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green"))
+  print(
+    ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10() + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Probability of spanning cluster") 
+  )
+
   if(sav){
-    fname<-paste0("figs/SpanPvsRepl_T",time,"_",metaNsp,"_side_meta.png")
+    fname<-paste0("figs/SpanPvsRepl_T",time,"_",metaNsp,"_side_meta_m",m,".png")
     ggsave(fname, width=6,height=6,units="in",dpi=600)
   }
   
   #
-  # The same Plot in linear x scale 
+  # Spaninng probability vs rho in linear x scale 
   #
-  print(ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + xlim(0,0.02) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour="red") + geom_vline(aes(xintercept=pcrit),k,colour="green") + ylab("Probability of Spanning cluster"))
+  print(
+    ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + coord_cartesian(xlim=c(0, limx)) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Probability of Spanning cluster")+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1))
+  )
   if(sav){
-    fname<-paste0("figs/SpanPvsRepl_T",time,"_",metaNsp,"_side_meta_lin.png")
+    fname<-paste0("figs/SpanPvsRepl_T",time,"_",metaNsp,"_side_meta_m",m,"lin.png")
     ggsave(fname, width=6,height=6,units="in",dpi=600)
   }
 
-  #
-  # Plot of Spanning clusters sizes with critical probability
-  #
-  print(ggplot(tClusters, aes(x=ReplacementRate, y=SpanningClust)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType ) + ylab("Spanning Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green"))
-
-  #ggsave("figs/SpanClusRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
-
-  #
-  # The same Plot in linear x scale 
-  #
-  #print(ggplot(tClusters, aes(x=ReplacementRate, y=SpanningClust)) + geom_point(alpha=.2) + theme_bw() + xlim(0,0.02)  + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType ) + ylab("Spanning Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green"))
-
-
+  
   #
   # Shannon diversity vs rho
   #
-
-  print(ggplot(tClusters, aes(x=ReplacementRate, y=H)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green"))
+  print(
+    ggplot(tClusters, aes(x=ReplacementRate, y=H)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
+  )
   if(sav){
-    fname<-paste0("figs/HvsRepl_T",time,"_",metaNsp,"_side_meta.png")
+    fname<-paste0("figs/HvsRepl_T",time,"_",metaNsp,"_side_meta_m",m,".png")
     ggsave(fname, width=6,height=6,units="in",dpi=600)
   }
 
   #
-  # The same Plot in linear x scale 
-
-  print(ggplot(tClusters, aes(x=ReplacementRate, y=H)) + geom_point(alpha=.2) + theme_bw() + xlim(0,0.02) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green"))
+  # Shannon diversity vs rho in linear x scale 
+  #
+  print(
+    ggplot(tClusters, aes(x=ReplacementRate, y=H)) + geom_point(alpha=.1) + theme_bw() + coord_cartesian(xlim=c(0, limx)) + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + theme(panel.margin.x=unit(0.6, "lines"))+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1))
+  )
   if(sav){
-    fname<-paste0("figs/HvsRepl_T",time,"_",metaNsp,"_side_meta_lin.png")
+    fname<-paste0("figs/HvsRepl_T",time,"_",metaNsp,"_side_meta_m",m,"lin.png")
     ggsave(fname, width=6,height=6,units="in",dpi=600)
   }
 
@@ -2447,17 +2459,93 @@ plotCritical_Clusters<-function(Clusters,time,metaNsp,alfa,m, k,exclude_side=0,s
   #
   # Richness vs rho
   #
-  print(ggplot(tClusters, aes(x=ReplacementRate, y=Richness)) + geom_point(alpha=.2) + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y") +xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green"))
+  print(
+    ggplot(tClusters, aes(x=ReplacementRate, y=Richness)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType,scales="free_y") +xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
+  )
   if(sav){
-    fname<-paste0("figs/RichvsRepl_T",time,"_",metaNsp,"_side_meta.png")
+    fname<-paste0("figs/RichvsRepl_T",time,"_",metaNsp,"_side_meta_m",m,"png")
     ggsave(fname, width=6,height=6,units="in",dpi=600)
   }
 
   #
-  # The same Plot in linear x scale 
+  # Richness vs rho in linear x scale 
 
-  print(ggplot(tClusters, aes(x=ReplacementRate, y=Richness)) + geom_point(alpha=.2) + theme_bw() + stat_summary(fun.y=mean,geom="line",colour="red")+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour="green"))
+  print(
+    ggplot(tClusters, aes(x=ReplacementRate, y=Richness)) + geom_point(alpha=.2) + theme_bw() +  coord_cartesian(xlim=c(0, limx)) + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1))
+  )
+  if(sav){
+    fname<-paste0("figs/RichvsRepl_T",time,"_",metaNsp,"_side_meta_m",m,"lin.png")
+    ggsave(fname, width=6,height=6,units="in",dpi=600)
+  }
 
+
+  #
+  # Spanning clusters sizes vs Rho with critical probability
+  #
+  print(
+    ggplot(tClusters, aes(x=ReplacementRate, y=SpanningClust)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType ) + ylab("Spanning Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
+  )
+  if(sav){
+    fname<-paste0("figs/SpanClusRepl_T",time,"_",metaNsp,"_side_meta_m",m,".png")
+    ggsave(fname, width=6,height=6,units="in",dpi=600)
+  }
+
+  #
+  # Spanning clusters sizes vs Rho in linear x scale 
+  #
+  print(
+    ggplot(tClusters, aes(x=ReplacementRate, y=SpanningClust)) + geom_point(alpha=.2) + theme_bw() + coord_cartesian(xlim=c(0, limx))  + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType ) + ylab("Spanning Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1))
+  )
+  if(sav){
+    fname<-paste0("figs/SpanClusRepl_T",time,"_",metaNsp,"_side_meta_m",m,"lin.png")
+    ggsave(fname, width=6,height=6,units="in",dpi=600)
+  }
+
+  #
+  # Plot of Max clusters proportion with critical probability
+  #
+  print(
+    ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterProp)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType ) + ylab("Max. Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
+  )  
+  if(sav){
+    fname<-paste0("figs/MaxClusRepl_T",time,"_",metaNsp,"_side_meta_m",m,".png")
+    ggsave(fname, width=6,height=6,units="in",dpi=600)
+  }
+
+  #
+  # Plot of Max clusters proportion vs Rho in linear scale
+  #
+  ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterProp)) + geom_point(alpha=.1) + theme_bw() + coord_cartesian(xlim=c(0, limx)) + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType ) + ylab("Max. Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1))
+
+  if(sav){
+    fname<-paste0("figs/MaxClusRepl_T",time,"_",metaNsp,"_side_meta_m",m,"lin.png")
+    ggsave(fname, width=6,height=6,units="in",dpi=600)
+  }
+
+  
+  #
+  # Plot of Species Max clusters proportion relative to species total vs Rho, with critical probability
+  #
+  print(
+    ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterSpProp)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType ) + ylab("Max. Cluster Relative to Species") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
+  )  
+  if(sav){
+    fname<-paste0("figs/MaxClusSpRepl_T",time,"_",metaNsp,"_side_meta_m",m,".png")
+    ggsave(fname, width=6,height=6,units="in",dpi=600)
+  }
+
+  #
+  # Plot of Species Max clusters proportion relative to species total vs Rho, in linear scale
+  #
+  print(
+    ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterSpProp)) + geom_point(alpha=.1) + theme_bw() + coord_cartesian(xlim=c(0, limx)) + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType ) + ylab("Max. Cluster Relative to Species") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1))
+
+  )  
+  if(sav){
+    fname<-paste0("figs/MaxClusSpRepl_T",time,"_",metaNsp,"_side_meta_m",m,"lin.png")
+    ggsave(fname, width=6,height=6,units="in",dpi=600)
+  }
+  
 }
 
 # Calculate the mean of a power distribution alfa>2
@@ -2501,7 +2589,8 @@ calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
 
   rhoCTSide <- k[,c(1,5,6,2:4)]
   rhoCTSide$MetaNsp<-metaNsp
-
+  rhoCTSide$Time <-time
+  
   #
   # finite size scaling to determine pcrit for infinite lattices
   #
@@ -2517,6 +2606,7 @@ calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
   rhoCT <- data_frame()
   rhoCT <- k1[,c(3,5,6,1,2)]
   rhoCT$MetaNsp<-metaNsp
+  rhoCT$Time <-time
 
   #pandoc.table(rhoCrit,round=5)
   require(RColorBrewer)
@@ -2526,7 +2616,7 @@ calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
   #
   # Spaninng probability vs rho
   #
-  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10(breaks=c(0.003,0.02,0.1,1)) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[4])
+  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10() + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[4])
   print(g)
   #
   # The same Plot in linear x scale 
