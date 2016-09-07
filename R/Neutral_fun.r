@@ -86,6 +86,24 @@ mean_power_opt <-function(alfa,x=1) abs(((alfa-1)/(alfa-2)*x)-m_DD)
 m_from_dispersalDistance <-function(meanDispersal,side) side*4*meanDispersal/(side*side*pi)
 
 
+# Calculate theta and I from spatially implicit neutral theory parameters from dispersal distance and m [@@Etienne2011]
+# side == 128 
+#
+theta_from_dispMigration<-function(D,m,side=256){
+  at<-2.401
+  xt<-0.136
+  yt <-1.852
+  
+  ai<-3.841
+  xi<-0.095
+  yi<-1.501
+  theta<- at*m^(xt)*D^(yt)
+  I    <- ai*m^(xi)*D^(yi)
+  J<-side*side
+  return(data.frame(ColonizationRate=m,DispersalDistance=D,Theta=theta,I=I))
+}
+
+
 # Calculate Ranks for every parameter combination, for ggplot2  
 #
 calcRankSAD  <- function(den)
@@ -2421,7 +2439,7 @@ plotCritical_SAD<-function(metaNsp,side,alfa,m, time,Rhos,nCP,sav=F)
   
   setwd(oldcd)
   if(sav){
-    fname<-paste0("figs/SAD_T",time,"_",metaNsp,"_", side,"_meta_m",m,".png")
+    fname<-paste0("figs/SAD_T",time[1],"_",metaNsp,"_", side,"_meta_m",substring(format(m),3),".png")
     ggsave(fname, width=6,height=4,units="in",dpi=600)
   }
 }
@@ -2666,13 +2684,13 @@ calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
   #
   # Spaninng probability vs rho
   #
-  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10() + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[4])
-  print(g)
+  # g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + scale_x_log10() + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[4])
+  # print(g)
   #
   # The same Plot in linear x scale 
   #
-  g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + xlim(0,1) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[4]) + ylab("Probability of Spanning cluster")
-  print(g)
+  # g<-ggplot(mClusters, aes(x=ReplacementRate, y=SpanningProb)) + geom_point() + theme_bw() + xlim(0,1) + facet_grid(Side ~ MetaType ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[4]) + ylab("Probability of Spanning cluster")
+  # print(g)
   #ggsave("figs/SpanPvsRepl_T5000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
 return(list(rCTs=rhoCTSide,rCT=rhoCT))
 }

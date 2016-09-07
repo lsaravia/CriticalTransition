@@ -141,38 +141,14 @@ rm(k)
 #
 # Plots of SAD logseries and uniform metacommunity 
 #
-setwd("Simul")
 
 m   <-0.0001
 alfa <-round(2.03897,5)
 time<-      c(20000,  20000, 30000, 30000, 20000, 20000, 20000,  5000, 5000)
 ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010,0.0050,0.0100,0.1000,1)
 
-options("scipen"=0, "digits"=4)
 
-rank <- plotNeutral_SAD_1T(64,256,ReplRate,time,m,alfa,"L",T)
-rank$MetaType="Logseries"
-r1 <-  plotNeutral_SAD_1T(64,256,ReplRate,time,m,alfa,"U",T) 
-r1$MetaType="Uniform"
-rank <- rbind(rank,r1)
-rank$Time <- 20000 
-rm(r1)
-
-options("scipen"=100, "digits"=6)
-# require(RColorBrewer)
-# mc <-brewer.pal(8,"Dark2")
-colourCount = length(unique(rank$ReplacementRate))
-# mc1 <- colorRampPalette(mc)(colourCount)
-mc1 <-gg_color_hue(colourCount) 
-
-mc1[3]<-"#0D0D0D" # rho=0.0003
-g <- ggplot(rank,aes(x=Rank,y=Freq,colour=factor(ReplacementRate))) +  theme_bw() + scale_y_log10() 
-g + scale_colour_manual(values=mc1,name=bquote("  "~rho))  + geom_point(size=0.5) +geom_line() + facet_grid(. ~ MetaType, scales="free_x" )
-
-setwd(oldcd)
-ggsave("figs/SAD_T20000_64_256_meta_m0001.png", width=6,height=4,units="in",dpi=600)
-
-rm(rank,mc1)
+plotCritical_SAD(nsp,side,alfa,m,time,ReplRate,3,T)
 
 ```
 
@@ -181,7 +157,7 @@ rm(rank,mc1)
 
 m = Perimeter*DispersalDistance/(pi*Area),
 
-```{r gensimul_clu_side_320_meta_T20000m0001, eval=T,echo=F,message=T,warning=T}
+```{r gensimul_clu_side_320_meta_T20000m0001, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
                   # Ver @Condit2012 
@@ -256,12 +232,12 @@ require(pander)
 # Create data frame to store Critical Point for lattices with different sides
 #
 rhoCritSide <- bind_rows(rhoCritSide,k$rCTs)
-pandoc.table(rhoCritSide,round=5)
+pandoc.table(filter(rhoCritSide,ColonizationRate==m),round=5)
 
 # Create data frame to store CP for infinite lattices
 #rhoCrit <- filter(rhoCrit,ColonizationRate!=m)
 rhoCrit <- bind_rows(rhoCrit,k$rCT)
-pandoc.table(rhoCrit,round=5)
+pandoc.table(filter(rhoCrit,ColonizationRate==m),round=5)
 
 
 plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
@@ -273,7 +249,58 @@ ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010,0.0050,0.0100,0.1000,1)
 
 plotCritical_SAD(nsp,side,alfa,m,time,ReplRate,3)
 
+rm(k,p)
 ```
+
+
+## Simulations to Determine critical point for m=0.0001 Species=320 dispersal 13
+
+m = Perimeter*DispersalDistance/(pi*Area), 
+
+If dispersal is lower the community should be more sensitive
+
+```{r gensimul_clu_side_320_meta_T20000m0001_disp13, eval=T,echo=F,message=T,warning=T}
+setwd("Simul")
+
+                  # Ver @Condit2012 
+m   <-0.0001
+alfa <- 2.081069
+side <- c(128,192,256)
+nsp <- 320
+nSimul <- 30
+mean_power(alfa)
+m_from_dispersalDistance(mean_power(alfa),side)
+theta_from_dispMigration(13.34,m)
+
+ReplRate <- c(0.0000,0.0001,0.0002,0.00025,0.0003,0.0004,0.0005,0.0006,0.0007,0.0008,0.0010,0.0020,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0200,0.0500,0.1000,0.3000,1 )
+time<-      c(20000,  20000, 20000,  30000, 30000, 30000, 30000, 30000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000,  5000,  5000,  5000,  5000,5000)
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(128,192,256),meta=c("L","U")) 
+time <-rep(time, times=nrow(p)/length(time))
+p <-cbind(p,time)
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+Clu <- data.frame()
+Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,T,"N",p$meta[i],F,2)
+}
+
+stopCluster(cl)
+
+Clusters <-rbind(Clusters,Clu)
+setwd(oldcd)
+
+rm(cn,cl,Clu)
+
+save.image()
+```
+
+
 
 ## Calculation of the critical point T=20000 DispersalDistance=26 m=0.1 no. species=320
 
@@ -411,30 +438,12 @@ plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
 #
 # Plots of SAD 
 #
-setwd("Simul")
-options("scipen"=0, "digits"=4)
 m   <-0.01
 alfa <-round(2.03897,5)
 ReplRate <- c(0.0000,0.0010,0.0050,0.0070,0.0100,0.0200,0.1000,0.3000,1)
 time<-      c(10000 , 30000, 20000, 20000, 20000, 20000,  5000,  5000,  5000)
 
-rank <- plotNeutral_SAD_1T(64,256,ReplRate,time,m,alfa,"L",T)
-rank$MetaType="Logseries"
-r1 <-  plotNeutral_SAD_1T(64,256,ReplRate,time,m,alfa,"U",T) 
-r1$MetaType="Uniform"
-rank <- rbind(rank,r1)
-rank$Time <- 20000 
-rm(r1)
-
-options("scipen"=100, "digits"=6)
-colourCount = length(unique(rank$ReplacementRate))
-mc1 <-gg_color_hue(colourCount) 
-mc1[4]<-"#0D0D0D" # rho=0.0015
-g <- ggplot(rank,aes(x=Rank,y=Freq,colour=factor(ReplacementRate))) +  theme_bw() + scale_y_log10() 
-g + scale_colour_manual(values=mc1,name=bquote("  "~rho))  + geom_point(size=0.5) +geom_line() + facet_grid(. ~ MetaType, scales="free_x" )
-
-setwd(oldcd)
-ggsave("figs/SAD_T20000_64_256_meta_m01.png", width=6,height=4,units="in",dpi=600)
+plotCritical_SAD(nsp,side,alfa,m,time,ReplRate,4)
 
 rm(kk,k,k1,p,mClusters,tClusters,Clu,rank)
 ```
@@ -529,36 +538,18 @@ rhoCrit <- rhoCrit %>% arrange(DispersalDistance,MetaNsp,ColonizationRate,MetaTy
 plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
 
 
-
 #
 # Plots of SAD 
 #
-setwd("Simul")
-options("scipen"=0, "digits"=4)
 m   <-0.1
 alfa <-round(2.03897,5)
 ReplRate <- c(0.0000,0.0010,0.0100,0.0500,0.0600,0.0700,0.1000,0.3000,1)
 time<-      c(10000 , 10000, 10000, 20000, 20000, 20000,  5000,  5000,  5000)
 
-rank <- plotNeutral_SAD_1T(64,256,ReplRate,time,m,alfa,"L",T)
-rank$MetaType="Logseries"
-r1 <-  plotNeutral_SAD_1T(64,256,ReplRate,time,m,alfa,"U",T) 
-r1$MetaType="Uniform"
-rank <- rbind(rank,r1)
-rank$Time <- 20000 
-rm(r1)
+plotCritical_SAD(nsp,side,alfa,m,time,ReplRate,6,T)
 
-options("scipen"=100, "digits"=6)
-colourCount = length(unique(rank$ReplacementRate))
-mc1 <-gg_color_hue(colourCount) 
-mc1[6]<-"#0D0D0D" # rho=0.0015
-g <- ggplot(rank,aes(x=Rank,y=Freq,colour=factor(ReplacementRate))) +  theme_bw() + scale_y_log10() 
-g + scale_colour_manual(values=mc1,name=bquote("  "~rho))  + geom_point(size=0.5) +geom_line() + facet_grid(. ~ MetaType, scales="free_x" )
+rm(k,Clu)
 
-setwd(oldcd)
-ggsave("figs/SAD_T20000_64_256_meta_m1.png", width=6,height=4,units="in",dpi=600)
-
-rm(kk,k,k1,p,mClusters,tClusters,Clu,rank)
 save.image()
 ```
 
@@ -605,6 +596,8 @@ ggsave("figs/RichvsRepl_T20000_64_256_meta_m.png", width=6,height=6,units="in",d
 #
 ggplot(tClusters, aes(x=ReplacementRate, y=Richness)) + geom_point(alpha=.1) + theme_bw() + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(ColonizationRate ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
 ggsave("figs/RichvsRepl_T20000_64_256_meta_m_lin.png", width=6,height=6,units="in",dpi=600)
+
+
 
 ```
 
@@ -699,6 +692,11 @@ ggplot(Clu,aes(H,colour=ReplacementRate)) + geom_freqpoly() +facet_wrap( ~Replac
 rm(mClusters,p,kk,kk1,cn,cl,Clu,k,tClusters,rank)
 
 save.image()
+
+# Save and Delete old data.frames
+#
+save(old_Clusters, old_rhoCrit, old_rhoCritSide, BCIhsize, BCIMdl, Models, file="old_Clusters.RData",compress = T)
+rm(old_Clusters, old_rhoCrit, old_rhoCritSide, BCIhsize, BCIMdl, Models)
 
 
 ```
@@ -841,14 +839,6 @@ Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
     simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,T,"N",p$meta[i],F,2)
 }
 
-# To reconstruct the data frame Clusters from the output files  
-#
-# Clu <- data.frame()
-# for(i in 1:nrow(p))
-#   {
-#   Clu <- rbind(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,F,"N",p$meta[i]))
-#   }
-
 
 stopCluster(cl)
 
@@ -860,8 +850,42 @@ rm(cn,cl,Clu)
 save.image()
 ```
 
+## Calculates the range of theta and I neutral theory parameters
 
-## Simulations to Time=5000 with side=100-512, dispersal=26 migration=0.0001596079 species=16 
+```{r calcThetaI, eval=F,echo=F,message=T,warning=T}
+
+alfa <- 2.081069
+d <- round(mean_power(alfa),2)
+m_from_dispersalDistance(mean_power(alfa),side)
+
+m   <-0.01
+neutral_ThetaI <-theta_from_dispMigration(d,m)
+m   <-0.0001
+neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
+m   <-0.00001
+neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
+
+d <- round(mean_power(2.01911),2) # 53.33
+m   <-0.01
+neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
+m   <-0.0001
+neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
+m   <-0.00001
+neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
+ 
+d <- round(mean_power(2.03897),2) # 26.66
+m   <-0.01
+neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
+m   <-0.0001
+neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
+m   <-0.00001
+neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
+
+
+
+```
+
+## OLD --- Simulations to Time=5000 with side=100-512, dispersal=26 migration=0.0001596079 species=16 
 
 ```{r simuldisp_clu_side512_meta16_n30_T5000, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")

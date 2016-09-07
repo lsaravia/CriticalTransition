@@ -29,11 +29,19 @@ The most common species in a neutral community should coincide with the most com
 
 * The most competitive species could be seem as non-habitable patch produced by deforestation, and the intensity of competition is a measure of growth rate of deforestation. It has been seen that deforested patches become abandoned due to economic crisis or changes reglamentations and management [@Haddad2015;Hansen2013]. Besides the growth and decay of unhabitable patches should be different from other species rates of invasions (here we assumed all equal) the qualitative features should be the same taking into account that near the percolation threshold the details of the models do not modify the behavior of the system. Thus based on these we can establish that about a 30% percent non-habitable patches can produce a biodiversity collapse if communities live near a critical interaction/competitive intensity. A similar approach taking into account the interplay between two dynamic processes: habitat loss/recuperation and 1 species population spread [@Oborny2007]. found a critical threshold on the same order: 27% of non-habitable patches. 
 
-* Evolution: we could start with a neutral community and let species mutate to modify its interaction by individual
+* Evolution: we could start with a neutral community and let species mutate to modify its interaction by individual ver Eco-evolutionary dynamics
 
+## Reviewers
 
 Fangliang He,
 Stephen P. Hubbell
+
+Carlos Martorell martorell@ciencias.unam.mx ,
+Facultad de Ciencias, Departamento de Ecología y Recursos Naturales, Universidad Nacional Aut o
+Circuito Exterior S/N, Cd. Universitaria, 04510 México D.F., Mexico; 
+
+James Rosindell j.rosindell@imperial.ac.uk
+Faculty of Natural Sciences, Department of Life Sciences (Silwood Park)
 
 # Fragments from papers
 
@@ -272,18 +280,9 @@ logged and clear-cut forests. Both total number of species and number of rare sp
 
 --------
 
-@Chisholm2010
+@Chisholm2010 Niche and neutral models predict asymptotically equivalent species abundance distributions in high-diversity ecological communities
 
-niche theory and neutral theory are two
-major families of theoretical models that aim to explain patterns
-of biodiversity observed in nature (1, 2). Niche theory, which has
-a long history of development (3–5), assumes that different species
-are regulated by different environmental factors and proposes that
-diversity arises from spatial and temporal environmental hetero-
-geneity (6). Neutral theory, which was developed more recently
-from the theory of island biogeography (7), assumes that species
-are equivalent and proposes that diversity arises from a balance
-between immigration, speciation, and extinction (8–10)
+niche theory and neutral theory are two major families of theoretical models that aim to explain patterns of biodiversity observed in nature (1, 2). Niche theory, which has a long history of development (3–5), assumes that different species are regulated by different environmental factors and proposes that diversity arises from spatial and temporal environmental heterogeneity (6). Neutral theory, which was developed more recently from the theory of island biogeography (7), assumes that species are equivalent and proposes that diversity arises from a balance between immigration, speciation, and extinction (8–10)
 
 in which a semiisolated local community receives immigrants from a much larger metacommunity that is assumed to be static relative to the timescale of the local community 
 
@@ -398,9 +397,9 @@ As a result, it is possible to drive a community between the niche and neutral p
 
 @Rosindell2009 Species-area curves, neutral models, and long-distance dispersal
 
+In the present manuscript, we extend to the case of ‘‘fat-tailed’’ dispersal, where the probability of dispersal decays as a power law with distance, which is considered a more faithful description for many species, especially wind-dispersed seeds (Clark et al. 1999, Nathan 2006)
 
-Condit et al. (2002) quote a range of
-m values between 4.8 3 10À8 and 1.7 3 10À14 for forests in
+Condit et al. (2002) quote a range of m values between 4.8 3 10À8 and 1.7 3 10À14 for forests in
 Panama, Ecuador, and Peru,
 
 
@@ -545,38 +544,20 @@ Being far from equilibrium, fitting detailed snapshots of tropical forest data c
 
 --------------
 
-Chisholm2009c   Linking dispersal, immigration and scale in the neutral theory of biodiversity
+@Chisholm2009c   Linking dispersal, immigration and scale in the neutral theory of biodiversity
 
-the mean dispersal
-distance d, based on seed-trap data for 81 tree species in the
-plot, is 39.5 m and the 95% confidence interval for d is (32.8,
-46.7) (confidence interval estimated by bootstrap-resampling
-raw data in Muller-Landau 2001; see also Condit et al. 2002)
+The immigration parameter m is the probability that a death in the local community is replaced by the offspring of an individual from outside the local community.
 
-Although m is useful for analytical purposes, such as
-deriving the theoretical functional forms of SADs (e.g.,
-Volkov et al. 2003), we propose that the mean dispersal
-distance d is a more suitable fundamental parameter because
-it is scale invariant, biologically meaningful and easily related
-to m analytically
+the mean dispersal distance d, based on seed-trap data for 81 tree species in the plot, is 39.5 m and the 95% confidence interval for d is (32.8, 46.7) (confidence interval estimated by bootstrap-resampling raw data in Muller-Landau 2001; see also Condit et al. 2002)
 
-The predictions of spatially implicit neutral theory appear
-robust to violations of the assumption that all species in a
-community have the same dispersal kernel: our main
-approximation (2) holds even when different species have
-different dispersal kernels and exert different propagule
-pressures, provided that the mean dispersal distance d is
-calculated as the average of the mean dispersal distances of
-different species (weighted by the speciesÕ relative abun-
-dances and propagule pressures; see Appendix S2). This is
-important, because the assumption that species have
-identical dispersal kernels is patently false
+Although m is useful for analytical purposes, such as deriving the theoretical functional forms of SADs (e.g., Volkov et al. 2003), we propose that the mean dispersal distance d is a more suitable fundamental parameter because it is scale invariant, biologically meaningful and easily related to m analytically
 
-Our
-finding of robustness to interspecific variation in dispersal
-kernels provides some justification for a fundamental
-premise of neutral theory, which is that inter and intraspe-
-cific trait variation averages out statistically at large scales
-and is not important for predicting macroscopic patterns of
-diversity (Chave 2004, p250–251).
+The predictions of spatially implicit neutral theory appear robust to violations of the assumption that all species in a community have the same dispersal kernel: our main approximation (2) holds even when different species have different dispersal kernels and exert different propagule pressures, provided that the mean dispersal distance d is calculated as the average of the mean dispersal distances of different species (weighted by the speciesÕ relative abundances and propagule pressures; see Appendix S2). This is important, because the assumption that species have identical dispersal kernels is patently false
 
+Our finding of robustness to interspecific variation in dispersal kernels provides some justification for a fundamental premise of neutral theory, which is that inter and intraspecific trait variation averages out statistically at large scales and is not important for predicting macroscopic patterns of diversity (Chave 2004, p250–251).
+
+-----------------
+
+@Etienne2011c The spatial limitations of current neutral models of biodiversity.
+
+binned abundance distributions are largely uninformative unless the visual fit is bad, in which case the statistical fit will be bad too. Rank-abundance distributions contain the full abundance vector of a sample and are therefore more informative. This has been argued before (e.g. [35]), but nevertheless binned SADs are still widely used. Perhaps our results will help to make this point again.

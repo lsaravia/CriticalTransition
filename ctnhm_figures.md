@@ -4,16 +4,16 @@
   Side   Metacomm.     $\mu$   $\alpha$        $m$
          No. Species           (mean dist.)       
 ------- ------------- ------- -------------- ----------  
-   100            64     0.2   2.04 (26.66)    0.00016    
+   128            64     0.2   2.04 (26.6)    0.0001    
 
-   150           128     	     2.08 (13.34)    0.0016     
+   192           320     	     2.08 (13.3)    0.001     
 
-   256            16     	     2.18 (6.67)     0.016      
+   256            32     	     2.02 (53.3)    0.01      
 
-   512                                              
+                                                
 -------------------------------------------------------
 
-Table: Parameters values used in the simulations of the neutral-hierarchical model. The parameter $\mu$ is the mortality rate; $\alpha$ is exponent of the inverse power law dispersal kernel, between brakets is the mean dispersal distance; and $m$ is the migration from the metacommunity. 
+Table: Parameters values used in the simulations of the neutral-hierarchical model. Side, is the size of the side of the simulation grid. The parameter $\mu$ is the mortality rate; $\alpha$ is exponent of the inverse power law dispersal kernel, between brackets is the mean dispersal distance; and $m$ is the migration from the metacommunity. The units of the simulation grid and dispersal are in meters to make them comparable with field values.
 
 \newpage
 
