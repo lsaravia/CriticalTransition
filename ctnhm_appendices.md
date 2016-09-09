@@ -15,6 +15,33 @@ In this process we have to find the scale that give us the maximal occupation of
 
 ## Appendix Tables 
 
+----------------------------------------
+               $\alpha$
+  $m$      (mean dist.)  $\theta$    $I$  
+--------- ------------- ---------  -----
+    0.01    2.08 (13.3)     155.7  121.1
+
+   0.001    2.08 (13.3)     113.8  97.3
+
+   0.0001   2.08 (13.3)     83.2   78.2
+
+    0.01    2.04 (26.6)     561.2  342.5
+
+   0.001    2.04 (26.6)     410.3  275.2
+
+   0.0001   2.04 (26.6)     300.0  221.1
+
+    0.01    2.02 (53.3)    2026.0  969.7
+
+   0.001    2.02 (53.3)    1482.0  779.2
+
+   0.0001   2.02 (53.3)    1083.0  626.1
+----------------------------------------
+
+Table: Equivalence of spatially explicit parameters $m$ and $\alpha$ (Mean dispersal distance) with spatially implicit neutral parameters $\theta$ and $I$.  
+
+
+
 
 ---------------------------------------------------------------------
 Metacomm.  Metacomm.  Mean           $m$  $\rho_c^\infty$  SE$\rho_c$    
@@ -219,8 +246,8 @@ Table: Median regression of patch distribution model parameters vs. Year for BCI
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=6.5in]{figs/SAD_T5000_64_512_meta.png}
-\caption{Rank abundance diagrams (RADs) for simulated neutral/niche model communities as a function of the intensity of competition $\rho$. Except for $\rho=0$ the values in the legend are upper limits. The RADs are averages of 30 simulations. Metacommunities have 64 species and two different species abundance distributions (SAD): logseries SAD (L); and uniform SAD (U); the critical point for logseries is 0.0013 and 0.0011 for uniform metacommunities. The size of the grid was 256*256 sites and the other parameters used are migration=0.00016, dispersal distance=26.66.}
+\includegraphics[width=6.5in]{figs/SAD_T20000_64_256_meta_m0001.png}
+\caption{Rank abundance diagrams (RADs) for simulated neutral/niche model communities as a function of the intensity of competition $\rho$. Except for $\rho=0$ the values in the legend are upper limits. The RADs are averages of 50 simulations. Metacommunities have 64 species and two different species abundance distributions (SAD): logseries SAD (L); and uniform SAD (U); the black line is the closest to the critical point . The size of the grid was 256*256 sites and the other parameters used are $m$=0.0001, dispersal distance=26.66.}
 \end{figure}
 
 

@@ -1373,7 +1373,7 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
   }
   clu$Richness <- den$Richness 
   clu$H <- den$H
-  disp <- round(2.03897,5)
+  disp <- round(disp,5)
   clu <-filter(clu, ColonizationRate==migr,DispersalDistance==disp) %>% rename(MaxSpeciesAbund=TotalSpecies) %>%
                mutate( MetaNsp=nsp, Side=side, MetaType=as.character(meta),MaxClusterProp = MaxClusterSize/(side*side),MaxClusterSpProp=MaxClusterSize/MaxSpeciesAbund,
                 SpanningClust=ifelse(SpanningSpecies>0,MaxClusterProp,0)) # %>% sample_n(30)
@@ -1503,9 +1503,10 @@ simul_NeutralSAD <- function(nsp,side,disp,migr,ReplRate,clus="S",time=1000,meta
 #  4=Other not Spanning
 #
 simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
-                time=1000,sims=10,simulate=T,mf="N",meta="U",delo=T,ssed="N") 
+                time=1000,sims=10,simulate=T,mf="N",meta="U",delo=T,sedIni=0,birth=1,death=0.2) 
 {
   options("scipen"=0, "digits"=4)
+
   if(toupper(meta)=="L") {
     if(simulate) prob <- genFisherSAD(nsp,side)
     neuParm <- paste0("fishP",nsp,"_",side,"R", repl)
@@ -1522,22 +1523,30 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
   # make simulations 
   if(simulate)
   {
-    # Delete old simulations
-    if(delo){
-      system(paste0("rm ",bname,"m*.txt")) # MultiFractal mf
-      system(paste0("rm ",bname,"D*.txt")) # Density
-      system(paste0("rm ",bname,"C*.txt")) # Clusters
-    }
+      genNeutralParms(neuParm,side,prob,birth,death,disp,migr,repl)
 
-    genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,repl)
+      if(sedIni==1){
+          genInitialSed(paste0(neuParm,".sed"),nsp,side,0)    # One individual of each species in the center
+      } else if(sedIni==2) {
+          genInitialSed(paste0(neuParm,".sed"),nsp,side,prob) # Filled with metacommunity frequency
+      } else {
+          genInitialSed(paste0(neuParm,".sed"),nsp,side,1)    # a square of 1 in the center, size=nsp
+      }
 
+      # Delete old simulations
+      if(delo){
+        system(paste0("rm ",bname,"m*.txt")) # MultiFractal mf
+        system(paste0("rm ",bname,"D*.txt")) # Density
+        system(paste0("rm ",bname,"C*.txt")) # Clusters
+      }
+  
     par <- read.table("sim.par",quote="",stringsAsFactors=F)
 
     par[par$V1=="nEvals",]$V2 <- time+400
     par[par$V1=="inter",]$V2 <- 40          # interval to measure Density and Diversity
     par[par$V1=="init",]$V2 <- time           # Firs time of measurement = interval
     par[par$V1=="modType",]$V2 <- 4           # Hierarchical saturated
-    par[par$V1=="sa",]$V2 <- ssed              # Save a snapshot of the model
+    par[par$V1=="sa",]$V2 <- "N"              # Save a snapshot of the model
     par[par$V1=="baseName",]$V2 <- bname      # Base name for output
     par[par$V1=="mfDim",]$V2 <- mf
     par[par$V1=="minBox",]$V2 <- 2
@@ -1550,16 +1559,26 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
     parfname <- paste0("sim",nsp,"_",side,"R", repl,".par")
     write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
 
-    genPomacParms(pname,1,c(0.2),disp,migr,repl,sims)
+    genPomacParms(pname,birth,death,disp,migr,repl,sims)
 
-    # copy pomExp.lin to pomac.lin
-    #system("cp pomExp.lin pomac.lin")
+
     s <- system("uname -a",intern=T)
-    if(grepl("i686",s)) {
-      system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+
+    if(sedIni){
+      if(grepl("i686",s)) {
+          system(paste(neuBin,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+        } else {
+          system(paste(neuBin64,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+        }
+
     } else {
-      system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+      if(grepl("i686",s)) {
+        system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+      } else {
+        system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+      }
     }
+
   }
 
   require(plyr)
@@ -2634,6 +2653,7 @@ calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
   require(ggplot2)
 
   mClusters <- filter(Clusters, MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate) %>% summarise(MaxClusterProp=median(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+  stopifnot(nrow(mClusters)>0)
   #
   # Calculates the probability of spanning cluster
   #

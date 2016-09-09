@@ -203,14 +203,14 @@ source("R/powerlaw/zeta.R")
 setwd("Simul")
 
 
-m <-  0.0001596079
+m <-  0.0001
 alfa <- 2.038974
 side <- 256
 nsp <- 64
-nSimul <- 10
-time <- 5000
+nSimul <- 1
+time <- 500
 #time <- 100
-ReplRate <- c(0.0000,0.0005,0.0010,0.0020,0.0030,0.004,0.005,0.01)
+ReplRate <- c(0.0000,0.0001,0.0005,0.0010,0.005,0.01)
 p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(256),meta=c("U","L")) 
 
 require(doParallel)
@@ -221,7 +221,7 @@ Models <- data.frame()
 Mdl <- data.frame()
 Mdl <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
 {
-    simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",time,nSimul,F,"N",p$meta[i],F)
+    simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",time,nSimul,T,"N",p$meta[i],F,2)
 }
 
 stopCluster(cl)

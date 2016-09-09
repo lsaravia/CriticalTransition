@@ -4,7 +4,7 @@ OPTS= -H margins.sty --bibliography ctnhm.bib --csl=ecology.csl
 %.pdf: %.md 
 	pandoc  -H ctnhm_figures.sty -V geometry:margin=1.2cm  --latex-engine=xelatex $^ -o $@
 
-all: ctnhm.pdf ctnhm_figures.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf
+all: ctnhm.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf
 
 
 SomeResults.pdf: SomeResults.md

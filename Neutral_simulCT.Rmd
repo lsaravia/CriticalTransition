@@ -267,7 +267,7 @@ m   <-0.0001
 alfa <- 2.081069
 side <- c(128,192,256)
 nsp <- 320
-nSimul <- 30
+nSimul <- 20
 mean_power(alfa)
 m_from_dispersalDistance(mean_power(alfa),side)
 theta_from_dispMigration(13.34,m)
@@ -300,6 +300,49 @@ rm(cn,cl,Clu)
 save.image()
 ```
 
+
+## Calculation of the critical point T=20000 DispersalDistance=13 m=0.0001 no. species=320
+
+```{r pcT20000_clu_side_320_meta_m0001_disp13, eval=F,echo=F,message=T,warning=T}
+
+m   <-0.0001
+alfa <- round(2.081069,5)
+side <- 256
+nsp <- 320
+nSimul <- 100
+time <- 20000
+
+require(plyr)
+require(dplyr)
+
+# Calculates critical probabilities for differnt side (rCTs) and critical probability for infinite lattices (rCT)
+#
+k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
+
+require(ggplot2)
+require(pander)
+
+# Create data frame to store Critical Point for lattices with different sides
+#
+rhoCritSide <- bind_rows(rhoCritSide,k$rCTs)
+pandoc.table(filter(rhoCritSide,ColonizationRate==m),round=5)
+
+# Create data frame to store CP for infinite lattices
+#rhoCrit <- filter(rhoCrit,ColonizationRate!=m)
+rhoCrit <- bind_rows(rhoCrit,k$rCT)
+pandoc.table(filter(rhoCrit,ColonizationRate==m),round=5)
+
+
+plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
+
+filter(rhoCritSide,Side==side,ColonizationRate==m)
+
+time<-      c(20000,  20000, 30000, 30000, 20000, 20000, 20000,  5000, 5000)
+ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010,0.0050,0.0100,0.1000,1)
+
+plotCritical_SAD(nsp,side,alfa,m,time,ReplRate,3)
+
+```
 
 
 ## Calculation of the critical point T=20000 DispersalDistance=26 m=0.1 no. species=320
@@ -601,107 +644,6 @@ ggsave("figs/RichvsRepl_T20000_64_256_meta_m_lin.png", width=6,height=6,units="i
 
 ```
 
-
-## Regenerate Clusters data.frame from files in Simul folder DON'T RUN it without revision
-
-```{r regen_clust_Side_64_meta_Time, eval=F,echo=F,message=T,warning=T}
-setwd("Simul")
-
-m    <-  0.0001
-m    <-  0.01
-m    <-  0.1
-alfa <- 2.038974   # 26
-alfa <- round(2.081069,5)   # 13
-nsp  <- 64
-nSimul<-100
-require(dplyr)
-
-# Count number of simulations
-#
-mClusters <- filter(Clusters, ColonizationRate==m,MetaNsp==nsp,DispersalDistance==alfa) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate,Time) %>% summarise(n=n()) #%>% filter(n==50)
-
-# Get ReplacementRates used in simulations
-ReplRate <- unique(mClusters$ReplacementRate)
-
-# Get sides used in simulations
-side <- unique(mClusters$Side)
-
-# For m=0.0001
-#
-# m    <-  0.0001
-# ReplRate <- c(0.0000,0.0001,0.0002,0.0003,0.0004,0.0005,0.0006,0.0007,0.0008,0.0010,0.0020,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
-# 
-# time<-      c(20000,  20000, 20000, 30000, 30000, 30000, 30000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 10000,  5000,  5000,  5000,  5000,5000)
-
-# For m=0.01
-#
-# m    <-  0.01
-# ReplRate <- c(0.0000,0.0001,0.0005,0.0006,0.0007,0.0008,0.0010,0.0020,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
-# 
-# time<-      c(10000,  10000, 20000, 30000, 30000, 30000, 30000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 10000,  5000,  5000,  5000)
-
-m <- 0.1
-ReplRate <- c(0.0000,0.0001,0.0005,0.0010,0.0050,0.0100,0.0200,0.0300, 0.0400, 0.0500, 0.0550, 0.0600, 0.0650, 0.0700, 0.0750, 0.0800, 0.0900,0.1000,0.3000,0.6000,0.9000,1) 
-time<-      c(10000,  10000, 10000, 10000, 10000, 10000, 20000, 20000,  20000,  20000,  20000,  20000,  20000,  20000,  20000,  20000,   5000,  5000,  5000,  5000,  5000,5000)
-side <- c(128,192,256)
-p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("L","U")) 
-time <-rep(time, times=nrow(p)/length(time))
-p <-cbind(p,time)
-
-setwd("Simul")
-nSimul<-100
-Clu <- data.frame()
-for(i in 1:nrow(p))
-  {
-  Clu <- rbind(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,F,"N",p$meta[i]))
-  }
-
-# Count number of simulations
-#
-kk <-filter(Clu,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,Time) %>% summarise(n=n())  %>% filter(n<50)
-
-kk1 <-filter(Clusters,ColonizationRate==m,MetaNsp==nsp) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,Time) %>% summarise(n=n()) %>% filter(n<50)
-
-# Filter and replace
-#
-i<-23
-kk1 <- filter(Clusters,ColonizationRate==m & MetaNsp==nsp & Side==256)
-
-Clusters <- anti_join(Clusters,Clu)
-
-Clusters <- filter(Clusters, !(ColonizationRate==m & MetaNsp==nsp & Side==256)) #%>% distinct()
-
-Clusters <- bind_rows(Clusters, Clu)
-
-setwd(oldcd)
-
-# Filter some rho
-#
-# ReplRate <- c(0.0150,0.0250,0.0350,0.0450,0.45,0.7,0.8)
-# Clusters <- filter(Clusters, !(ColonizationRate==m & ReplacementRate %in% ReplRate)) #%>% distinct()
-
-
-# Filter simulations
-#
-#Clusters <- Clusters %>% filter(!(MetaNsp==nsp & DispersalDistance==alfa & ColonizationRate==m & Side==256 & ReplacementRate==0.1 & MetaType=="L"))
-ReplRate <- c(0.0000,0.0005,0.0010,0.0050,0.0200,0.0300, 0.0600, 0.0650, 0.0750, 0.0900,0.1000,0.3000,0.6000) 
-
-Clu <- Clusters %>% filter(MetaNsp==nsp & ColonizationRate==m & Side==256 & MetaType=="L" & (ReplacementRate %in% ReplRate))
-ggplot(Clu,aes(H,colour=ReplacementRate)) + geom_freqpoly() +facet_wrap( ~ReplacementRate)+ guides(colour=FALSE)
-
-rm(mClusters,p,kk,kk1,cn,cl,Clu,k,tClusters,rank)
-
-save.image()
-
-# Save and Delete old data.frames
-#
-save(old_Clusters, old_rhoCrit, old_rhoCritSide, BCIhsize, BCIMdl, Models, file="old_Clusters.RData",compress = T)
-rm(old_Clusters, old_rhoCrit, old_rhoCritSide, BCIhsize, BCIMdl, Models)
-
-
-```
-
-
 ## Simulations to determine critical point, Time=20000 migration=0.1 dispersal=13
 
 ```{r gensimul_disp13_clu_side_64_meta_T20000m1, eval=F,echo=F,message=T,warning=T}
@@ -850,7 +792,7 @@ rm(cn,cl,Clu)
 save.image()
 ```
 
-## Calculates the range of theta and I neutral theory parameters
+## Calculates the range of theta and I spatially implicit neutral theory parameters
 
 ```{r calcThetaI, eval=F,echo=F,message=T,warning=T}
 
@@ -860,25 +802,25 @@ m_from_dispersalDistance(mean_power(alfa),side)
 
 m   <-0.01
 neutral_ThetaI <-theta_from_dispMigration(d,m)
-m   <-0.0001
+m   <-0.001
 neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
-m   <-0.00001
+m   <-0.0001
 neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
 
 d <- round(mean_power(2.01911),2) # 53.33
 m   <-0.01
 neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
-m   <-0.0001
+m   <-0.001
 neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
-m   <-0.00001
+m   <-0.0001
 neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
  
 d <- round(mean_power(2.03897),2) # 26.66
 m   <-0.01
 neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
-m   <-0.0001
+m   <-0.001
 neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
-m   <-0.00001
+m   <-0.0001
 neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
 
 
@@ -1053,6 +995,120 @@ ggsave("figs/SpatAllSp_Repl_T5000_64_256_Unif.png", width=6,height=6,units="in",
 
 plotNeutral_SpatPat(nsp,side,time,meta=c("L"),ReplRate,F)
 
+
+```
+
+
+
+## Regenerate Clusters data.frame from files in Simul folder DON'T RUN it without revision
+
+```{r regen_clust_Side_64_meta_Time, eval=F,echo=F,message=T,warning=T}
+setwd("Simul")
+
+m    <-  0.0001
+m    <-  0.01
+m    <-  0.1
+alfa <- 2.038974   # 26
+alfa <- round(2.081069,5)   # 13
+nsp  <- 320
+nSimul<-100
+require(dplyr)
+
+# Count number of simulations
+#
+mClusters <- Clusters %>% group_by(MetaNsp,DispersalDistance,ColonizationRate,Time) %>% summarise(n=n()) #%>% filter(n==50)
+
+
+# Count number of simulations
+#
+mClusters <- filter(Clusters, ColonizationRate==m,MetaNsp==nsp,DispersalDistance==alfa) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,ColonizationRate,Time) %>% summarise(n=n()) #%>% filter(n==50)
+
+# Get ReplacementRates used in simulations
+ReplRate <- unique(mClusters$ReplacementRate)
+
+# Get sides used in simulations
+side <- unique(mClusters$Side)
+
+# For m=0.0001
+#
+m    <-  0.0001
+nsp  <- 64
+ReplRate <- c(0.0000,0.0001,0.0002,0.0003,0.0004,0.0005,0.0006,0.0007,0.0008,0.0010,0.0020,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+
+time<-      c(20000,  20000, 20000, 30000, 30000, 30000, 30000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 10000,  5000,  5000,  5000,  5000,5000)
+
+# nsp  <- 320
+# m    <-  0.0001
+# ReplRate <- c(0.0000,0.0001,0.0002,0.00025,0.0003,0.0004,0.0005,0.0006,0.0007,0.0008,0.0010,0.0020,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0200,0.0500,0.1000,0.3000,1 )
+# time<-      c(20000,  20000, 20000,  30000, 30000, 30000, 30000, 30000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000,  5000,  5000,  5000,  5000,5000)
+
+# For m=0.01
+#
+# m    <-  0.01
+# ReplRate <- c(0.0000,0.0001,0.0005,0.0006,0.0007,0.0008,0.0010,0.0020,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+# 
+# time<-      c(10000,  10000, 20000, 30000, 30000, 30000, 30000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 10000,  5000,  5000,  5000)
+
+# m <- 0.1
+# ReplRate <- c(0.0000,0.0001,0.0005,0.0010,0.0050,0.0100,0.0200,0.0300, 0.0400, 0.0500, 0.0550, 0.0600, 0.0650, 0.0700, 0.0750, 0.0800, 0.0900,0.1000,0.3000,0.6000,0.9000,1) 
+# time<-      c(10000,  10000, 10000, 10000, 10000, 10000, 20000, 20000,  20000,  20000,  20000,  20000,  20000,  20000,  20000,  20000,   5000,  5000,  5000,  5000,  5000,5000)
+
+
+side <- c(128,192,256)
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("L","U")) 
+time <-rep(time, times=nrow(p)/length(time))
+p <-cbind(p,time)
+
+setwd("Simul")
+nSimul<-100
+Clu <- data.frame()
+for(i in 1:nrow(p))
+  {
+  Clu <- rbind(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,F,"N",p$meta[i]))
+  }
+
+# Count number of simulations
+#
+kk <-filter(Clu,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,Time) %>% summarise(n=n())  #%>% filter(n<50)
+
+kk1 <-filter(Clusters,ColonizationRate==m,MetaNsp==nsp) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,Time) %>% summarise(n=n()) %>% filter(n<50)
+
+# Filter and replace
+#
+i<-23
+kk1 <- filter(Clusters,ColonizationRate==m & MetaNsp==nsp & Side==256)
+
+Clusters <- anti_join(Clusters,Clu)
+
+Clusters <- filter(Clusters, !(ColonizationRate==m & MetaNsp==nsp & Side==256)) #%>% distinct()
+
+Clusters <- bind_rows(Clusters, Clu)
+
+setwd(oldcd)
+
+# Filter some rho
+#
+# ReplRate <- c(0.0150,0.0250,0.0350,0.0450,0.45,0.7,0.8)
+# Clusters <- filter(Clusters, !(ColonizationRate==m & ReplacementRate %in% ReplRate)) #%>% distinct()
+
+
+# Filter simulations
+#
+#Clusters <- Clusters %>% filter(!(MetaNsp==nsp & DispersalDistance==alfa & ColonizationRate==m & Side==256 & ReplacementRate==0.1 & MetaType=="L"))
+ReplRate <- c(0.0000,0.0005,0.0010,0.0050,0.0200,0.0300, 0.0600, 0.0650, 0.0750, 0.0900,0.1000,0.3000,0.6000) 
+
+Clu <- Clusters %>% filter(MetaNsp==nsp & ColonizationRate==m & Side==256 & MetaType=="L" & (ReplacementRate %in% ReplRate))
+ggplot(Clu,aes(H,colour=ReplacementRate)) + geom_freqpoly() +facet_wrap( ~ReplacementRate)+ guides(colour=FALSE)
+
+rm(mClusters,p,kk,kk1,cn,cl,Clu,k,tClusters,rank)
+
+
+# Save and Delete old data.frames
+#
+save(old_Clusters, old_rhoCrit, old_rhoCritSide, BCIhsize, BCIMdl, Models, file="old_Clusters.RData",compress = T)
+rm(old_Clusters, old_rhoCrit, old_rhoCritSide, BCIhsize, BCIMdl, Models)
+
+save.image()
 
 ```
 
