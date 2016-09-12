@@ -32,9 +32,9 @@ options("scipen"=100, "digits"=6)
 
 ## Plots of Smax - Calculation of Early warnings based on the Max Cluster (Smax)
 
-```{r plotSmaxT20000_clu_side_64_meta_m1, eval=F,echo=F,message=T,warning=T}
+```{r plotSmaxT20000_clu_side_64_meta_m0001, eval=F,echo=F,message=T,warning=T}
 
-m   <-0.1
+m   <-0.0001
 alfa <-round(2.03897,5)
 side <- 256
 nsp <- 64
@@ -66,25 +66,25 @@ colp <-brewer.pal(8,"Dark2")
 # Plot of Spanning clusters sizes with critical probability across side
 #
 ggplot(tClusters, aes(x=ReplacementRate, y=SpanningClust)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType ) + ylab("Spanning Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
-ggsave("figs/SpanClusRepl_T20000_64_side_meta_m1.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/SpanClusRepl_T20000_64_side_meta_m0001.png", width=6,height=6,units="in",dpi=600)
 
 #
 # The same Plot in linear x scale 
 #
 ggplot(tClusters, aes(x=ReplacementRate, y=SpanningClust)) + geom_point(alpha=.1) + theme_bw() + xlim(0,1)  + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType ) + ylab("Spanning Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
-ggsave("figs/SpanClusRepl_T20000_64_side_meta_m1_lin.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/SpanClusRepl_T20000_64_side_meta_m0001_lin.png", width=6,height=6,units="in",dpi=600)
 
 #
 # Plot of Max clusters proportion with critical probability across side 
 #
 ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterProp)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType ) + ylab("Max. Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
-ggsave("figs/MaxClusRepl_T20000_64_side_meta_m1.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/MaxClusRepl_T20000_64_side_meta_m0001.png", width=6,height=6,units="in",dpi=600)
 
 #
 # Plot of Max clusters proportion with critical probability
 #
 ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterProp)) + geom_point(alpha=.1) + theme_bw() + xlim(0,1) + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType ) + ylab("Max. Cluster Size") + xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
-ggsave("figs/MaxClusRepl_T20000_64_side_meta_m1_lin.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/MaxClusRepl_T20000_64_side_meta_m0001_lin.png", width=6,height=6,units="in",dpi=600)
 
 # Select  Smax & Shannon diversity vs rho across ColonizationRate 
 #
@@ -95,7 +95,7 @@ tClusters <- Clusters %>% filter(MetaNsp==nsp,DispersalDistance==alfa,Side==256)
 #
 # Smax vs rho
 #
-ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterProp)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() + stat_summary(fun.y=median,geom="line",colour=colp[1])+ facet_grid(ColonizationRate ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
+ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterProp)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() + stat_summary(fun.y=median,geom="line",colour=colp[1])+ facet_grid(ColonizationRate ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Smax proportion")
 ggsave("figs/SmaxvsRepl_T20000_64_256_meta_m.png", width=6,height=6,units="in",dpi=600)
 
 #
@@ -127,7 +127,7 @@ rm(kk,k,k1,p,mClusters,tClusters,Clu,rank)
 
 ```{r plotSmaxT20000_clu_side_64_meta_m1, eval=F,echo=F,message=T,warning=T}
 
-m   <-0.1
+m   <-0.0001
 alfa <-round(2.03897,5)
 side <- 256
 nsp <- 64
@@ -191,7 +191,7 @@ ggsave("figs/SkewDeltaSmaxvsRepl_T20000_64_side_meta_m.png", width=6,height=6,un
 # OLD CODE : Simulate to estimate distributions of patch sizes statistics
 
 
-```{r simuldisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+```{r simuldisp26_cluAll_side_64_meta30_T5000, eval=T,echo=F,message=T,warning=T}
 setwd(oldcd)
 source("R/powerlaw/discpowerexp.R")
 source("R/powerlaw/discexp.R")
@@ -205,30 +205,34 @@ setwd("Simul")
 
 m <-  0.0001
 alfa <- 2.038974
-side <- 256
+side <- 512
 nsp <- 64
-nSimul <- 1
-time <- 500
-#time <- 100
-ReplRate <- c(0.0000,0.0001,0.0005,0.0010,0.005,0.01)
-p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(256),meta=c("U","L")) 
+nSimul <- 10
+time <- 10000
+ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010,0.01)
+
+time <- 20000
+ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010)
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("U","L")) 
 
 require(doParallel)
 cn <-detectCores()
 cl <- makeCluster(cn)
 registerDoParallel(cl)
-Models <- data.frame()
+#Models <- data.frame()
 Mdl <- data.frame()
 Mdl <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
 {
-    simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",time,nSimul,T,"N",p$meta[i],F,2)
+    simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",time,nSimul,TRUE,"N",p$meta[i],FALSE,2)
+    #simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",time,nSimul,FALSE,"N",p$meta[i],FALSE,2)
 }
+Mdl$Side <- side
 
 stopCluster(cl)
 setwd(oldcd)
 
-Models <- rbind(Models,Mdl)
-
+Models <- bind_rows(Models,Mdl)
 rm(cn,cl,Mdl,p)
 
 save.image()
@@ -249,13 +253,13 @@ source("R/powerlaw/zeta.R")
 setwd("Simul")
 
 
-m <-  0.0001596079
+m <-  0.0001
 alfa <- 2.038974
 side <- 256
 nsp <- 64
 nSimul <- 10
-time <- 5000
-ReplRate <- c(0.0000,0.0005,0.0010,0.0020,0.0030,0.004,0.005,0.01)
+time <- 10000
+ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010,0.01)
 p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(256),meta=c("U","L")) 
 
 for(i in 1:nrow(p)){
@@ -395,14 +399,14 @@ group_by(rqm,MetaType,type,param) %>% filter(pvalue<0.05) %>% summarise(n=n())
 ```{r gensimul_spat_256_32_meta30_T5000, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
-m =  0.0001596079
-alfa=2.038974
+m   <-  0.0001
+alfa<-  2.038974
 side <- 256
-nsp <- 32
+nsp <-  64
 nSimul <- 1
 
 
-ReplRate <- c(0.0011)
+ReplRate <- c(0.0003)
 time <- 3000
 
 require(animation)

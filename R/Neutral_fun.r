@@ -21,7 +21,6 @@ genNeutralParms <- function(fname,side,mprob,birth,mortality,dispersal,colonizat
   nff <- S+3
   parm$text[4:nff] <-   with(parm[4:nff,], paste(n,z,z,z,format(sort(prob),scientific=F),sep="\t"))                    
   if(!grepl(".inp",fname)) fname <-paste0(fname,".inp")
-  genInitialSed
   write.table(parm$text,fname,sep="\t",row.names=F,col.names=F,quote=F)
 }
 
@@ -1516,7 +1515,7 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
     neuParm <- paste0("unifP",nsp,"_",side,"R", repl)
     bname <- paste0("neuUnif",nsp,"_",side,"R", repl)
   }
-  pname <- paste0("pomacR",repl,".lin")
+  pname <- paste0("pomac",nsp,"_",side,"R",repl,".lin")
   bname <- paste0(bname ,"T", time )
   
 
@@ -1542,8 +1541,8 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
   
     par <- read.table("sim.par",quote="",stringsAsFactors=F)
 
-    par[par$V1=="nEvals",]$V2 <- time+400
-    par[par$V1=="inter",]$V2 <- 40          # interval to measure Density and Diversity
+    par[par$V1=="nEvals",]$V2 <- time
+    par[par$V1=="inter",]$V2 <- time          # interval to measure Density and Diversity
     par[par$V1=="init",]$V2 <- time           # Firs time of measurement = interval
     par[par$V1=="modType",]$V2 <- 4           # Hierarchical saturated
     par[par$V1=="sa",]$V2 <- "N"              # Save a snapshot of the model
@@ -1586,12 +1585,13 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
   
   # Read Cluster sizes
   clu <-readClusterOut(bname,clus)
-
+  print(bname)
   # Split repetition of simulations  
   #
   # I divide by 10 because there are 10 outputs for each repetition
-  #
-  clu <- mutate(clu, Rep = ceiling((cumsum(ClusterSize == -1) + 1)/10)) %>% filter(ClusterSize != -1)
+  #   clu <- mutate(clu, Rep = ceiling((cumsum(ClusterSize == -1) + 1)/10)) %>% filter(ClusterSize != -1)
+  # I use 1 Time step
+  clu <- mutate(clu, Rep = ceiling((cumsum(ClusterSize == -1) + 1))) %>% filter(ClusterSize != -1)
   
   # Spanning species
   clu1 <-group_by(clu,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>% slice(1:1) %>% rename(Spanning=ClusterSize)
@@ -1600,38 +1600,38 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
   
   clu <- left_join(clu,clu1) %>% mutate(Spanning=ifelse(is.na(Spanning),0,1))
   
-  # Select most abundant or spanning species !!!!!!!
+  # Select species with largest patch (Smax) or spanning species !!!!!!! 
   #
-  clu1 <- group_by(clu,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>%  slice(1:1) %>% select(Species,Spanning)
+  clu1 <- clu %>% filter(ClusterSize>1) %>% group_by(MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>%  slice(1:1) %>% dplyr::select(Species,Spanning)
   clu2 <- inner_join(clu,clu1)
   
   # Fits only 1 species patches, most abundant or spanning
   #
   mdl <- group_by(clu2,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Species,Spanning) %>% 
-      do(fitNeutral_Clusters(.))
+      do(fitNeutral_Clusters(.,TRUE))
   
   clu2 <- anti_join(clu,clu1) # eliminates most abundant or spanning sp
 
   # Select Other species not most abundant
   #
-  clu3 <- filter(clu1,Spanning==0) %>% ungroup() %>% select(MortalityRate:Time) %>% distinct() # No spanning other species
+  clu3 <- filter(clu1,Spanning==0) %>% ungroup() %>% dplyr::select(MortalityRate:Time) %>% distinct() # No spanning other species
 
   clu4 <- inner_join(clu2,clu3) %>% mutate(Spanning=3)
   mdl1 <- group_by(clu4,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep) %>% 
-    do(fitNeutral_Clusters(.))
+    do(fitNeutral_Clusters(.,TRUE))
   
   # Select Other species not spanning
   #
-  clu3 <- filter(clu1,Spanning==1)  %>% ungroup() %>% select(MortalityRate:Time) %>% distinct() # Spanning other species
+  clu3 <- filter(clu1,Spanning==1)  %>% ungroup() %>% dplyr::select(MortalityRate:Time) %>% distinct() # Spanning other species
   clu4 <- inner_join(clu2,clu3) %>% mutate(Spanning=4)
   mdl2 <- group_by(clu4,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep) %>% 
-    do(fitNeutral_Clusters(.))
+    do(fitNeutral_Clusters(.,TRUE))
 
   mdl <- bind_rows(mdl,mdl1,mdl2)
   
   # Calculates DeltaAIC
   #
-  mdl <- group_by(mdl,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,type,Species) %>% mutate( DeltaAIC= AICc -min(AICc),MetaType=as.character(meta)) %>% arrange(DeltaAIC)
+  mdl <- group_by(mdl,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,type,Species) %>% mutate( DeltaAIC= AICc -min(AICc),MetaType=as.character(meta),Time=time) %>% arrange(DeltaAIC)
 }
 
 
@@ -1683,12 +1683,6 @@ fitNeutral_Clusters <-function(clu,est_xmin=F){
     
     mExp$setPars(est$pars)
 
-#    fname <- paste0("pLaw_R",unique(clu$ReplacementRate),"_T",tipo,"_Rep",unique(clu$Rep))
-
-#    png(filename=fname,res=300,units = "mm", height=200, width=200)
-#    plot(mPow,main=paste("Rho",unique(clu$ReplacementRate),tdes,paste0(sp,collapse=" ")),xlab="Patch Area",ylab="CCDF")
-#    lines(mPow,col=2)
-#    lines(mExp,col=3)
     LLPow <- dist_ll(mPow)     
     AICPow <-AICc(LLPow,nPatch,1)
     AICExp <-AICc(dist_ll(mExp),nPatch,1)

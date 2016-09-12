@@ -36,12 +36,20 @@ The most common species in a neutral community should coincide with the most com
 Fangliang He,
 Stephen P. Hubbell
 
-Carlos Martorell martorell@ciencias.unam.mx ,
+Carlos Martorell 
+martorell@ciencias.unam.mx ,
 Facultad de Ciencias, Departamento de Ecología y Recursos Naturales, Universidad Nacional Aut o
 Circuito Exterior S/N, Cd. Universitaria, 04510 México D.F., Mexico; 
 
-James Rosindell j.rosindell@imperial.ac.uk
+James Rosindell 
+j.rosindell@imperial.ac.uk
 Faculty of Natural Sciences, Department of Life Sciences (Silwood Park)
+
+
+C. Patrick Doncaster
+cpd@soton.ac.uk
+School of Biological Sciences, University of Southampton, Southampton, United Kingdom
+
 
 # Fragments from papers
 
