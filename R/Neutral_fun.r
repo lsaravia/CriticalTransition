@@ -1293,7 +1293,7 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
     neuParm <- paste0("unifP",nsp,"_",side,"R", repl)
     bname <- paste0("neuUnif",nsp,"_",side,"R", repl)
   }
-  pname <- paste0("pomacR",repl,".lin")
+  pname <- paste0("pomac",nsp,"_",side,"R",repl,".lin")
   bname <- paste0(bname ,"T", time )
   
 
@@ -2655,11 +2655,20 @@ calcCritical_prob<-function(Clusters,time,metaNsp,alfa,m)
   lg_fun<-function(x){
     lf <-glm(SpanningProb ~ ReplacementRate, family=binomial(logit), data = x)
     pcrit=- (lf$coefficients[1] / lf$coefficients[2])
-    
-    lf <-glm(SpanningProb ~ SpanningClust, family=binomial(logit), data = x)
-    critClust=- (lf$coefficients[1] / lf$coefficients[2])
+    x$p <-predict(lf,x,type="resp")
+    x1 <- x %>% filter(SpanningProb>0.50) %>% arrange(SpanningProb) %>% slice(1:2)      
+    x1 <- bind_rows(x1, x %>% filter(SpanningProb<=0.50) %>% arrange(desc(SpanningProb)) %>% slice(1:2))
+      
+    pcrit <- approx(x1$SpanningProb,x1$ReplacementRate,xout=0.5)[["y"]]
+    #if(pcrit<0) pcrit<-pcrit1
 
-    if(pcrit<0) pcrit<-0
+    critClust <-approx(x1$SpanningProb,x1$SpanningClust,xout=0.5)[["y"]]
+    
+    #Check critical points
+    # x1 <-data.frame( SpanningProb=0.5, ReplacementRate=c(pcrit,pcrit1))
+    # print(ggplot(x,aes(ReplacementRate,SpanningProb)) + geom_point(size=.5) +  theme_bw() + scale_x_log10() +
+    #   geom_point(data=x1,aes(ReplacementRate,SpanningProb),colour="orange",size=.5) +
+    #   geom_line(aes(ReplacementRate,p),colour="orange",size=.5))
 
     return(data.frame(pcrit,critClust))
   }

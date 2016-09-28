@@ -11,7 +11,6 @@ I generate parameter files for the simulation of neutral/hierarchical model usin
 
 ```{r setup, eval=T }
 load(".RData")
-#simul  <- F # variable to perform or not the simulations
 
 oldcd <-getwd()
 source("R/Neutral_fun.r")
@@ -110,8 +109,7 @@ require(dplyr)
 
 # Calculates critical probabilities for differnt side (rCTs) and critical probability for infinite lattices (rCT)
 #
-Clu <- filter(Clusters, Side!=64)
-k <-calcCritical_prob(Clu,time,nsp,alfa,m)
+k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 
 require(ggplot2)
 require(pander)
@@ -136,7 +134,7 @@ pandoc.table(rhoCrit,round=5)
 plotCritical_Clusters(Clusters,time,nsp,alfa,m,rhoCritSide)
 
 
-rm(k)
+rm(k,kk1,kk,p)
 
 #
 # Plots of SAD logseries and uniform metacommunity 
@@ -210,7 +208,7 @@ save.image()
 
 ## Calculation of the critical point T=20000 DispersalDistance=26 m=0.0001 no. species=320
 
-```{r pcT20000_clu_side_320_meta_m0001, eval=F,echo=F,message=T,warning=T}
+```{r pcT20000_clu_side_320_meta_m0001_disp26, eval=F,echo=F,message=T,warning=T}
 
 m   <-0.0001
 alfa <-round(2.03897,5)
@@ -237,8 +235,96 @@ pandoc.table(filter(rhoCritSide,ColonizationRate==m),round=5)
 # Create data frame to store CP for infinite lattices
 #rhoCrit <- filter(rhoCrit,ColonizationRate!=m)
 rhoCrit <- bind_rows(rhoCrit,k$rCT)
-pandoc.table(filter(rhoCrit,ColonizationRate==m),round=5)
+pandoc.table(filter(rhoCrit,ColonizationRate==m,DispersalDistance==26.66,MetaNsp==nsp),round=5)
 
+plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
+
+filter(rhoCritSide,Side==side,ColonizationRate==m)
+
+time<-      c(20000,  20000, 30000, 30000, 20000, 20000, 20000,  5000, 5000)
+ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010,0.0050,0.0100,0.1000,1)
+
+plotCritical_SAD(nsp,side,alfa,m,time,ReplRate,3)
+
+rm(k,p)
+```
+
+
+## Simulations to Determine critical point for m=0.0001 Species=16 dispersal 26
+
+m = Perimeter*DispersalDistance/(pi*Area),
+
+```{r gensimul_clu_side_16_meta_T20000m0001, eval=F,echo=F,message=T,warning=T}
+setwd("Simul")
+
+                  # Ver @Condit2012 
+m   <-0.0001
+alfa=2.038974
+side <- c(128,192,256)
+nsp <- 16
+nSimul <- 20
+
+m_from_dispersalDistance(mean_power(alfa),side)
+
+ReplRate <- c(0.0000,0.0001,0.0002,0.0003,0.0004,0.0005,0.0006,0.0007,0.0008,0.0010,0.0020,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+time<-      c(20000,  20000, 20000, 30000, 30000, 30000, 30000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 10000,  5000,  5000,  5000,  5000,5000)
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(128,192,256),meta=c("L","U")) 
+time <-rep(time, times=nrow(p)/length(time))
+p <-cbind(p,time)
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+Clu <- data.frame()
+Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,T,"N",p$meta[i],F,2)
+}
+
+stopCluster(cl)
+
+Clusters <-rbind(Clusters,Clu)
+setwd(oldcd)
+
+rm(cn,cl,Clu)
+
+save.image()
+```
+
+## Determine critical point for m=0.0001 Species=16 dispersal 26 
+
+```{r pcT20000_clu_side_16_meta_m0001_disp26, eval=F,echo=F,message=T,warning=T}
+
+m   <-0.0001
+alfa <-round(2.03897,5)
+side <- 256
+nsp <- 16
+nSimul <- 20
+time <- 20000
+
+require(plyr)
+require(dplyr)
+
+# Calculates critical probabilities for differnt side (rCTs) and critical probability for infinite lattices (rCT)
+#
+k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
+
+require(ggplot2)
+require(pander)
+
+# Create data frame to store Critical Point for lattices with different sides
+#
+#rhoCritSide <- filter(rhoCritSide,!(ColonizationRate==m & MetaNsp==16))
+rhoCritSide <- bind_rows(rhoCritSide,k$rCTs)
+filter(rhoCritSide,ColonizationRate==m & MetaNsp==16)
+
+# Create data frame to store CP for infinite lattices
+rhoCrit <- filter(rhoCrit,!(ColonizationRate==m &MetaNsp==16))
+rhoCrit <- bind_rows(rhoCrit,k$rCT)
+pandoc.table(filter(rhoCrit,ColonizationRate==m,DispersalDistance==26.66,MetaNsp==nsp),round=5)
 
 plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
 
@@ -262,7 +348,15 @@ If dispersal is lower the community should be more sensitive
 ```{r gensimul_clu_side_320_meta_T20000m0001_disp13, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
-                  # Ver @Condit2012 
+# Calculate dispersal parameter for half the mean distance from @Anand2010 DispersalDistance=13
+#
+# ana <- read.table("Data/Anand2010_DD.dat", header=T)
+# m_DD <-mean(ana$DD)
+# m_DD <- m_DD/2
+# mean_power_opt <-function(alfa,x=1) abs(((alfa-1)/(alfa-2)*x)-m_DD)
+# optimize(mean_power_opt,c(2,4))
+# mean_power(2.081069)
+
 m   <-0.0001
 alfa <- 2.081069
 side <- c(128,192,256)
@@ -335,7 +429,7 @@ pandoc.table(filter(rhoCrit,ColonizationRate==m),round=5)
 
 plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
 
-filter(rhoCritSide,Side==side,ColonizationRate==m)
+filter(rhoCritSide,Side==side,ColonizationRate==m,MetaNsp==nsp)
 
 time<-      c(20000,  20000, 30000, 30000, 20000, 20000, 20000,  5000, 5000)
 ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010,0.0050,0.0100,0.1000,1)
@@ -347,14 +441,14 @@ plotCritical_SAD(nsp,side,alfa,m,time,ReplRate,3)
 
 ## Simulations to Determine critical point for m=0.0001 Species=320 dispersal 52
 
-```{r gensimul_clu_side_320_meta_T20000m0001_disp52, eval=T,echo=F,message=T,warning=T}
+```{r gensimul_clu_side_320_meta_T20000m0001_disp52,eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
 m   <-0.0001
 alfa <- 2.01911         # 52
 side <- c(128,192,256)
 nsp <- 320
-nSimul <- 30
+nSimul <- 20
 mean_power(alfa)
 m_from_dispersalDistance(mean_power(alfa),side)
 theta_from_dispMigration(mean_power(alfa),m)
@@ -410,15 +504,16 @@ k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 require(ggplot2)
 require(pander)
 
-# Create data frame to store Critical Point for lattices with different sides
+# Filter to replace values
 #
+# rhoCritSide <- filter(rhoCritSide,!(ColonizationRate==m & MetaNsp==nsp & DispersalDistance==53.33))
 rhoCritSide <- bind_rows(rhoCritSide,k$rCTs)
-pandoc.table(filter(rhoCritSide,ColonizationRate==m),round=5)
+pandoc.table(filter(rhoCritSide,ColonizationRate==m,MetaNsp==nsp,DispersalDistance==53.33),round=5)
 
 # Create data frame to store CP for infinite lattices
-#rhoCrit <- filter(rhoCrit,ColonizationRate!=m)
+#rhoCrit <- filter(rhoCrit,!(ColonizationRate==m & MetaNsp==nsp & DispersalDistance==53.33))
 rhoCrit <- bind_rows(rhoCrit,k$rCT)
-pandoc.table(filter(rhoCrit,ColonizationRate==m),round=5)
+filter(rhoCrit,(ColonizationRate==m & MetaNsp==nsp ))
 
 
 plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
@@ -432,66 +527,25 @@ plotCritical_SAD(nsp,side,alfa,m,time,ReplRate,3)
 
 ```
 
+For this parameters Logseries and uniform metacommunities generate similar SADs (Dispersal 53)
 
 
 
-## Calculation of the critical point T=20000 DispersalDistance=26 m=0.1 no. species=320
+## Simulations to Determine critical point for m=0.01 Species=320 dispersal 26
 
-```{r pcT20000_clu_side_320_meta_m1, eval=F,echo=F,message=T,warning=T}
-
-m   <-0.1
-alfa <-round(2.03897,5)
-side <- 256
-nsp <- 320
-nSimul <- 20
-time <- 20000
-
-require(plyr)
-require(dplyr)
-
-# Calculates critical probabilities for differnt side (rCTs) and critical probability for infinite lattices (rCT)
-#
-Clu <- filter(Clusters, Side!=64)
-k <-calcCritical_prob(Clu,time,nsp,alfa,m)
-
-require(ggplot2)
-require(pander)
-
-# Update table after recalculation of critical points
-#
-#rhoCritSide <- filter(rhoCritSide,ColonizationRate!=m)
-
-rhoCritSide <- bind_rows(rhoCritSide,k$rCTs)
-pandoc.table(filter(rhoCritSide,ColonizationRate==m),round=5)
-
-# Create data frame to store Pc for infinite lattices
-#
-#rhoCrit <- filter(rhoCrit,ColonizationRate!=m)
-rhoCrit <- bind_rows(rhoCrit,k$rCT)
-pandoc.table(rhoCrit,round=5)
-filter(rhoCrit,ColonizationRate==m)
-
-plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
-
-```
-
-
-
-## Determine critical point for m=0.01
-
-```{r gensimul_clu_side_64_meta40_T20000m01, eval=F,echo=F,message=T,warning=T}
+```{r gensimul_clu_side_320_meta_T20000m0001_disp26, eval=T,echo=F,message=T,warning=T}
 setwd("Simul")
 
-m =  0.01                  # Ver @Condit2012 
-alfa=2.038974
+m   <-  0.01                  # Ver @Condit2012 
+alfa <-2.038974
 side <- 256
-nsp <- 64
-nSimul <- 40
+nsp <- 320
+nSimul <- 30
 
-ReplRate <- c(0.0000,0.0001,0.0005,0.0006,0.0007,0.0008,0.0010,0.0020,0.0030,0.0040,0.0050,0.0060,0.0070,0.0080,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1) 
+ReplRate <- c(0.0000,0.0001,0.0005,0.0010,0.0020,0.0025,0.0030,0.0035,0.0040,0.0045,0.0050,0.0060,0.0070,0.0080,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1) 
 
 
-time<-      c(10000,  10000, 20000, 30000, 30000, 30000, 30000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 10000,  5000,  5000,  5000)
+time<-      c(10000,  10000, 20000, 20000, 20000, 30000, 30000, 30000, 30000, 30000, 30000, 20000, 20000, 20000, 20000, 20000, 20000, 20000, 5000,  5000,  5000,  5000)
 
 
 p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(128,192,256),meta=c("L","U")) 
@@ -532,12 +586,12 @@ save.image()
 
 ## Calculation of the critical point T=20000 DispersalDistance=26 m=0.01
 
-```{r pcT20000_clu_side_64_meta_m01, eval=F,echo=F,message=T,warning=T}
+```{r pcT20000_clu_side_320_meta_m01_disp26, eval=F,echo=F,message=T,warning=T}
 
 m   <-0.01
 alfa <-round(2.03897,5)
 side <- 256
-nsp <- 64
+nsp <- 320
 nSimul <- 10
 time <- 20000
 
@@ -546,8 +600,7 @@ require(dplyr)
 
 # Calculates critical probabilities for differnt side (rCTs) and critical probability for infinite lattices (rCT)
 #
-Clu <- filter(Clusters, Side!=64)
-k <-calcCritical_prob(Clu,time,nsp,alfa,m)
+k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 
 require(ggplot2)
 require(pander)
@@ -557,12 +610,17 @@ require(pander)
 
 # Update CP tables after recalculation of critical points
 #
-rhoCritSide <- bind_rows(rhoCritSide,k$rCTs)
+rhoCritSide <- filter(rhoCritSide,!(ColonizationRate==m &  MetaNsp==nsp))
+
+rhoCritSide <-  bind_rows(rhoCritSide,k$rCTs)
 pandoc.table(rhoCritSide,round=5)
+
+rhoCrit <- filter(rhoCrit,!(ColonizationRate==m &  MetaNsp==nsp))
 
 rhoCrit <- bind_rows(rhoCrit,k$rCT)
 pandoc.table(rhoCrit,round=5)
 
+filter(rhoCrit,ColonizationRate==0.01)
 
 plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
 
@@ -646,8 +704,7 @@ require(dplyr)
 
 # Calculates critical probabilities for differnt side (rCTs) and critical probability for infinite lattices (rCT)
 #
-Clu <- filter(Clusters, Side!=64)
-k <-calcCritical_prob(Clu,time,nsp,alfa,m)
+k <-calcCritical_prob(Clusters,time,nsp,alfa,m)
 
 require(ggplot2)
 require(pander)
@@ -737,14 +794,6 @@ ggsave("figs/RichvsRepl_T20000_64_256_meta_m_lin.png", width=6,height=6,units="i
 
 ```{r gensimul_disp13_clu_side_64_meta_T20000m1, eval=F,echo=F,message=T,warning=T}
 
-# Calculate dispersal parameter for half the mean distance from @Anand2010 DispersalDistance=13
-#
-# ana <- read.table("Data/Anand2010_DD.dat", header=T)
-# m_DD <-mean(ana$DD)
-# m_DD <- m_DD/2
-# mean_power_opt <-function(alfa,x=1) abs(((alfa-1)/(alfa-2)*x)-m_DD)
-# optimize(mean_power_opt,c(2,4))
-# mean_power(2.081069)
 
 setwd("Simul")
 
@@ -1092,15 +1141,16 @@ plotNeutral_SpatPat(nsp,side,time,meta=c("L"),ReplRate,F)
 ## Regenerate Clusters data.frame from files in Simul folder DON'T RUN it without revision
 
 ```{r regen_clust_Side_64_meta_Time, eval=F,echo=F,message=T,warning=T}
-setwd("Simul")
 
 m    <-  0.0001
 m    <-  0.01
 m    <-  0.1
+alfa <- round(2.01911,5)     # 52
 alfa <- round(2.038974,5)   # 26
 alfa <- round(2.081069,5)   # 13
 nsp  <- 320
 nsp <- 64
+nsp<-16
 nSimul<-100
 require(dplyr)
 
@@ -1150,7 +1200,7 @@ time <-rep(time, times=nrow(p)/length(time))
 p <-cbind(p,time)
 
 setwd("Simul")
-nSimul<-100
+nSimul<-50
 Clu <- data.frame()
 for(i in 1:nrow(p))
   {
@@ -1161,16 +1211,15 @@ for(i in 1:nrow(p))
 #
 kk <-filter(Clu,ColonizationRate==m) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,Time) %>% summarise(n=n())  #%>% filter(n<50)
 
-kk1 <-filter(Clusters,ColonizationRate==m,MetaNsp==nsp) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,Time) %>% summarise(n=n()) %>% filter(n<50)
+kk1 <-filter(Clusters,ColonizationRate==m,MetaNsp==nsp,DispersalDistance==alfa) %>% group_by(MetaNsp,Side,MetaType,ReplacementRate,DispersalDistance,Time) %>% summarise(n=n()) 
 
 # Filter and replace
 #
-i<-23
 kk1 <- filter(Clusters,ColonizationRate==m & MetaNsp==nsp & Side==256)
 
 Clusters <- anti_join(Clusters,Clu)
 
-Clusters <- filter(Clusters, !(ColonizationRate==m & MetaNsp==nsp & Side==256)) #%>% distinct()
+Clusters <- filter(Clusters, !(ColonizationRate==m & MetaNsp==nsp & DispersalDistance==alfa)) #%>% distinct()
 
 Clusters <- bind_rows(Clusters, Clu)
 
@@ -1210,61 +1259,3 @@ Number of 1 = N(t) ~ t^theta
 
 To do this the model should be non saturated !!!!!!!!!!!!!!!
 
-```{r survivalTimel512_64_U5_T5000, eval=F,echo=F,message=F,warning=F}
-
-setwd("Simul")
-
-# Ver Neutral_Model_BCI.Rmd por parametros
-#
-m =  0.1
-alfa=2.038974
-side <- 512
-nsp <- 64
-nSimul <- 5
-ReplRate <- c(0,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.009,0.01,0.02,0.03,0.05,0.07,0.1,0.2,0.3,0.6,1)
-time <- 20000
-# loop con do paralell 
-
-require(doParallel)
-cn <-detectCores()
-cl <- makeCluster(cn)
-registerDoParallel(cl)
-
-CT1 <- data.frame()
-
-CT1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
-{
-    simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],T,time,nSimul,"N")
-}
-stopCluster(cl)
-
-rm(cn,cl)
-for(i in 1:length(ReplRate)){
-  kk <- simul_NeutralPlotTime(nsp,side,alfa,m,ReplRate[i],F,time,nSimul,"N")
-}
-
-# Correct CT add variable metatype
-#CT <- mutate(CT,MetaType="U")
-CT1$Time <- time
-CT <- rbind(CT,CT1)
-
-setwd(oldcd)
-
-# Calculate averages by simulations 
-
-require(dplyr)
-require(ggplot2)
-mct <- group_by(CT,Repl,MetaType) %>% summarize(meanRich = mean(meanRich),meanH=mean(meanH),
-                                       TMaxH=mean(TMaxH),TMaxRich=mean(TMaxRich),
-                                       MaxH=mean(MaxH),MaxRich=mean(MaxRich),
-                                       meanEven=mean(meanEven))
-
-# Plots of all simulations and averages H & Richness
-
-
-plot_simul_timeRH(CT,mct)
-
-rm(kk,CT1)
-save.image()
-
-```
