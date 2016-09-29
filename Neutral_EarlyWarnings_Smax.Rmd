@@ -188,7 +188,7 @@ ggsave("figs/SkewDeltaSmaxvsRepl_T20000_64_side_meta_m.png", width=6,height=6,un
 ```
 
 
-# OLD CODE : Simulate to estimate distributions of patch sizes statistics
+## Simulate to estimate distributions of patch sizes statistics
 
 
 ```{r simuldisp26_cluAll_side_64_meta30_T5000, eval=T,echo=F,message=T,warning=T}
@@ -240,7 +240,7 @@ save.image()
 ```
 
 
-# Plot the cluster sizes with fitted functions
+# Plot the cluster sizes with fitted functions DA ERROR!!!!
  
 ```{r plotFitdisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
 source("R/powerlaw/discpowerexp.R")
@@ -282,22 +282,23 @@ require(dplyr)
 Models <- ungroup(Models)
 
 
-# Power laws best models 
-#
-nMdl <-group_by(Models,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,MetaType,Rep) %>% filter(DeltaAIC>0, model=="PowExp")
-
 # Proportion of best models by model only
 #
-group_by(Models,model) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n))
+group_by(Models,model) %>% filter(DeltaAIC==0,ReplacementRate==0.0003,type==1 | type==2)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n))
 
 namType <- c("Spanning","MaxPatch","Other MaxPatch","Other Spanning")
 namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other Species")
 
-mMdl <- group_by(Models,model,type) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
+mMdl <- Models %>% group_by(model,type,ReplacementRate) %>% filter(DeltaAIC==0,type==1 | type==2,model!="NoModel")  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
+
+mMdl <- bind_rows(mMdl,data.frame(model="Exp",type=unique(mMdl$type),n=0,Frequency=0,ReplacementRate=0)) 
 
 mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc,name="Species",breaks=c("Spanning","MaxPatch","Other Spanning","Other MaxPatch")) + scale_x_discrete(labels=c("No Model","Power","Power Exp.")) + theme_bw()
-ggsave("figs/ClusModels_T5000_64_256_Logser.png", width=6,height=6,units="in",dpi=600)
+ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc,name="Species",breaks=c("Spanning","MaxPatch","Other Spanning","Other MaxPatch")) + theme_bw() + scale_x_discrete(labels=c("Exp.","Power","Power Exp.")) + facet_wrap(~ReplacementRate)
+ggsave("figs/ClusModels_T20000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
+
+
+## HICE HASTA ACA!!!!! 
 
 require(pander)
 pandoc.table(mMdl,round=2)
@@ -309,7 +310,7 @@ mMdl <- filter(Models,model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTy
 
 # Plot lambda - exponential decay rate
 #
-ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(Side~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
   theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(lambda)) + xlab(bquote(rho))+ scale_colour_manual(values=mc) +stat_quantile(alpha=0.5) + coord_cartesian(ylim=c(-0.02,0.65))
 ggsave("figs/discRateOther_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
 
@@ -344,13 +345,13 @@ rqm <- rbind(rqm,rq1)
 
 # Select Power w/exponential cutoff - spanning or most abundant  sp
 #
-mMdl <- filter(Models,model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
+mMdl <- filter(Models,model=="PowExp" | model == "Pow",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
 
 
 # Plot Power exponent - alpha  of spanning or most abundant  sp
 #
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(alpha)) + xlab(bquote(rho)) + scale_colour_manual(values=mc)+stat_quantile(alpha=0.5)+ coord_cartesian(ylim=c(1.5,3.6))
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) +  geom_point(size=0.5) + theme_bw() + facet_wrap(model~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="point") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(alpha)) + xlab(bquote(rho)) + scale_colour_manual(values=mc)+ coord_cartesian(ylim=c(1.5,3.6)) + scale_x_log10()
 ggsave("figs/discExpSpan_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
 
 # Quantile regression alpha
