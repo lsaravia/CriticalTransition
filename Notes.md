@@ -569,3 +569,10 @@ Our finding of robustness to interspecific variation in dispersal kernels provid
 @Etienne2011c The spatial limitations of current neutral models of biodiversity.
 
 binned abundance distributions are largely uninformative unless the visual fit is bad, in which case the statistical fit will be bad too. Rank-abundance distributions contain the full abundance vector of a sample and are therefore more informative. This has been argued before (e.g. [35]), but nevertheless binned SADs are still widely used. Perhaps our results will help to make this point again.
+
+
+
+-----------------
+@Kefi2013 Early warning signals also precede non-catastrophic transitions
+
+Due to statistical limitations, a trend in a single indicator is likely to be insufficient to determine the proximity to a transition in real ecosystems (Biggs et  al. 2009). Therefore combining several indicators to confidently detect an approach- ing transition (Guttal and Jayaprakash 2009, Drake and Griffen 2010, Dakos et al. 2011), or using both time series and spatial information if available (Rietkerk et  al. 2004, Kéfi et  al. 2007, 2011) can be a promising way forward. Also combining early warning signals with predictions of mechanistic models may be helpful (Lenton 2011).

@@ -533,14 +533,14 @@ For this parameters Logseries and uniform metacommunities generate similar SADs 
 
 ## Simulations to Determine critical point for m=0.01 Species=320 dispersal 26
 
-```{r gensimul_clu_side_320_meta_T20000m0001_disp26, eval=T,echo=F,message=T,warning=T}
+```{r gensimul_clu_side_320_meta_T20000m01_disp26, eval=F,echo=F,message=T,warning=T}
 setwd("Simul")
 
 m   <-  0.01                  # Ver @Condit2012 
 alfa <-2.038974
 side <- 256
 nsp <- 320
-nSimul <- 30
+nSimul <- 20
 
 ReplRate <- c(0.0000,0.0001,0.0005,0.0010,0.0020,0.0025,0.0030,0.0035,0.0040,0.0045,0.0050,0.0060,0.0070,0.0080,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1) 
 
@@ -611,6 +611,7 @@ require(pander)
 # Update CP tables after recalculation of critical points
 #
 rhoCritSide <- filter(rhoCritSide,!(ColonizationRate==m &  MetaNsp==nsp))
+filter(rhoCritSide,(ColonizationRate==m &  MetaNsp==nsp))
 
 rhoCritSide <-  bind_rows(rhoCritSide,k$rCTs)
 pandoc.table(rhoCritSide,round=5)
@@ -618,9 +619,10 @@ pandoc.table(rhoCritSide,round=5)
 rhoCrit <- filter(rhoCrit,!(ColonizationRate==m &  MetaNsp==nsp))
 
 rhoCrit <- bind_rows(rhoCrit,k$rCT)
+filter(rhoCrit,(ColonizationRate==m &  MetaNsp==nsp))
 pandoc.table(rhoCrit,round=5)
 
-filter(rhoCrit,ColonizationRate==0.01)
+filter(rhoCrit,ColonizationRate==m)
 
 plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
 
@@ -631,13 +633,64 @@ plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide)
 m   <-0.01
 alfa <-round(2.03897,5)
 ReplRate <- c(0.0000,0.0010,0.0050,0.0070,0.0100,0.0200,0.1000,0.3000,1)
-time<-      c(10000 , 30000, 20000, 20000, 20000, 20000,  5000,  5000,  5000)
+time<-      c(10000 , 20000, 20000, 20000, 20000, 20000,  5000,  5000,  5000)
 
 plotCritical_SAD(nsp,side,alfa,m,time,ReplRate,4)
 
 rm(kk,k,k1,p,mClusters,tClusters,Clu,rank)
 ```
 
+
+
+## Simulations to Determine critical point for m=0.001 Species=320 dispersal 26
+
+```{r gensimul_clu_side_320_meta_T20000m001_disp26, eval=T,echo=F,message=T,warning=T}
+setwd("Simul")
+
+m   <-  0.001                  # Ver @Condit2012 
+alfa <-2.038974
+side <- 256
+nsp <- 320
+nSimul <- 30
+
+ReplRate <- c(0.0000,0.0001,0.0004,0.0005,0.0008,0.0009,0.0010,0.0013,0.0018,0.0020,0.0025,0.0030,0.0040,0.0050,0.0060,0.0070,0.0090,0.0100,0.0150,0.0200,0.0500,0.1000,0.3000,1)
+time<-      c(20000,  20000, 20000, 30000, 30000, 30000, 30000, 30000, 30000, 30000, 30000, 30000, 30000, 20000, 20000, 20000, 20000, 20000, 10000,  5000,  5000,  5000,5000  ,5000)
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(128,192,256),meta=c("L","U")) 
+
+time <-rep(time, times=nrow(p)/length(time))
+
+p <-cbind(p,time)
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+Clu <- data.frame()
+Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
+{
+    simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,T,"N",p$meta[i],F,2)
+}
+
+# To reconstruct the data frame Clusters from the output files  
+#
+# Clu <- data.frame()
+# for(i in 1:nrow(p))
+#   {
+#   Clu <- rbind(Clu,simulNeutral_1Time(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"S",p$time[i],nSimul,F,"N",p$meta[i]))
+#   }
+
+
+stopCluster(cl)
+
+Clusters <-rbind(Clusters,Clu)
+setwd(oldcd)
+
+rm(cn,cl,Clu)
+
+save.image()
+```
 
 ## Simulatios to Determine critical point for m=0.1
 

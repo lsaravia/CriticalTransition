@@ -10,35 +10,6 @@ figs/HvsRho_T20000_64_256_L_IniCond.png)
 figs/HvsRho_Time_64_256_L_Filled.png)
 
 
-## Time series m=0.1 Filled Empty 
-
-\begin{figure}[H]
-\centering
-\begin{tabular}{cc}
-Filled & Empty \\
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled1-25.png}} &
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty1-25.png}} \\
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled1-21.png}} &
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty1-21.png}} \\
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled1-17.png}} &
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty1-17.png}} \\
-\end{tabular}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\begin{tabular}{cc}
-Filled & Empty \\
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled1-13.png}} &
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty1-13.png}} \\
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled1-9.png}} &
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty1-9.png}} \\
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled1-5.png}} &
-\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty1-5.png}} \\
-\end{tabular}
-\end{figure}
-
-
 ## Time series m=0.01 Filled & Empty initial conditions 
 
 \begin{figure}[H]
@@ -66,6 +37,35 @@ Filled & Empty \\
 \subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty01-5.png}} \\
 \end{tabular}
 \end{figure}
+
+## Time series m=0.001 Filled Empty 
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{cc}
+Filled & Empty \\
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled001-25.png}} &
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty001-25.png}} \\
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled001-21.png}} &
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty001-21.png}} \\
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled001-17.png}} &
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty001-17.png}} \\
+\end{tabular}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{cc}
+Filled & Empty \\
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled001-13.png}} &
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty001-13.png}} \\
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled001-9.png}} &
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty001-9.png}} \\
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Filled001-5.png}} &
+\subfloat{\includegraphics[width=3.1in]{figure/plotsimul256_64_L5_T20000Empty001-5.png}} \\
+\end{tabular}
+\end{figure}
+
 
 ## Time series m=0.0001 Filled Empty
 

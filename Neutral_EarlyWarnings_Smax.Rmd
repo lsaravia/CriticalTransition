@@ -208,13 +208,16 @@ alfa <- 2.038974
 side <- 512
 nsp <- 64
 nSimul <- 10
-time <- 10000
-ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010,0.01)
 
-time <- 20000
-ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010)
+time     <- c(20000 ,20000 ,20000 ,20000 ,20000, 15000)
+ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010, 0.01)
+
 
 p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("U","L")) 
+
+time <-rep(time, times=nrow(p)/length(time))
+
+p <-cbind(p,time)
 
 require(doParallel)
 cn <-detectCores()
@@ -224,7 +227,7 @@ registerDoParallel(cl)
 Mdl <- data.frame()
 Mdl <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
 {
-    simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",time,nSimul,TRUE,"N",p$meta[i],FALSE,2)
+    simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",p$time[i],nSimul,TRUE,"N",p$meta[i],FALSE,2)
     #simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",time,nSimul,FALSE,"N",p$meta[i],FALSE,2)
 }
 Mdl$Side <- side
@@ -258,12 +261,15 @@ alfa <- 2.038974
 side <- 256
 nsp <- 64
 nSimul <- 10
-time <- 10000
-ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010,0.01)
-p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=c(256),meta=c("U","L")) 
+
+time     <- c(20000 ,20000 ,20000 ,20000 ,20000, 15000)
+ReplRate <- c(0.0000,0.0001,0.0003,0.0005,0.0010, 0.01)
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("U","L")) 
+time <-rep(time, times=nrow(p)/length(time))
+p <-cbind(p,time)
 
 for(i in 1:nrow(p)){
-  plotNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],time,p$meta[i],Models)
+  plotNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],p$time[i],p$meta[i],Models)
 }
 setwd(oldcd)
 
@@ -279,119 +285,79 @@ setwd(oldcd)
 require(ggplot2)
 require(plyr)
 require(dplyr)
+options("scipen"=100, "digits"=6)
+
 Models <- ungroup(Models)
 
 
 # Proportion of best models by model only
 #
-group_by(Models,model) %>% filter(DeltaAIC==0,ReplacementRate==0.0003,type==1 | type==2)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n))
+group_by(Models,Side,model) %>% filter(DeltaAIC==0,ReplacementRate==0.01,type==1 | type ==2)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n))
 
 namType <- c("Spanning","MaxPatch","Other MaxPatch","Other Spanning")
 namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other Species")
 
-mMdl <- Models %>% group_by(model,type,ReplacementRate) %>% filter(DeltaAIC==0,type==1 | type==2,model!="NoModel")  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
+mMdl <- Models %>% group_by(model,type,ReplacementRate) %>% filter(DeltaAIC==0,type==1 | type==2,Side==512,model!="NoModel")  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
 
 mMdl <- bind_rows(mMdl,data.frame(model="Exp",type=unique(mMdl$type),n=0,Frequency=0,ReplacementRate=0)) 
+mMdl$model <- factor(mMdl$model,levels=c("Exp","Pow","PowExp"))
 
 mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc,name="Species",breaks=c("Spanning","MaxPatch","Other Spanning","Other MaxPatch")) + theme_bw() + scale_x_discrete(labels=c("Exp.","Power","Power Exp.")) + facet_wrap(~ReplacementRate)
-ggsave("figs/ClusModels_T20000_64_side_meta.png", width=6,height=6,units="in",dpi=600)
+
+ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc,name="Species",breaks=c("Spanning","MaxPatch","Other Spanning","Other MaxPatch")) + theme_bw() + scale_x_discrete(labels=c("Exp.","Power","Power Exp.")) + xlab("") +theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1))
+
+ggsave("figs/ClusBestModel_T20000_64_512_meta.png", width=6,height=6,units="in",dpi=600)
 
 
-## HICE HASTA ACA!!!!! 
+
+# General linear model on alfa
+#
+mm <- filter(Models,model!="NoModel",Side==512,type==1 | type ==2,DeltaAIC==0) %>% mutate(type=namType[type])
+
+am <-glm(alfa ~ MetaType+model+type+ReplacementRate,data=mm)
+summary(am)
+re <-resid(am)
+plot(am, which=1)
+
+# Kruskal wallis test on alfa
+#
+
+kruskal.test(alfa~factor(MetaType),data=mm)
+kruskal.test(alfa~factor(model),data=mm)
+kruskal.test(alfa~factor(type),data=mm)
+kruskal.test(alfa~factor(ReplacementRate),data=mm)
+
+boxplot(mm$alfa~mm$MetaType)
+boxplot(mm$alfa~mm$model)
+boxplot(mm$alfa~mm$type)
+plot(mm$alfa~mm$ReplacementRate)
+
+require(multcomp)
+summary(glht(am, mcp(model="Tukey")))
+
+#
+# No differences bteween Metacommunity or type (Spanning or max patch)
+#
+# Make a table with average parameter values
+#
+names(mm)
+mm <- mm %>% group_by(model,ReplacementRate)  %>% summarise(n=n(),xmin=mean(xmin),alfa=mean(alfa),rate=mean(rate)) %>%  arrange(model,ReplacementRate)
 
 require(pander)
-pandoc.table(mMdl,round=2)
-
-
-# Select Power w/exponential cutoff other sp most abundant or other spanning
-#
-mMdl <- filter(Models,model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-
-# Plot lambda - exponential decay rate
-#
-ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(Side~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(lambda)) + xlab(bquote(rho))+ scale_colour_manual(values=mc) +stat_quantile(alpha=0.5) + coord_cartesian(ylim=c(-0.02,0.65))
-ggsave("figs/discRateOther_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
-
-# Quantile regression lambda
-#
-#
-rqm <-group_by(mMdl,type,MetaType) %>%
-      do(as.data.frame(do.call(rbind,
-                               lapply(summary(rq(rate~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
-                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="lambda")
-
+options("scipen"=100, "digits"=4)
+pandoc.table(mm,round=4)
 
 # Plot power exponent alpha
 #
-mMdl <- filter(Models,model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
+mMdl <- filter(Models,model=="PowExp" | model == "Pow",type==1 | type==2, DeltaAIC==0) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
 
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=median,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(alpha)) + xlab(bquote(rho))+ scale_colour_manual(values=mc)+stat_quantile(alpha=0.5)+ coord_cartesian(ylim=c(1.1,2.1))
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=model)) +  geom_point(size=0.5) + theme_bw() +  stat_summary(fun.y=mean,geom="line") + scale_x_continuous(breaks=c(0.0000,0.0001,0.0003,0.0005,0.0010, 0.01)) +
+  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(alpha)) + xlab(bquote(rho)) + scale_colour_manual(values=mc)+ coord_cartesian(ylim=c(1.5,4)) 
 
-ggsave("figs/discExpOther_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
-
-
-# Quantile regression alpha
-#
-#
-rq1 <-group_by(mMdl,type,MetaType) %>%
-      do(as.data.frame(do.call(rbind,
-                               lapply(summary(rq(alfa~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
-                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="alpha")
-
-rqm <- rbind(rqm,rq1)
-
-# Select Power w/exponential cutoff - spanning or most abundant  sp
-#
-mMdl <- filter(Models,model=="PowExp" | model == "Pow",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-
-
-# Plot Power exponent - alpha  of spanning or most abundant  sp
-#
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=type)) +  geom_point(size=0.5) + theme_bw() + facet_wrap(model~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="point") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(alpha)) + xlab(bquote(rho)) + scale_colour_manual(values=mc)+ coord_cartesian(ylim=c(1.5,3.6)) + scale_x_log10()
-ggsave("figs/discExpSpan_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
-
-# Quantile regression alpha
-#
-#
-rq1 <-group_by(mMdl,type,MetaType) %>%
-      do(as.data.frame(do.call(rbind,
-                               lapply(summary(rq(alfa~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
-                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="alpha")
-
-rqm <- rbind(rqm,rq1)
-
-# Select Power w/exponential cutoff - spanning or most abundant  sp
-#
-mMdl <- filter(Models,model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-
-# Plot Exponential rate - lambda of spanning or  most abundant sp
-#
-ggplot(mMdl,aes(x=ReplacementRate,y=rate,colour=type)) + geom_point() +  theme_bw() + facet_wrap(~MetaType,scales="free_y") + stat_summary(fun.y=mean,geom="line",colour=mc[5],linetype="dashed") + scale_x_continuous(breaks=c(0,0.0010,0.0020,0.0030,0.005,0.01)) +
-  theme(axis.text.x=element_text(angle=90,vjust=0.5)) + ylab(bquote(lambda)) + xlab(bquote(rho))+ scale_colour_manual(values=mc)+stat_quantile(alpha=0.5)+ coord_cartesian(ylim=c(-0.02,0.32))
-ggsave("figs/discRateSpan_T5000_64_256_meta.png", width=7,height=4,units="in",dpi=600)
-
-# Quantile regression lambda
-#
-#
-rq1 <-group_by(mMdl,type,MetaType) %>%
-      do(as.data.frame(do.call(rbind,
-                               lapply(summary(rq(rate~ReplacementRate,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
-                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="lambda")
-
-rqm <- rbind(rqm,rq1)
-rqm$slope<-c(F,T)
-names(rqm)[6]<-"pvalue"
-rqm <- filter(rqm, slope==T ) %>% #rename(species=type) %>%
-  select(MetaType,species,param,Tau,Value:pvalue)
-
-require(pander)
-pandoc.table(rqm,round=2)
-group_by(rqm,MetaType,type,param) %>% filter(pvalue<0.05) %>% summarise(n=n())
-
+ggsave("figs/AlfaVsRho_T20000_64_side_meta.png", width=7,height=4,units="in",dpi=600)
+ 
+# Plot exponential decay rate
+ 
 
 ```
 
