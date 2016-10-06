@@ -1364,7 +1364,10 @@ simulNeutral_1Time <- function(nsp,side,disp,migr,repl,clus="S",time=1000,sims=1
   den <-readWideDensityOut(bname)
   den <-den[, c("GrowthRate","MortalityRate","DispersalDistance","ColonizationRate","ReplacementRate","Time", 
                 "Richness","H")]
+  den <- filter(den, ColonizationRate==migr,DispersalDistance==disp)
+  
   clu <-readClusterOut(bname)
+  clu <-filter(clu, ColonizationRate==migr,DispersalDistance==disp)
   if(nrow(den)<nrow(clu)) {
     clu <- clu[1:nrow(den),]
   } else if(nrow(den)>nrow(clu)) {
@@ -2544,7 +2547,7 @@ plotCritical_Clusters<-function(Clusters,time,metaNsp,alfa,m, k,limx=0.01,exclud
     ggplot(tClusters, aes(x=ReplacementRate, y=Richness)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() + stat_summary(fun.y=mean,geom="line",colour=colp[1])+ facet_grid(Side ~ MetaType,scales="free_y") +xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
   )
   if(sav){
-    fname<-paste0("figs/RichvsRepl_T",time,"_",metaNsp,"_side_meta_m",m,"png")
+    fname<-paste0("figs/RichvsRepl_T",time,"_",metaNsp,"_side_meta_m",m,".png")
     ggsave(fname, width=6,height=6,units="in",dpi=600)
   }
 
