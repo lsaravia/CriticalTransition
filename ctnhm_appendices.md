@@ -15,6 +15,37 @@ In this process we have to find the scale that give us the maximal occupation of
 
 ## Appendix Tables 
 
+
+---------------------------------------------------------------------------
+ Side   MetaType    beforepc          $S_{max}$               $RS_{max}$ 
+------ ---------- ------------- -------------------- ----------------------
+ 128   Logseries  $rho < rho_c$        0.938                 0.973         
+
+ 128   Logseries  $rho > rho_c$        0.147                 0.230         
+
+ 128    Uniform   $rho < rho_c$        0.951                 0.985         
+
+ 128    Uniform   $rho > rho_c$        0.127                 0.205         
+
+ 192   Logseries  $rho < rho_c$        0.934                 0.972         
+
+ 192   Logseries  $rho > rho_c$        0.020                 0.040         
+
+ 192    Uniform   $rho < rho_c$        0.942                 0.978         
+
+ 192    Uniform   $rho > rho_c$        0.031                 0.056         
+
+ 256   Logseries  $rho < rho_c$        0.928                 0.967         
+
+ 256   Logseries  $rho > rho_c$        0.002                 0.008         
+
+ 256    Uniform   $rho < rho_c$        0.940                 0.974         
+
+ 256    Uniform   $rho > rho_c$        0.002                 0.009         
+---------------------------------------------------------------------------
+
+Table: Size of the largest patch relative to the total area $S_{max}$ before the critical point $\rho < \rho_c$ and after the critical point $\rho > \rho_c$, and for the largest patch relative to the total species area $RS_{max}$. The parameters used were the specified in the first row of table 1. 
+
 ----------------------------------------
                $\alpha$
   $m$      (mean dist.)  $\theta$    $I$  
@@ -47,36 +78,36 @@ Table: Equivalence of spatially explicit parameters $m$ and $\alpha$ (Mean dispe
 Metacomm.  Metacomm.  Mean           $m$  $\rho_c^\infty$  SE$\rho_c$    
  species     type     Distance
 --------- ---------- ---------- --------- --------------- -----------
-   16         L          26.66    0.00016        0.00138     0.00012
-   
-   16         U          26.66    0.00016        0.00101     0.00004
-   
-   64         L          26.66    0.00016        0.00156     0.00004
-   
-   64         U          26.66    0.00016        0.00128     0.00007
-   
-   256        L          26.66    0.00016        0.00189     0.00015
-   
-   256        U          26.66    0.00016        0.00161     0.00013
-   
-   64         L          13.34    0.00016        0.00168     0.0002 
-   
-   64         U          13.34    0.00016        0.00131     0.00011
-   
-   64         L          6.67     0.00016        0.0016      0.00025
-   
-   64         U          6.67     0.00016        0.00124     0.00022
-   
-   64         L          26.66     0.0016        0.00286     0.00009
-   
-   64         U          26.66     0.0016        0.00178     0.00002
-   
-   64         L          26.66    0.01596        0.01244     0.00004
-   
-   64         U          26.66    0.01596        0.01151     0.00102
---------------------------------------------------------------------
+   16         L          26.66    0.0001       0.00017      0.00003
 
-Table: Critical points $\rho_c^\infty$ for infinite lattices. Where *Mean Dist.* is the mean dispersal distance,  $m$ is the migration parameter, and SE $p_c$ the standar error of the critical point.  
+   16         U          26.66    0.0001       0.00026      0.00001
+
+   64         L          26.66    0.0001       0.00029      0.00001
+
+   64         U          26.66    0.0001       0.00026      0.00000
+
+   320        L          53.33    0.0001       0.00028      0.00002
+
+   320        L          26.66    0.0001       0.00026      0.00002
+
+   320        L          13.34    0.0001       0.00027      0.00000
+
+   320        L          26.66    0.0010       0.00052      0.00008
+
+   320        L          26.66    0.0100       0.00646      0.00000
+
+   320        U          53.33    0.0001       0.00026      0.00001
+
+   320        U          26.66    0.0001       0.00024      0.00001
+
+   320        U          13.34    0.0001       0.00026      0.00001
+
+   320        U          26.66    0.0010       0.00062      0.00007
+
+   320        U          26.66    0.0100       0.00640      0.00000
+---------------------------------------------------------------------
+
+Table: Critical points $\rho_c^\infty$ for infinite lattices. Where *Mean Dist.* is the mean dispersal distance,  $m$ is the migration parameter, and SE $p_c$ the standard error of the critical point.  
 
 \newpage
 
@@ -84,20 +115,20 @@ Table: Critical points $\rho_c^\infty$ for infinite lattices. Where *Mean Dist.*
  Metacomm.   Variable     Delta          Delta    Relative 
  Type                   $\rho_c^\infty$ Variable Variation
 ---------- ------------ --------------- -------- ----------
-    L       Dispersal      0.07            0.75      0.1   
+    L       Dispersal      0.05            0.75    0.07    
 
-    U       Dispersal      0.06            0.75      0.08  
+    U       Dispersal      0.07            0.75    0.09    
 
-    L        MetaNsp       0.27            0.94      0.29  
+    L        MetaNsp       0.42            0.95    0.44    
 
-    U        MetaNsp       0.37            0.94      0.39  
+    U        MetaNsp       0.07            0.95    0.07    
 
-    L      Colonization    0.87            0.99      0.88  
+    L      Colonization    0.96            0.99    0.97    
 
-    U      Colonization    0.89            0.99      0.9   
+    U      Colonization    0.96            0.99    0.97    
 -----------------------------------------------------------
 
-Table: Relative variation of the critical point for infinite lattices $\rho_c^\infty$. See methods for details about simulations and table 1 for the ranges of parameters. We used metacommunitis with two different species abundance distributions (SAD): *L* logseries SAD; and *U* uniform SAD.
+Table: Relative variation of the critical point for infinite lattices $\rho_c^\infty$. See methods for details about simulations and table 1 for the ranges of parameters. We used metacommunities with two different species abundance distributions (SAD): *L* logseries SAD; and *U* uniform SAD.
 
 \newpage
 
@@ -246,7 +277,7 @@ Table: Median regression of patch distribution model parameters vs. Year for BCI
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=6.5in]{figs/SAD_T20000_64_256_meta_m0001.png}
+\includegraphics[width=6.5in]{figs/SAD_T20000_320_256_meta_m0001.png}
 \caption{Rank abundance diagrams (RADs) for simulated neutral/niche model communities as a function of the intensity of competition $\rho$. Except for $\rho=0$ the values in the legend are upper limits. The RADs are averages of 50 simulations. Metacommunities have 64 species and two different species abundance distributions (SAD): logseries SAD (L); and uniform SAD (U); the black line is the closest to the critical point . The size of the grid was 256*256 sites and the other parameters used are $m$=0.0001, dispersal distance=26.66.}
 \end{figure}
 

@@ -336,7 +336,7 @@ require(multcomp)
 summary(glht(am, mcp(model="Tukey")))
 
 #
-# No differences bteween Metacommunity or type (Spanning or max patch)
+# No differences between Metacommunity or type (Spanning or max patch)
 #
 # Make a table with average parameter values
 #

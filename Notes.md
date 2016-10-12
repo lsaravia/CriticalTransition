@@ -14,6 +14,10 @@ The exponential tail being may not be a result of the finite space in the simula
 
 Delete quantil regressions
 
+### Para agregar a la discusion
+
+Ni los tradeoff ni el dispersal pueden cambiar la sensibilidad a la intensidad de la competencia, por lo tanto lo mas probable es que la intensidad de la competencia en comunidades naturales sea muy baja.
+
 
 ### percolation
 
