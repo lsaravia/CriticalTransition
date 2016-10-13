@@ -275,23 +275,15 @@ Table: Median regression of patch distribution model parameters vs. Year for BCI
 
 ## Appendix Figures
 
+
+![Largest patch for a spatial neutral/niche model as a function of the intensity of competition $\rho$. The columns represent two different metacommunity types: Logseries, a metacommunity with logseries species abundance distribution (SAD); Uniform, a metacommunity with a uniform SAD. The columns represent the largest patch relative to total area $S_{max}$ and the largest patch relative to the species area $RS_{max}$. The vertical line is the critical point: the value for parameter $\rho$ where a phase transition between neutral and niche phases occurs. The parameters used were: side of the simulation lattice was 256 sites, the number of species in the metacomunity was 320, the metacommunity migration $m$=0.0001 and the dispersal distance = 26.66](figs/MaxClusRepl_T20000_320_side256_meta_m0.0001.png)
+
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/SAD_T20000_320_256_meta_m0001.png}
 \caption{Rank abundance diagrams (RADs) for simulated neutral/niche model communities as a function of the intensity of competition $\rho$. Except for $\rho=0$ the values in the legend are upper limits. The RADs are averages of 50 simulations. Metacommunities have 64 species and two different species abundance distributions (SAD): logseries SAD (L); and uniform SAD (U); the black line is the closest to the critical point . The size of the grid was 256*256 sites and the other parameters used are $m$=0.0001, dispersal distance=26.66.}
 \end{figure}
-
-
-\begin{figure}[H]
-\centering
-\begin{tabular}{cc}
-\subfloat{\includegraphics[width=3.3in]{figs/CritProb_Migr_T5000_64_meta.png}} &
-\subfloat{\includegraphics[width=3.3in]{figs/CritProb_Disp_T5000_64_meta.png}} \\
-\subfloat{\includegraphics[width=3.3in]{figs/CritProb_MetaNsp_T5000_64_meta.png}} &
-\end{tabular}
-\caption{Critical point for infinite lattices $\rho_c^\infty$ in function of migration from metacommunity,local dispersal distance and number of species in the metacommunity. The parameters used in the simulations are specified in table 1. Two kinds of metacommunities with different species abundance distributions (SAD) were used: *L*, logseries SAD; and *U*, uniform SAD.}
-\end{figure}
-
 
 
 \begin{figure}[H]

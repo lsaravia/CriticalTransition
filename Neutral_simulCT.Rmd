@@ -908,7 +908,7 @@ time <- 20000
 plotCritical_Clusters(Clusters, time,nsp,alfa,m,rhoCritSide,0.01,0,T)
 
 
-plotCritical_HS_rho(Clusters, nsp,alfa,m,side,rhoCritSide,0.01,F)
+plotCritical_HS_rho(Clusters, nsp,alfa,m,side,rhoCritSide,0.003,F)
 #
 # Tables for paper
 #

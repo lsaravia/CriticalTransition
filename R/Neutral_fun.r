@@ -2720,12 +2720,12 @@ plotCritical_HS_rho<-function(Clusters,metaNsp,alfa,m, side, k,limx=0.01,sav=F)
   
   # Filter Clusters data.frame
   #
-  tClusters <- Clusters %>% filter(MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m,Side==side)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
+  tClusters <- Clusters %>% filter(MetaNsp==metaNsp,DispersalDistance==alfa,ColonizationRate==m,Side==side)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform"))) 
 
   # Create data frame for plots
   #
   require(tidyr)  
-  tt <- tClusters %>% gather(DivType,DivValue,H,Richness)
+  tt <- tClusters %>% gather(DivType,DivValue,H,Richness) %>% mutate(ReplacementRate=ifelse(ReplacementRate==0,2e-5,ReplacementRate))
   tt$DivType <- factor(tt$DivType, labels = c("Shannon Diversity", "Species Richness"))
   require(RColorBrewer)
   colp <-brewer.pal(8,"Dark2")
