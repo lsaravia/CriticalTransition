@@ -136,20 +136,20 @@ Table: Relative variation of the critical point for infinite lattices $\rho_c^\i
 --------------------------------------
  model       type       n   Frequency 
 ------- -------------- --- -----------
-NoModel    Spanning    91     0.22    
+NoModel     Spanning   84     0.27    
 
-  Pow      Spanning    21     0.05    
+  Pow       Spanning   16     0.05    
 
-  Pow      MaxPatch    13     0.03    
+  Pow       MaxPatch   44     0.14    
 
-PowExp     Spanning    42      0.1    
+PowExp      Spanning   18     0.06    
 
-PowExp     MaxPatch    137    0.33    
+PowExp      MaxPatch   147    0.48    
 
-PowExp  Other MaxPatch 47     0.11    
+Exp         Spanning    0     0.00
 
-PowExp  Other Spanning 60     0.15    
---------------------------------------
+Exp         MaxPatch    0     0.00
+-------------------------------------
 
 Table: Proportion of best models for patch size distributions from simulated neutral/niche model communities. We fitted 3 models to the patch distributions: exponential, power law (Pow) and power law with exponential cutoff (PowExp). The best model was selected using the Akaike information criteria. We made 10 simulations in a range of $\rho$ (see methods) and we used the following parameters: metacommunities have 64 species and two different species abundance distributions (SAD): logseries SAD; and uniform SAD; The size of the grid was 256*256 sites, migration=0.00016, and dispersal distance=26.66.
 
@@ -158,8 +158,12 @@ Table: Proportion of best models for patch size distributions from simulated neu
 
 ## Appendix Figures
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=6.5in]{figs/{MaxClusRepl_T20000_320_side256_meta_m0.0001}.png}
+\caption{Largest patch for a spatial neutral/niche model as a function of the intensity of competition $\rho$. The columns represent two different metacommunity types: Logseries, a metacommunity with logseries species abundance distribution (SAD); Uniform, a metacommunity with a uniform SAD. The columns represent the largest patch relative to total area $S_{max}$ and the largest patch relative to the species area $RS_{max}$. The vertical line is the critical point: the value for parameter $\rho$ where a phase transition between neutral and niche phases occurs. The parameters used were: side of the simulation lattice was 256 sites, the number of species in the metacomunity was 320, the metacommunity migration $m$=0.0001 and the dispersal distance = 26.66.}
+\end{figure}
 
-![Largest patch for a spatial neutral/niche model as a function of the intensity of competition $\rho$. The columns represent two different metacommunity types: Logseries, a metacommunity with logseries species abundance distribution (SAD); Uniform, a metacommunity with a uniform SAD. The columns represent the largest patch relative to total area $S_{max}$ and the largest patch relative to the species area $RS_{max}$. The vertical line is the critical point: the value for parameter $\rho$ where a phase transition between neutral and niche phases occurs. The parameters used were: side of the simulation lattice was 256 sites, the number of species in the metacomunity was 320, the metacommunity migration $m$=0.0001 and the dispersal distance = 26.66](figs/MaxClusRepl_T20000_320_side256_meta_m0.0001.png)
 
 
 \begin{figure}[H]
@@ -169,10 +173,17 @@ Table: Proportion of best models for patch size distributions from simulated neu
 \end{figure}
 
 
+
 \begin{figure}[H]
 \centering
-\includegraphics[width=6.5in]{figs/AlfaVsRho_T20000_64_side_meta.png}
-\caption{Power law exponent $\alpha$ for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that has the biggest patch (MaxPatch) or species that percolate and form a  spanning cluster (Spanning). We made 10 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point for logseries is 0.0013, for uniform metacommunities is 0.0011. The size of the grid was 512*512 sites and the other parameters used were migration=0.0001, dispersal distance=26.66.}
+\includegraphics[width=6.5in]{figs/AlfaVsRho_T20000_64_512_meta.png}
+\caption{Power law exponent $\alpha$ for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that has the biggest patch (MaxPatch) or species that percolate and form a  spanning cluster (Spanning). We made 30 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point is between 0.00026-0.00024. The size of the grid was 512*512 sites and the other parameters used were migration=0.0001, dispersal distance=26.66.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=6.5in]{figs/ExpRateVsRho_T20000_64_512_meta.png}
+\caption{Exponential decay rate of the Power law with exponential cutoff model for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of species that has the biggest patch (MaxPatch) or species that percolate and form a  spanning cluster (Spanning). We made 30 simulations for each $\rho$, metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD; the critical point is between 0.00026-0.00024. The size of the grid was 512*512 sites and the other parameters used were migration=0.0001, dispersal distance=26.66.}
 \end{figure}
 
 

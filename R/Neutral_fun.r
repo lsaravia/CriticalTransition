@@ -1588,7 +1588,7 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
   
   # Read Cluster sizes
   clu <-readClusterOut(bname,clus)
-  print(bname)
+
   # Split repetition of simulations  
   #
   # I divide by 10 because there are 10 outputs for each repetition
@@ -1598,6 +1598,9 @@ simulNeutral_Clusters <- function(nsp,side,disp,migr,repl,clus="A",
   
   # Spanning species
   clu1 <-group_by(clu,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>% slice(1:1) %>% rename(Spanning=ClusterSize)
+  
+  # Print name and repetitions
+  cat(bname," - ", nrow(clu1),"\n")
   
   clu <-group_by(clu,MortalityRate,DispersalDistance,ColonizationRate,ReplacementRate,Rep,Time) %>% slice(2:n()) %>% arrange(desc(ClusterSize))
   
