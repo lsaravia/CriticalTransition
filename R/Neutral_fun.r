@@ -1399,7 +1399,8 @@ simul_NeutralSAD <- function(nsp,side,disp,migr,ReplRate,clus="S",time=1000,meta
 {
   if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
   if(!require(untb))  stop("Untb package not installed")
-
+  options("scipen"=0, "digits"=4)
+  
   sad <- data.frame()
   for(i in 1:length(ReplRate)) {
 
@@ -1425,7 +1426,8 @@ simul_NeutralSAD <- function(nsp,side,disp,migr,ReplRate,clus="S",time=1000,meta
 
     # Always delete spatial patterm sed file
     #
-    system(paste0("rm ",bname,"-",formatC(time,width=4,flag=0),".sed"))
+    #system(paste0("rm ",bname,"-",formatC(time,width=4,flag=0),".sed"))
+    system(paste0("rm ",bname,"-",time,".sed"))
     
 
     genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,ReplRate[i])
@@ -2112,10 +2114,14 @@ readDq_fit <- function(side,nsp,sad="U") {
 #
 plotNeutral_SpatPat<-function(nsp,side,time,meta,ReplRate,spanClu=F)
 {
+  setwd("Simul")
+  
   require(ggplot2)
-  options("scipen"=0, "digits"=4)
+  options("scipen"=0, "digits"=6)
   p <-expand.grid(MetaType=meta,Repl=ReplRate) 
-
+  time <-rep(time, times=nrow(p)/length(time))
+  p <-cbind(p,time)
+  
   spa <- data.frame()
   for(i in 1:nrow(p)) {
     if(toupper(p$MetaType[i])=="L") {
@@ -2124,12 +2130,14 @@ plotNeutral_SpatPat<-function(nsp,side,time,meta,ReplRate,spanClu=F)
       bname <- paste0("neuUnif",nsp,"_",side,"R", p$Repl[i])
     }
     
-    fname <- paste0(bname,"-",formatC(time,width=4,flag=0),".sed")
+    #fname <- paste0(bname,"-",formatC(p$time[i],width=6,flag=0),".sed")
+    fname <- paste0(bname,"-",p$time[i],".sed")
     
     sp1 <-read_sed2xy(fname)
     sp1$MetaType <- p$MetaType[i] 
     sp1$Repl <- p$Repl[i]
-    sp1$Species <- paste("Species:",length(unique(sp1$v)))
+    #sp1$Species <- paste("S:",length(unique(sp1$v)))
+    sp1$Species <- length(unique(sp1$v))
     
     ## assume the last is the one with sed
     #
@@ -2148,10 +2156,12 @@ plotNeutral_SpatPat<-function(nsp,side,time,meta,ReplRate,spanClu=F)
     spa <-  rbind(spa,sp1)
     
   }
-
+  
+  setwd(oldcd)
+  
   mc <- c("#b35806","#e08214","#fdb863","#fee0b6","#f7f7f7","#d8daeb","#b2abd2","#8073ac","#542788")
   
-  options("scipen"=Inf, "digits"=4)
+  options("scipen"=999, "digits"=6)
   
   if(spanClu){  
     #lvl <- unique(spa$Type)
@@ -2169,16 +2179,18 @@ plotNeutral_SpatPat<-function(nsp,side,time,meta,ReplRate,spanClu=F)
       theme_bw() + coord_equal() 
   #  g <- g + scale_fill_gradient(low="red", high="green", guide=F) +
   #  g <- g + scale_fill_grey(guide=F) +
-    g <- g + scale_fill_gradientn(colours=mc,guide="colourbar",name="Species no.") + #guide=F
+#    g <- g + scale_fill_gradientn(colours=mc,guide="colourbar",name="") + #guide=F
+      g <- g + scale_fill_distiller(type="div",palette=4,guide="colourbar",name="") + #guide=F
       scale_x_continuous(expand=c(.01,.01),breaks=NULL) + 
       scale_y_continuous(expand=c(.01,.01),breaks=NULL) +  
       labs(x=NULL, y=NULL) 
   }
   if(length(meta)>1) {
     g <- g + facet_grid( Repl ~ MetaType)
-  } else { 
+  } else {
+   
     #  g <- g + facet_wrap( ~ Repl + Species,ncol=2)
-    g <- g + facet_wrap( ~ Repl + Species ,ncol=2)
+    g <- g + facet_wrap( ~ Repl+Species  ,ncol=2, labeller=label_bquote(rho:.(Repl)~~S:.(Species)))
   }
   print(g)
   

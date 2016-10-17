@@ -136,15 +136,15 @@ Table: Relative variation of the critical point for infinite lattices $\rho_c^\i
 --------------------------------------
  model       type       n   Frequency 
 ------- -------------- --- -----------
-NoModel     Spanning   84     0.27    
+NoModel     Spanning   121    0.28    
 
-  Pow       Spanning   16     0.05    
+  Pow       Spanning   29     0.07    
 
-  Pow       MaxPatch   44     0.14    
+  Pow       MaxPatch   61     0.14    
 
-PowExp      Spanning   18     0.06    
+PowExp      Spanning   22     0.05    
 
-PowExp      MaxPatch   147    0.48    
+PowExp      MaxPatch   196    0.46    
 
 Exp         Spanning    0     0.00
 

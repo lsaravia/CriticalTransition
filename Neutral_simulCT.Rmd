@@ -957,8 +957,12 @@ side <- 256
 nsp <- 64
 nSimul <- 1
 
-time<-      c(20000,  20000, 30000, 20000, 20000, 20000,  5000, 5000, 5000)
-ReplRate <- c(0.0000,0.0001,0.0005,0.0010,0.0050,0.0100,0.1000,0.3000,1)
+time<-      c(20000,  20000, 20000, 30000, 30000, 20000, 20000, 20000)
+ReplRate <- c(0.0000,0.0001,0.0001,0.0003,0.0005,0.0010,0.0050,0.0100)
+
+time<-      c(30000)
+ReplRate <- c(0.00025)
+
 
 p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("U","L")) 
 time <-rep(time, times=nrow(p)/length(time))
@@ -978,6 +982,7 @@ Clu <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
 stopCluster(cl)
 
 rm(cn,cl,Clu)
+setwd(oldcd)
 
 #save.image()
 
@@ -986,32 +991,30 @@ rm(cn,cl,Clu)
 #
 
 ReplRate <- c(0.0000,0.0001,0.0005,0.0010,0.0050,0.0100,0.1000,0.3000,1)
+time<-      c(20000,  20000, 30000, 20000, 20000, 20000,  5000, 5000, 5000)
 
-ReplRate <- c(0.0000,0.0001,0.0005,0.0010)
+ReplRate <- c(0.0000,0.0001,0.00025,0.0003)
+time<-      c(20000,  20000,  30000, 30000)
+
 ReplRate <- c(0.0000,0.0005,0.0010,0.0050)
+time<-      c(20000,  30000, 20000, 20000)
 
 #ReplRate <- c(0.1)
 options("scipen"=0, "digits"=4)
 
 # only the spanning species
 plotNeutral_SpatPat(nsp,side,time,meta=c("U"),ReplRate,T)
-setwd(oldcd)
-ggsave("figs/SpatSpan_Repl_T5000_64_256_Unif.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/SpatSpan_Repl_T20000_64_256_Unif.png", width=6,height=6,units="in",dpi=600)
 
-setwd("Simul")
-ReplRate <- c(0.0000,0.0013,0.0020,0.0050)
 plotNeutral_SpatPat(nsp,side,time,meta=c("L"),ReplRate,T)
-setwd(oldcd)
-ggsave("figs/SpatSpan_Repl_T5000_64_256_Logser.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/SpatSpan_Repl_T20000_64_256_Logser.png", width=6,height=6,units="in",dpi=600)
 
 # All species
-setwd("Simul")
-plotNeutral_SpatPat(nsp,side,time,meta=c("U"),ReplRate,F)
-setwd(oldcd)
-ggsave("figs/SpatAllSp_Repl_T5000_64_256_Unif.png", width=6,height=6,units="in",dpi=600)
-
 plotNeutral_SpatPat(nsp,side,time,meta=c("L"),ReplRate,F)
+ggsave("figs/SpatAllSp_Repl_T20000_64_256_Logser.png", width=6,height=6,units="in",dpi=600)
 
+plotNeutral_SpatPat(nsp,side,time,meta=c("U"),ReplRate,F)
+ggsave("figs/SpatAllSp_Repl_T20000_64_256_Unif.png", width=6,height=6,units="in",dpi=600)
 
 ```
 
@@ -1105,7 +1108,7 @@ setwd(oldcd)
 
 
 # Filter simulations
-#
+#Error in fBody[[i]] : no such index at level 6
 #Clusters <- Clusters %>% filter(!(MetaNsp==nsp & DispersalDistance==alfa & ColonizationRate==m & Side==256 & ReplacementRate==0.1 & MetaType=="L"))
 ReplRate <- c(0.0000,0.0005,0.0010,0.0050,0.0200,0.0300, 0.0600, 0.0650, 0.0750, 0.0900,0.1000,0.3000,0.6000) 
 
