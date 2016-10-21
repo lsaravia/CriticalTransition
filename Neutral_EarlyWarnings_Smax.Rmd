@@ -130,7 +130,7 @@ rm(kk,k,k1,p,mClusters,tClusters,Clu,rank)
 m   <-0.0001
 alfa <-round(2.03897,5)
 side <- 256
-nsp <- 64
+nsp <- 320
 time <- 20000
 
 require(plyr)
@@ -143,34 +143,34 @@ require(ggplot2)
 k<-filter(rhoCritSide,Time==time,MetaNsp==nsp,DispersalDistance==26.66,Side==256)
 k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
 
-tClusters <- Clusters %>% filter(MetaNsp==nsp,DispersalDistance==alfa,Side==256)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform"))) %>% group_by(MetaNsp,Side,MetaType,ColonizationRate,DispersalDistance,ReplacementRate) %>% summarise(MaxClusterVar=var(MaxClusterProp),MaxClusterProp=mean(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
+tClusters <- Clusters %>% filter(MetaNsp==nsp,DispersalDistance==alfa,Side==256,ColonizationRate!=0.1)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform"))) %>% group_by(MetaNsp,Side,MetaType,ColonizationRate,DispersalDistance,ReplacementRate) %>% summarise(MaxClusterVar=var(MaxClusterProp),MaxClusterProp=mean(MaxClusterProp),n=n(),SpanningProb=sum(ifelse(SpanningSpecies>0,1,0))/n,SpanningClust=mean(SpanningClust))
 
 require(RColorBrewer)
 colp <-brewer.pal(8,"Dark2")
 
 ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterProp)) + geom_point() + theme_bw() + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Mean of max cluster size")+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
-ggsave("figs/SmaxvsRepl_T20000_64_side_meta_m.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/SmaxvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
 
 ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterVar)) + geom_point() + theme_bw() + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Variance of max cluster size")+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
-ggsave("figs/VarSmaxvsRepl_T20000_64_side_meta_m.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/VarSmaxvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
 
 
 #
 # Calculate fluctuations.
 # 
 require(fitdistrplus)
-tClusters <- Clusters %>% filter(MetaNsp==nsp,DispersalDistance==alfa,Side==256)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform"))) %>% group_by(MetaNsp,Side,MetaType,ColonizationRate,DispersalDistance,ReplacementRate) %>% mutate( Mean_MaxClusterProp=mean(MaxClusterProp), Delta_MaxCluster=MaxClusterProp-Mean_MaxClusterProp)
+tClusters <- Clusters %>% filter(MetaNsp==nsp,DispersalDistance==alfa,Side==256,ColonizationRate!=0.1)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform"))) %>% group_by(MetaNsp,Side,MetaType,ColonizationRate,DispersalDistance,ReplacementRate) %>% mutate( Mean_MaxClusterProp=mean(MaxClusterProp), Delta_MaxCluster=MaxClusterProp-Mean_MaxClusterProp)
 
 # Plot fluctuations
 #
 ggplot(tClusters, aes(x=ReplacementRate, y=Delta_MaxCluster)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + stat_summary(fun.y=median,geom="line",colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Fluctuations of max cluster size")+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
-ggsave("figs/DeltaSmaxvsRepl_T20000_64_side_meta_m.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/DeltaSmaxvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
 
 # Variance of fluctuations
 #
 vClusters <- tClusters %>% summarise(varDelta_MaxCluster=var(Delta_MaxCluster))
 ggplot(vClusters, aes(x=ReplacementRate, y=varDelta_MaxCluster)) + geom_point(size=1) + theme_bw() + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab(expression(Variance~of~Delta~S[max]))+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
-ggsave("figs/VarDeltaSmaxvsRepl_T20000_64_side_meta_m.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/VarDeltaSmaxvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
 
 # Skewness of fluctuations
 #
@@ -182,7 +182,7 @@ ggplot(sClusters, aes(x=ReplacementRate, y=abs_skewness)) + geom_point(size=1) +
 ssClusters <-left_join(sClusters,k,by=c("MetaType","ColonizationRate","Side","MetaNsp")) %>% mutate(before=ifelse(ReplacementRate<pcrit,TRUE,FALSE))
 
 ggplot(ssClusters, aes(x=ReplacementRate, y=abs_skewness,colour=before)) + geom_point(size=1) + theme_bw() + scale_color_manual(values=colp,guide=FALSE) + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab(expression(Skewness~of~Delta~S[max]))+ geom_hline(yintercept = 0,colour=colp[1]) + theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
-ggsave("figs/SkewDeltaSmaxvsRepl_T20000_64_side_meta_m.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/SkewDeltaSmaxvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
 
 
 ```
@@ -191,7 +191,7 @@ ggsave("figs/SkewDeltaSmaxvsRepl_T20000_64_side_meta_m.png", width=6,height=6,un
 ## Simulate to estimate distributions of patch sizes statistics
 
 
-```{r simuldisp26_cluAll_side_64_meta30_T5000, eval=T,echo=F,message=T,warning=T}
+```{r simuldisp26_cluAll_side_64_meta30_T20000, eval=F,echo=F,message=T,warning=T}
 setwd(oldcd)
 source("R/powerlaw/discpowerexp.R")
 source("R/powerlaw/discexp.R")
@@ -207,12 +207,12 @@ m <-  0.0001
 alfa <- 2.038974
 side <- 512
 nsp <- 64
-nSimul <- 10
+nSimul <- 4
 
-time     <- c(20000 ,20000 ,20000 ,20000 ,20000 ,20000, 15000)
-ReplRate <- c(0.0000,0.0001,0.0001,0.0003,0.0005,0.0010, 0.01)
-#time     <- c(20000)
-#ReplRate <- c(0.0002)
+# time     <- c(20000 ,20000 ,20000 ,20000 ,20000 ,20000, 15000)
+# ReplRate <- c(0.0000,0.0001,0.0002,0.0003,0.0005,0.0010, 0.01)
+time     <- c(20000)
+ReplRate <- c(0.0004)
 
 p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("U","L")) 
 
@@ -228,9 +228,8 @@ registerDoParallel(cl)
 Mdl <- data.frame()
 Mdl <- foreach(i=1:nrow(p),.combine='rbind') %dopar%
 {
-    
-  #simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",p$time[i],nSimul,TRUE,"N",p$meta[i],FALSE,2)
-   simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",p$time[i],nSimul,FALSE,"N",p$meta[i],FALSE,2)
+  simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",p$time[i],nSimul,TRUE,"N",p$meta[i],FALSE,2)
+  #simulNeutral_Clusters(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],"A",p$time[i],nSimul,FALSE,"N",p$meta[i],FALSE,2)
 }
 Mdl$Side <- side
 
@@ -238,7 +237,7 @@ stopCluster(cl)
 setwd(oldcd)
 
 Models <- Mdl
-#Models <- bind_rows(Models,Mdl)
+Models <- bind_rows(Models,Mdl)
 
 rm(cn,cl,Mdl,p,mm,mMdl)
 
@@ -281,7 +280,7 @@ setwd(oldcd)
 
 # Plot relation of power exponent/ exponential rate with ReplacementRate
 
-```{r plotdisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
+```{r plotdisp26_cluAll_side_64_meta30_T20000, eval=F,echo=F,message=T,warning=T}
 setwd(oldcd)
 
 #
@@ -316,7 +315,7 @@ ggplot(mMdl, aes(x=model,y=Frequency,fill=type)) + geom_bar(stat="identity") +  
 #ggsave("figs/ClusBestModel_T20000_64_512.png", width=6,height=6,units="in",dpi=600)
 
 
-ggplot(mMdl, aes(x=ReplacementRate,y=Frequency,fill=model)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc,name="",labels=c("Exp.","Power","Power Exp.")) + theme_bw() + theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) + scale_x_continuous(breaks=c(0.0000,0.0001,0.0002,0.0003,0.0005,0.0010, 0.01))  + xlab(bquote(rho))
+ggplot(mMdl, aes(x=ReplacementRate,y=Frequency,fill=model)) + geom_bar(stat="identity") +  scale_fill_manual(values=mc,name="",labels=c("Exp.","Power","Power Exp.")) + theme_bw() + theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) +  scale_x_continuous(breaks=c(0.0000,0.0001,0.0002,0.0003,0.0005,0.0010, 0.01))  + xlab(bquote(rho))
 ggsave("figs/ClusBestModel_T20000_64_512_rho.png", width=6,height=6,units="in",dpi=600)
 
 # Make table by model
@@ -332,11 +331,22 @@ pandoc.table(mm %>% mutate_if(is.numeric,round,digits=2))
 mm <- filter(Models,model!="NoModel",Side==512,type==1 | type ==2,DeltaAIC==0) %>% mutate(type=namType[type])
 
 
-am <-glm(alfa ~ MetaType*model*type*ReplacementRate,data=mm)
+am <-lm(alfa ~ MetaType*model*ReplacementRate,data=mm)
 summary(am)
+
 re <-resid(am)
 plot(am, which=1)
 plot(am, which=2)
+
+am1 <- update(am, ~. -MetaType:model:ReplacementRate)
+summary(am1)
+anova(am1,am)
+
+am2 <- update(am1, ~. -MetaType:model  )
+summary(am2)
+anova(am1,am2)
+AIC(am,am1,am2)
+
 
 # Kruskal wallis test on alfa
 #
@@ -349,7 +359,7 @@ kruskal.test(alfa~factor(ReplacementRate),data=mm)
 boxplot(mm$alfa~mm$MetaType)
 boxplot(mm$alfa~mm$model)
 boxplot(mm$alfa~mm$type)
-plot(mm$alfa~mm$ReplacementRate)
+boxplot(mm$alfa~mm$ReplacementRate)
 
 require(multcomp)
 summary(glht(am, mcp(model="Tukey")))
@@ -370,19 +380,10 @@ pandoc.table(mm %>%  mutate_if(is.numeric,round,digits=4))
 #
 mMdl <- filter(Models,model=="PowExp" | model == "Pow",type==1 | type==2, DeltaAIC==0) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
 
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=model)) +  geom_point(size=0.5) + theme_bw() +  stat_summary(fun.y=mean,geom="line") + scale_x_continuous(breaks=c(0.0000,0.0001,0.0002,0.0003,0.0005,0.0010, 0.01)) +
+ggplot(mMdl,aes(x=ReplacementRate,y=alfa,colour=model)) +  geom_jitter(size=0.5,width=0.00001) + theme_bw() + facet_grid(~MetaType)+ stat_summary(fun.y=median,geom="line") + scale_x_continuous(breaks=c(0.0000,0.0001,0.0002,0.0003,0.0005,0.0010, 0.01)) +
  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) + ylab(bquote(alpha)) + xlab(bquote(rho)) + scale_colour_manual(values=mc)+ coord_cartesian(ylim=c(1.5,5)) 
 
-ggsave("figs/AlfaVsRho_T20000_64_512.png", width=7,height=4,units="in",dpi=600)
-
-# Plot power exponent alpha of only PowExp model
-#
-mMdl <- filter(Models,model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-
-ggplot(mMdl,aes(x=ReplacementRate,y=alfa)) +  geom_point(size=0.5,colour=mc[2]) + theme_bw() +   stat_summary(fun.y=mean,geom="line",colour=mc[2]) + scale_x_continuous(breaks=c(0.0000,0.0001,0.0002,0.0003,0.0005,0.0010, 0.01)) +
- theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) + ylab(bquote(alpha)) + xlab(bquote(rho)) + coord_cartesian(ylim=c(1.5,4)) 
-
-ggsave("figs/ExpAlfaVsRho_T20000_64_512.png", width=7,height=4,units="in",dpi=600)
+ggsave("figs/AlfaVsRho_T20000_64_512_meta.png", width=7,height=4,units="in",dpi=600)
 
 
 
@@ -390,13 +391,13 @@ ggsave("figs/ExpAlfaVsRho_T20000_64_512.png", width=7,height=4,units="in",dpi=60
 #
 mMdl <- filter(Models,model=="PowExp" ,type==1 | type==2) %>%  mutate(typeAb=namTypeAb[type],type=namType[type])
 
-ggplot(mMdl,aes(x=ReplacementRate,y=rate)) +  geom_point(size=0.5,colour=mc[2]) + theme_bw() +   stat_summary(fun.y=mean,geom="line",colour=mc[2]) + scale_x_continuous(breaks=c(0.0000,0.0001,0.0002,0.0003,0.0005,0.0010, 0.01)) +
-  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1))  + ylab("Exp. decay rate") + xlab(bquote(rho)) +   coord_cartesian(ylim=c(0,.3))
-ggsave("figs/ExpRateVsRho_T20000_64_512.png", width=7,height=4,units="in",dpi=600)
+ggplot(mMdl,aes(x=ReplacementRate,y=rate)) +  geom_point(size=0.5,colour=mc[2]) + theme_bw() +   stat_summary(fun.y=median,geom="line",colour=mc[2]) + facet_grid(~MetaType) + scale_x_continuous(breaks=c(0.0000,0.0001,0.0002,0.0003,0.0005,0.0010, 0.01)) +
+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1))  + ylab("Exp. decay rate") + xlab(bquote(rho)) +   coord_cartesian(ylim=c(0,.2))
+ggsave("figs/ExpRateVsRho_T20000_64_512_meta.png", width=7,height=4,units="in",dpi=600)
  
 # Eliminate duplicates from Models
 #
-mm <- Models %>% group_by(Side,MetaType,ReplacementRate,type,Rep,nPatches) %>% summarise(n=n()) 
+mm <- Models %>% group_by(Side,MetaType,ReplacementRate,type,Rep,nPatches) %>% summarise(n=n()) %>% filter(n==1)
 mm1<- inner_join(Models,mm)
 mm2 <- mm1 %>% group_by(Side,MetaType,ReplacementRate,type,Rep,nPatches) %>% slice(1) 
 nrow(Models)
@@ -408,6 +409,144 @@ mm2 <- mm1 %>% group_by(Side,MetaType,ReplacementRate,type,Rep,nPatches) %>% sum
 mm <- Models %>% filter(Side==256,ReplacementRate==0.001,Rep==1) %>% arrange(nPatches)
 rm(mMdl,mm)
 ```
+
+
+
+## Time series simulations for side=256 time=20000 logseries metacomunity filled initial conditions  m=0.0001
+
+```{r timeSeries256_320__T20000Filled0001, eval=T,echo=F,message=F,warning=F}
+setwd("Simul")
+
+# Ver Neutral_Model_BCI.Rmd por parametros
+#
+m =  0.0001
+alfa=2.038974
+side <- 256
+nsp <- 320
+nSimul <- 10
+timeInit <-1
+timeDelta <- 100
+rndI <- 11
+
+# Interval where the critical transition occurs for rndI=11
+#
+# ReplRate <- c(0.0004,0.0005,0.0010,0.0100,0.02,0.05)
+# time<-      c(22000, 26500,11500,  1300, 1100, 500)
+# timeI<-     c(21400, 25900,10900,   800,  500, 1)   
+
+ReplRate <- c(0.0000,0.0001,0.0002,0.00025,0.0003,0.0004,0.0005,0.0010,0.0050,0.0100,0.0500,0.1000,0.5000,1)
+time <-     c(20000,  20000, 30000,  30000, 30000, 30000, 30000, 20000, 20000,20000,   5000,  5000,  5000,5000)
+timeI<-     c(15000,  15000, 25000,  25000, 25000, 25000, 25000, 15000, 15000,15000,   0500,  0500,  0500,0500)
+
+
+p <-expand.grid(disp=alfa,migr=m,repl=ReplRate,side=side,meta=c("L","U"),rndI=rndI)
+time <-rep(time, times=nrow(p)/length(time))
+p <-cbind(p,time)
+timeI <-rep(timeI, times=nrow(p)/length(time))
+p <-cbind(p,timeI)
+
+
+require(doParallel)
+cn <-detectCores()
+cl <- makeCluster(cn)
+registerDoParallel(cl)
+
+TSeriesCT <- data.frame()
+TS1 <- data.frame()
+
+TS1 <- foreach(i=1:length(ReplRate),.combine='rbind') %dopar%
+{
+    simul_NeutralTimeSeries(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],TRUE,p$time[i],nSimul,"N",p$meta[i],"S",2,p$timeI[i],timeDelta,p$rndI[i],TRUE)
+  
+    #simul_NeutralTimeSeries(nsp,p$side[i],p$disp[i],p$migr[i],p$repl[i],FALSE,p$time[i],nSimul,"N",p$meta[i],"S",2,p$timeI[i],timeDelta,p$rndI[i],TRUE)
+
+}
+stopCluster(cl)
+
+TSeriesCT <- rbind(TSeriesCT,TS1)
+
+setwd(oldcd)
+
+rm(kk,TS1,cl,cn,p)
+save.image()
+```
+
+## Plots of Smax - Calculation of Early warnings based on the Max Cluster (Smax)
+
+```{r plotSmaxT20000_clu_256_320_meta_m0001, eval=F,echo=F,message=T,warning=T}
+
+m   <-0.0001
+alfa <-round(2.03897,5)
+side <- 256
+nsp <- 320
+time <- 20000
+
+require(plyr)
+require(dplyr)
+require(ggplot2)
+
+names(TSeriesCT)
+
+# 
+TS1 <- TSeriesCT %>% filter(MetaNsp==nsp,DispersalDistance==alfa,Side==256,ColonizationRate==0.0001)  %>% mutate(MetaType=factor(MetaType,labels=c("Logseries"))) %>% group_by(MetaNsp,Side,MetaType,ColonizationRate,DispersalDistance,ReplacementRate,Rep) %>%
+  mutate(
+    isSpan = any(SpanningSpecies != 0),constSpan=length(unique(SpanningSpecies))>1) 
+
+
+# Select  Smax & Shannon diversity vs rho across ColonizationRate 
+#
+k<-filter(rhoCritSide,Time==time,MetaNsp==nsp,DispersalDistance==26.66,Side==256,ColonizationRate==m)
+k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
+
+tClusters <- TS1 %>%filter( isSpan==TRUE | ReplacementRate<0.0002) %>% group_by(MetaNsp,Side,MetaType,ColonizationRate,DispersalDistance,ReplacementRate,Rep) %>% summarise(MaxClusterVar=var(MaxClusterProp),MaxClusterProp=mean(MaxClusterProp),n=n())
+
+require(RColorBrewer)
+colp <-brewer.pal(8,"Dark2")
+
+ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterProp)) + geom_point() + theme_bw() + scale_x_log10() +   facet_grid(~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Mean of max cluster size")+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
+#ggsave("figs/SmaxvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
+
+ggplot(tClusters, aes(x=ReplacementRate, y=MaxClusterVar)) + geom_point() + theme_bw() + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Variance of max cluster size")+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
+#ggsave("figs/VarSmaxvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
+
+
+#
+# Calculate fluctuations.
+# 
+tClusters <- TS1  %>%filter(isSpan==TRUE | ReplacementRate<0.0002) %>%  group_by(MetaNsp,Side,MetaType,ColonizationRate,DispersalDistance,ReplacementRate,Rep) %>% mutate( Mean_MaxClusterProp=mean(MaxClusterProp), Delta_MaxCluster=MaxClusterProp-Mean_MaxClusterProp)
+# mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform")))
+
+# Plot fluctuations
+#
+options("scipen"=100, "digits"=4)
+
+ggplot(tClusters, aes(x=ReplacementRate, y=Delta_MaxCluster)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + stat_summary(fun.y=median,geom="line",colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Fluctuations of max cluster size")+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
+ggsave("figs/DeltaTSmaxvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
+
+# Variance of fluctuations
+#
+vClusters <- tClusters %>% summarise(varDelta_MaxCluster=var(Delta_MaxCluster))
+ggplot(vClusters, aes(x=ReplacementRate, y=varDelta_MaxCluster)) + geom_point(size=1) + theme_bw() + scale_x_log10(breaks=c(0.0000,0.0001,0.0002,0.0003,0.0005,0.0010, 0.01)) +   facet_grid(~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_line(colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab(expression(Variance~of~Delta~S[max]))+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
+ggsave("figs/VarDeltaTSmaxvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
+
+# Skewness of fluctuations
+#
+require(fitdistrplus)
+
+sClusters <- tClusters %>% do(abs_skewness=(descdist(.$MaxClusterProp, discrete=FALSE, boot=500))$skewness)
+sClusters$abs_skewness <- as.numeric(sClusters$abs_skewness)
+
+ggplot(sClusters, aes(x=ReplacementRate, y=abs_skewness)) + geom_point(size=1) + theme_bw() + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab("Skewness of Delta Smax")+ geom_hline(yintercept = 0,colour=colp[1]) + theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
+
+ssClusters <-left_join(sClusters,k,by=c("MetaType","ColonizationRate","Side","MetaNsp")) %>% mutate(before=ifelse(ReplacementRate<pcrit,TRUE,FALSE))
+
+ggplot(ssClusters, aes(x=ReplacementRate, y=abs_skewness,colour=before)) + geom_point(size=1) + theme_bw() + scale_color_manual(values=colp,guide=FALSE) + scale_x_log10() +   facet_grid(ColonizationRate ~ MetaType,scales="free_y" ) +xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab(expression(Skewness~of~Delta~S[max]))+ geom_hline(yintercept = 0,colour=colp[1]) + theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) 
+ggsave("figs/SkewDeltaSmaxvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
+
+
+rm(ssClusters,sClusters,tClusters,vClusters)
+```
+
 
 # Simulations to make a video of percolation
 

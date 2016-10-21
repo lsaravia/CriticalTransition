@@ -343,7 +343,7 @@ readWideDensityOut <- function(fname){
   if(nrow(den)<3)
     eTime <-1
   else
-    eTime <- (max(den$Time)/(den$Time[3]-den$Time[2]))+1
+    eTime <- ((max(den$Time)-min(den$Time))/(den$Time[3]-den$Time[2]))+1
   
   if(  eTime <= nrow(den) ){
     den$Rep <- rep( 1:(nrow(den)/eTime),each=eTime)
@@ -982,7 +982,7 @@ brayCurtis <- function (x, y)
 #         2 Filled lattice with metacommunity frequency  
 #         3 center with species nro 1 (a square of nsp individuals)
 #
-simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,mf="N",meta="U",clus="S",sedIni=0) {
+simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,mf="N",meta="U",clus="S",sedIni=0,timeInit=1,timeDelta=10,rndSeed=0) {
   
   if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
   op <- options()
@@ -1027,15 +1027,17 @@ simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims
     par <- read.table("sim.par",quote="",stringsAsFactors=F)
 
     par[par$V1=="nEvals",]$V2 <- time
-    par[par$V1=="inter",]$V2 <- 10        # interval to measure Density and Diversity
-    par[par$V1=="init",]$V2 <- 1          # Firs time of measurement = interval
-    par[par$V1=="modType",]$V2 <- 4       # Hierarchical saturated
-    par[par$V1=="sa",]$V2 <- "N"          # Save a snapshot of the model
-    par[par$V1=="baseName",]$V2 <- bname  # Base name for output 
+    par[par$V1=="rndSeed",]$V2<- rndSeed	
+    
+    par[par$V1=="inter",]$V2 <- timeDelta   # interval to measure Density and Diversity
+    par[par$V1=="init",]$V2 <- timeInit     # Firs time of measurement = interval
+    par[par$V1=="modType",]$V2 <- 4         # Hierarchical saturated
+    par[par$V1=="sa",]$V2 <- "N"            # Save a snapshot of the model
+    par[par$V1=="baseName",]$V2 <- bname    # Base name for output 
     par[par$V1=="mfDim",]$V2 <- mf
     par[par$V1=="minBox",]$V2 <- 2
-    par[par$V1=="pomac",]$V2 <- 1         # 0:one set of parms 
-                                          # 1:several simulations with pomac.lin parameters 
+    par[par$V1=="pomac",]$V2 <- 1           # 0:one set of parms 
+                                            # 1:several simulations with pomac.lin parameters 
     par[par$V1=="pomacFile",]$V2 <- pname  
     par[par$V1=="minProp",]$V2 <- 0
     par[par$V1=="clusters",]$V2 <- clus       # Calculate max cluster size
@@ -1238,6 +1240,131 @@ call_simul_NeutralPlotTime <- function(nsp,side,disp,migr,repl,simul=T,time=1000
 
 }
 
+
+# Simulate a time series of the neutral/hierarchical model
+#
+# disp: dispersal parameter
+# migr: migration rate
+# repl: replacement rate
+# mortality fixed to 0.2
+#
+# simul: T=make simulations F=make plots
+# sims:  Number of repetitions
+# mf: calculate multifractal spectrum
+# meta: U= uniform metacommunity
+#       L= logseries metacommunity
+#
+# sedIni: 0 empty initial conditions, 
+#         1 one individual of each species in the center 
+#         2 Filled lattice with metacommunity frequency  
+#         3 center with species nro 1 (a square of nsp individuals)
+#
+simul_NeutralTimeSeries <- function(nsp,side,disp,migr,repl,simul=T,time=1000,sims=10,mf="N",meta="U",clus="S",sedIni=0,timeInit=1,timeDelta=10,rndSeed=0,delOldSim=FALSE) {
+  
+  if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
+  op <- options()
+  options("scipen"=0, "digits"=4)
+  
+  if(toupper(meta)=="L") {
+    if(simul) prob <- genFisherSAD(nsp,side)
+    neuParm <- paste0("fishP",nsp,"_",side,"R", repl)
+    bname <- paste0("neuFish",nsp,"_",side,"R", repl)
+  } else {
+    if(simul) prob <- rep(1/nsp,nsp)  
+    neuParm <- paste0("unifP",nsp,"_",side,"R", repl)
+    bname <- paste0("neuUnif",nsp,"_",side,"R", repl)
+  }
+  pname <- paste0("pomacR",repl,".lin")
+  
+  # Add the start and end time to simulation output
+  #
+  old_bname <- bname
+  bname <- paste0(bname ,"T0-", time )         
+  
+  # make simulations 
+  if(simul){
+    
+    if(rndSeed==0 | (rndSeed>0 & !file.exists(paste0(neuParm,".sed"))))
+    {
+      genNeutralParms(neuParm,side,prob,1,0.2,disp,migr,repl)
+      
+      if(sedIni==1){
+        genInitialSed(paste0(neuParm,".sed"),nsp,side,0)
+      } else if(sedIni==2){
+        genInitialSed(paste0(neuParm,".sed"),nsp,side,prob)
+      } else if(sedIni==3){
+        genInitialSed(paste0(neuParm,".sed"),nsp,side,1)
+      }
+    }
+    # Delete old simulations
+    if(delOldSim){
+      system(paste0("rm ",bname,"m*.txt")) # MultiFractal mf
+      system(paste0("rm ",bname,"D*.txt")) # Density
+      system(paste0("rm ",bname,"C*.txt")) # Clusters
+    }
+    
+    par <- read.table("sim.par",quote="",stringsAsFactors=F)
+    
+    par[par$V1=="nEvals",]$V2 <- time
+    par[par$V1=="rndSeed",]$V2<- rndSeed	
+    
+    par[par$V1=="inter",]$V2 <- timeDelta   # interval to measure Density and Diversity
+    par[par$V1=="init",]$V2 <- timeInit     # Firs time of measurement = interval
+    par[par$V1=="modType",]$V2 <- 4         # Hierarchical saturated
+    par[par$V1=="sa",]$V2 <- "N"            # Save a snapshot of the model
+    par[par$V1=="baseName",]$V2 <- bname    # Base name for output 
+    par[par$V1=="mfDim",]$V2 <- mf
+    par[par$V1=="minBox",]$V2 <- 2
+    par[par$V1=="pomac",]$V2 <- 1           # 0:one set of parms 
+    # 1:several simulations with pomac.lin parameters 
+    par[par$V1=="pomacFile",]$V2 <- pname  
+    par[par$V1=="minProp",]$V2 <- 0
+    par[par$V1=="clusters",]$V2 <- clus       # Calculate max cluster size
+    
+    parfname <- paste0("sim",nsp,"_",side,"R", repl,".par")
+    write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
+    
+    genPomacParms(pname,1,c(0.2),disp,migr,repl,sims)
+    
+    # Get kind of OS 32 or 64Bits 
+    s <- system("uname -a",intern=T)
+    
+    if(sedIni){
+      if(grepl("i686",s)) {
+        system(paste(neuBin,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+      } else {
+        system(paste(neuBin64,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+      }
+      
+    } else {
+      if(grepl("i686",s)) {
+        system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+      } else {
+        system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+      }
+    }
+  }
+  cat("Reading ", bname, "\n")
+  den <-readWideDensityOut(bname)
+  
+  clu <-readClusterOut(bname)
+  if(nrow(den)!=nrow(clu)) {
+    stop("CluSizes <> Density -", bname)
+  }
+  clu$Richness <- den$Richness 
+  clu$H <- den$H
+  clu$RndIni <- rndSeed
+  clu$Rep    <- den$Rep
+  clu$MetaType <-meta
+  clu$Side <- side
+  clu$MetaNsp <- nsp
+  
+  require(plyr)
+  require(dplyr)
+  clu <- clu %>% rename(MaxSpeciesAbund=TotalSpecies) %>% mutate( MaxClusterProp = MaxClusterSize/(side*side),MaxClusterSpProp=MaxClusterSize/MaxSpeciesAbund,SpanningClust=ifelse(SpanningSpecies>0,MaxClusterProp,0))
+  
+  return(clu)
+}
 
 # Plot average H and Richnes of neutral simulations (Time=2900-3000) 
 # 
