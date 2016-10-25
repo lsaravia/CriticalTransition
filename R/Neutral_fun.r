@@ -346,7 +346,13 @@ readWideDensityOut <- function(fname){
     eTime <- ((max(den$Time)-min(den$Time))/(den$Time[3]-den$Time[2]))+1
   
   if(  eTime <= nrow(den) ){
-    den$Rep <- rep( 1:(nrow(den)/eTime),each=eTime)
+
+    rr <- rep( 1:(nrow(den)/eTime),each=eTime)
+    if(nrow(den)!=length(rr)) {
+      warning("Density file ",fname, " is icomplete ",  nrow(den)," - ", length(rr))
+      den <- den[1:length(rr),]
+    }
+    den$Rep <- rr
   }
   return(den)
 }

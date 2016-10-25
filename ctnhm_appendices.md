@@ -40,39 +40,40 @@ In this process we have to find the scale that give us the maximal occupation of
 
 Table: Equivalence of spatially explicit parameters $m$ and $\alpha$ (Mean dispersal distance) with spatially implicit neutral parameters $\theta$ and $I$.  
 
+\newpage
 
----------------------------------------------------------------------------
- Side   MetaType    beforepc          $S_{max}$               $RS_{max}$ 
------- ---------- ------------- -------------------- ----------------------
- 128   Logseries  $rho < rho_c$        0.938                 0.973         
+--------------------------------------------------------------------------
+ Side   MetaType   before/after       $S_{max}$               $RS_{max}$ 
+------ ---------- --------------- ----------------- ----------------------
+ 128   Logseries  $\rho > \rho_c$        0.938                 0.973         
 
- 128   Logseries  $rho > rho_c$        0.147                 0.230         
+ 128   Logseries  $\rho < \rho_c$        0.147                 0.230         
 
- 128    Uniform   $rho < rho_c$        0.951                 0.985         
+ 128    Uniform   $\rho > \rho_c$        0.951                 0.985         
 
- 128    Uniform   $rho > rho_c$        0.127                 0.205         
+ 128    Uniform   $\rho < \rho_c$        0.127                 0.205         
 
- 192   Logseries  $rho < rho_c$        0.934                 0.972         
+ 192   Logseries  $\rho > \rho_c$        0.934                 0.972         
 
- 192   Logseries  $rho > rho_c$        0.020                 0.040         
+ 192   Logseries  $\rho < \rho_c$        0.020                 0.040         
 
- 192    Uniform   $rho < rho_c$        0.942                 0.978         
+ 192    Uniform   $\rho > \rho_c$        0.942                 0.978         
 
- 192    Uniform   $rho > rho_c$        0.031                 0.056         
+ 192    Uniform   $\rho < \rho_c$        0.031                 0.056         
 
- 256   Logseries  $rho < rho_c$        0.928                 0.967         
+ 256   Logseries  $\rho > \rho_c$        0.928                 0.967         
 
- 256   Logseries  $rho > rho_c$        0.002                 0.008         
+ 256   Logseries  $\rho < \rho_c$        0.002                 0.008         
 
- 256    Uniform   $rho < rho_c$        0.940                 0.974         
+ 256    Uniform   $\rho > \rho_c$        0.940                 0.974         
 
- 256    Uniform   $rho > rho_c$        0.002                 0.009         
+ 256    Uniform   $\rho < \rho_c$        0.002                 0.009         
 ---------------------------------------------------------------------------
 
 Table: Size of the largest patch relative to the total area $S_{max}$ before the critical point $\rho < \rho_c$ and after the critical point $\rho > \rho_c$, and for the largest patch relative to the total species area $RS_{max}$. The parameters used were the specified in the first row of table 1. 
 
 
-
+\newpage
 
 
 ---------------------------------------------------------------------
@@ -142,7 +143,7 @@ NoModel     Spanning   121    0.25
 
   Pow       MaxPatch   65     0.13    
 
-PowExp      Spanning   42     0.09    
+PowExp      Spanning   42     0.08    
 
 PowExp      MaxPatch   221    0.46    
 
@@ -151,7 +152,7 @@ Exp         Spanning    0     0.00
 Exp         MaxPatch    0     0.00
 -------------------------------------
 
-Table: Proportion of best models for patch size distributions from simulated neutral/niche model communities. We fitted 3 models to the patch distributions: exponential, power law (Pow) and power law with exponential cutoff (PowExp). The best model was selected using the Akaike information criteria. We made 30 simulations in a range of $\rho$ (see methods) and we used the following parameters: metacommunities have 64 species and two different species abundance distributions (SAD): logseries SAD; and uniform SAD; The size of the grid was 256*256 sites, migration=0.00016, and dispersal distance=26.66.
+Table: Proportion of best models for patch size distributions from simulated neutral/niche model communities. We fitted the distribution of patches of the species with the largest patch (MaxPatch) or the spanning patch (Spanning). We used 3 models: exponential (Exp), power law (Pow) and power law with exponential cutoff (PowExp), when there is not enough number of patches we did not fit any model (NoModel). The best model was selected using the Akaike information criteria. We made 30 simulations in a range of $\rho$ (see methods) and we used the following parameters: metacommunities have 64 species and two different species abundance distributions: logseries and uniform SAD. The size of the grid was 512*512 sites, migration=0.0001, and dispersal distance=26.66. 
 
 \newpage
 
@@ -193,4 +194,34 @@ Table: Proportion of best models for patch size distributions from simulated neu
 
 
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=6.5in]{figs/VarDeltaTSmaxvsCP_T20000_320_256_meta.png}
+\caption{Variance of temporal fluctuations of the largest patch species relative to the total area. We simulated communities in the same time span than the simulations to determine the critical point---typically around 20000 time steps---we take the last 5000 and measure the patch sizes each 100 time steps. The communities that did not have a spanning patch were classified as "Before" the critical point, whit a range of $\rho: 0 - 0.0004$. The communities that present a spanning patch in all the times are measured as "After" the critical point, with $\rho: 0.0004 - 1$. The communities where the spanning patch appears and disappears were classified as "Near" the critical point, with  $\rho: 0.0002 - 0.0004$. 
+We made 10 simulations for each $\rho$ and two metacommunity types: "Logseries" species abundance distribution (SAD) and "Uniform" SAD. Metacommunities have 320 species, the size of the grid was 256*256 sites, migration from metacommunity was 0.0001, dispersal distance=26.66.}  
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=6.5in]{figs/VarDeltaTRSmaxvsCP_T20000_320_256_meta.png}
+\caption{Variance of temporal fluctuations of the largest patch species relative to the total abundance of the same species. We simulated communities in the same time span than the simulations to determine the critical point---typically around 20000 time steps---we take the last 5000 and measure the patch sizes each 100 time steps. The communities that did not have a spanning patch were classified as "Before" the critical point, whit a range of $\rho: 0 - 0.0004$. The communities that present a spanning patch in all the times are measured as "After" the critical point, with $\rho: 0.0004 - 1$. The communities where the spanning patch appears and disappears were classified as "Near" the critical point, with  $\rho: 0.0002 - 0.0004$. 
+We made 10 simulations for each $\rho$ and two metacommunity types: "Logseries" species abundance distribution (SAD) and "Uniform" SAD. Metacommunities have 320 species, the size of the grid was 256*256 sites, migration from metacommunity was 0.0001, dispersal distance=26.66.}  
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=6.5in]{figs/SkewDeltaTSmaxvsCP_T20000_320_256_meta.png}
+\caption{Skewness of the temporal fluctuations of the largest patch species relative to the total area. We simulated communities in the same time span than the simulations to determine the critical point---typically around 20000 time steps---we take the last 5000 and measure the patch sizes each 100 time steps. The communities that did not have a spanning patch were classified as "Before" the critical point, whit a range of $\rho: 0 - 0.0004$. The communities that present a spanning patch in all the times are measured as "After" the critical point, with $\rho: 0.0004 - 1$. The communities where the spanning patch appears and disappears were classified as "Near" the critical point, with  $\rho: 0.0002 - 0.0004$. 
+We made 10 simulations for each $\rho$ and two metacommunity types: "Logseries" species abundance distribution (SAD) and "Uniform" SAD. Metacommunities have 320 species, the size of the grid was 256*256 sites, migration from metacommunity was 0.0001, dispersal distance=26.66.}  
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=6.5in]{figs/SkewDeltaTRSmaxvsCP_T20000_320_256_meta.png}
+\caption{Skewness of the temporal fluctuations of the largest patch species relative to the total abundance of the same species. We simulated communities in the same time span than the simulations to determine the critical point---typically around 20000 time steps---we take the last 5000 and measure the patch sizes each 100 time steps. The communities that did not have a spanning patch were classified as "Before" the critical point, whit a range of $\rho: 0 - 0.0004$. The communities that present a spanning patch in all the times are measured as "After" the critical point, with $\rho: 0.0004 - 1$. The communities where the spanning patch appears and disappears were classified as "Near" the critical point, with  $\rho: 0.0002 - 0.0004$. 
+We made 10 simulations for each $\rho$ and two metacommunity types: "Logseries" species abundance distribution (SAD) and "Uniform" SAD. Metacommunities have 320 species, the size of the grid was 256*256 sites, migration from metacommunity was 0.0001, dispersal distance=26.66.}  
+\end{figure}
 

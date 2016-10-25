@@ -22,6 +22,7 @@ genSpSed_hk<- function(bcidata, biomassXYname, sizex,sizey,lc=1,dbhmin=0)
   names(bcin)[3]<-"SpNum"
   names(bcin)[1]<-"sp"
   bci$SpNum <- bcin$SpNum[match(bci$sp,bcin$sp)]
+  bci$Freq <- bcin$Freq[match(bci$sp,bcin$sp)]
   
   require(vegan)
   answer <- list(Hin=diversity(bcin$Freq),Sin=nrow(bcin))
@@ -32,7 +33,7 @@ genSpSed_hk<- function(bcidata, biomassXYname, sizex,sizey,lc=1,dbhmin=0)
   system(paste0("rm ", fname.sed))
   system(paste0("rm ", fname.bin))
   
-  write.table(bci[,c(1,2,5,4)],fname.txt,col.names=F,row.names=F)
+  write.table(bci[,c(1,2,5,6)],fname.txt,col.names=F,row.names=F)
 
   s <- system("uname -a",intern=T)
   if(!grepl("i686",s)) {
@@ -147,26 +148,27 @@ BCIFit_Clusters <- function(clu)
   
   # Fits only 1 species patches, most abundant or spanning
   #
-  mdl <- fitNeutral_Clusters(clu2)
+  mdl <- fitNeutral_Clusters(clu2,TRUE)
   mdl$Species <- clu$Species[1]
   mdl$ClusterSize <- clu$ClusterSize[1]
       
-  clu2 <- anti_join(clu,clu1) # eliminates most abundant or spanning sp
+  #clu2 <- anti_join(clu,clu1) # eliminates most abundant or spanning sp
 
   # if there is no spanning sp change Spanning =3, else Spanning =4
   #
-  clu2 <- clu2 %>% mutate(Spanning=ifelse(clu1$Spanning[1]==0,3,4))
-  mdl1 <- fitNeutral_Clusters(clu2)
-  mdl1$Species <- 0
-  mdl1$ClusterSize <- 0
+  # clu2 <- clu2 %>% mutate(Spanning=ifelse(clu1$Spanning[1]==0,3,4))
+  # mdl1 <- fitNeutral_Clusters(clu2)
+  # mdl1$Species <- 0
+  # mdl1$ClusterSize <- 0
   
 
-  mdl <- bind_rows(mdl,mdl1)
+  #mdl <- bind_rows(mdl,mdl1)
   
   # Calculates DeltaAIC
   #
   
   mdl <- group_by(mdl,type) %>% mutate( DeltaAIC= AICc -min(AICc)) %>% arrange(DeltaAIC)
+  return(mdl)
 }
 
 
@@ -226,31 +228,31 @@ BCIplot_Clusters <- function(clu,mdl,year)
 
   # Selects not spanning or not most abundant
 
-  clu2 <- anti_join(clu,clu1) # eliminates most abundant or spanning sp
-
-  # if there is no spanning sp change Spanning =3, else Spanning =4
-  #
-  clu2 <- clu2 %>% mutate(Spanning=ifelse(clu1$Spanning[1]==0,3,4))
-  tdes <- ifelse(clu1$Spanning[1]==0,"Other Max Patch","Other Spanning")
-  tpe <- ifelse(clu1$Spanning[1]==0,3,4)
-  # Plots multi species patches, not most abundant or not spanning
-  #
-  mPow<-displ$new(clu2$ClusterSize)
-
-  # select power law
-  m0 <- filter(mdl,model=="Pow",Year==year,type==tpe)
-  xmin <- m0$xmin
-  mPow$setXmin(xmin)
-  mPow$setPars(m0$alfa)
-  
-  mExp<-disexp$new(clu2$ClusterSize)
-  m1 <- filter(mdl,model=="Exp",Year==year,type==tpe)
-  mExp$setXmin(xmin)
-  mExp$setPars(m1$alfa)
-  tit <- paste("BCI",year,tdes)
-
-  m2 <- filter(mdl,model=="PowExp",Year==year,type==tpe)
-  freq_plot_displ_exp(clu2$ClusterSize,m0$alfa,m1$alfa,m2$alfa,m2$rate,xmin,tit)
+  # clu2 <- anti_join(clu,clu1) # eliminates most abundant or spanning sp
+  # 
+  # # if there is no spanning sp change Spanning =3, else Spanning =4
+  # #
+  # clu2 <- clu2 %>% mutate(Spanning=ifelse(clu1$Spanning[1]==0,3,4))
+  # tdes <- ifelse(clu1$Spanning[1]==0,"Other Max Patch","Other Spanning")
+  # tpe <- ifelse(clu1$Spanning[1]==0,3,4)
+  # # Plots multi species patches, not most abundant or not spanning
+  # #
+  # mPow<-displ$new(clu2$ClusterSize)
+  # 
+  # # select power law
+  # m0 <- filter(mdl,model=="Pow",Year==year,type==tpe)
+  # xmin <- m0$xmin
+  # mPow$setXmin(xmin)
+  # mPow$setPars(m0$alfa)
+  # 
+  # mExp<-disexp$new(clu2$ClusterSize)
+  # m1 <- filter(mdl,model=="Exp",Year==year,type==tpe)
+  # mExp$setXmin(xmin)
+  # mExp$setPars(m1$alfa)
+  # tit <- paste("BCI",year,tdes)
+  # 
+  # m2 <- filter(mdl,model=="PowExp",Year==year,type==tpe)
+  # freq_plot_displ_exp(clu2$ClusterSize,m0$alfa,m1$alfa,m2$alfa,m2$rate,xmin,tit)
   #cdfplot_displ_exp(clu2$ClusterSize,m0$alfa,m1$alfa,m2$alfa,m2$rate,xmin,tit)
 
 }
@@ -263,17 +265,20 @@ BCI_fit_plot <-function(rdat,dat,spdat,year,x=1000,y=500,lc=1)
   load(rdat) 
   dat <- get(dat)
   sa <- genSpSed_hk(dat,spdat,x,y,lc)
-  hs <- data.frame(Year=year,Hin=sa$Hin,Hout=sa$Hout,Sin=sa$Sin,Sout=sa$Sout,SpanSp=sa$Clusters.Species[1],
-                         SpanClus=sa$Clusters.ClusterSize[1], AD_p=sa$ad_p)
 
   BCIClus <- data.frame(Species=sa$Clusters.Species,ClusterSize=sa$Clusters.ClusterSize)
+  maxClus <-top_n(BCIClus,1)
+  sumClus <-filter(BCIClus,Species==maxClus$Species) %>% summarise(totSmax=sum(ClusterSize))
 
+    hs <- data.frame(Year=year,Hin=sa$Hin,Hout=sa$Hout,Sin=sa$Sin,Sout=sa$Sout,SpanSp=sa$Clusters.Species[1],
+                   SpanClus=sa$Clusters.ClusterSize[1], SmaxSpecies=maxClus$Species, Smax=maxClus$ClusterSize,SmaxTotal=sumClus$totSmax,AD_p=sa$ad_p)
+  
   dl <- BCIFit_Clusters(BCIClus) 
   dl$Year <- year
 
   setwd(oldcd)
 
-  setwd("figure")
+  setwd("figs")
   BCIplot_Clusters(BCIClus,dl,year)
 
   setwd(oldcd)

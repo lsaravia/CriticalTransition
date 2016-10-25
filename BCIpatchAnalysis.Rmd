@@ -115,13 +115,13 @@ mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79
 # Proportion of best models by model only
 #
 group_by(BCIMdl,model) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n))
-mMdl <- group_by(BCIMdl,model,type) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
+mMdl <- group_by(BCIMdl,model) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
 mMdl
 
 # Max Cluster Size proportion
-ungroup(BCIMdl) %>% filter(type==2,DeltaAIC==0) %>% mutate(maxPatch = ClusterSize/(1000*500)) %>% summarise(maxPatchMean=mean(maxPatch))
+ungroup(BCIMdl) %>% filter(DeltaAIC==0) %>% mutate(maxPatch = ClusterSize/(1000*500)) %>% summarise(maxPatchMean=mean(maxPatch))
 
-mMdl <- ungroup(BCIMdl) %>%  filter(model=="PowExp",type==1 | type==2) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
+mMdl <- ungroup(BCIMdl) %>%  filter(model=="PowExp") %>% mutate(typeAb=namTypeAb[type],type=namType[type])
 
 
 # Plot of power exponent 
@@ -131,7 +131,7 @@ g <-ggplot(mMdl,aes(x=Year,y=alfa,colour=type)) + geom_point() +  theme_bw()+
 
 g + stat_quantile(quantiles = 0.5) #+ coord_cartesian(ylim=c(-0.02,0.32))
 
-ggsave("figs/discExpSpan_BCI.png", width=6,height=4,units="in",dpi=600)
+ggsave("figs/discAlfaYear_BCI.png", width=6,height=4,units="in",dpi=600)
 
 
 # Plot Exponential rate - lambda of spanning or  most abundant sp
@@ -139,52 +139,22 @@ ggsave("figs/discExpSpan_BCI.png", width=6,height=4,units="in",dpi=600)
 g <-ggplot(mMdl,aes(x=Year,y=rate,colour=type)) + geom_point() +  theme_bw() +
     ylab(bquote(lambda)) + xlab("Year") + scale_colour_manual(values=mc,guide=F)
 
-g + stat_quantile(quantiles = 0.5) #+ coord_cartesian(ylim=c(-0.02,0.32))
+g + stat_quantile(quantiles = 0.5) + #+ coord_cartesian(ylim=c(-0.02,0.32))
 
-ggsave("figs/discRateSpan_BCI.png", width=6,height=4,units="in",dpi=600)
+ggsave("figs/discLamdaYear_BCI.png", width=6,height=4,units="in",dpi=600)
 
-# Quantile regression lambda
+
 #
-#
-require(quantreg)
+# Quantile Regression
+# 
 
-rq1 <-group_by(mMdl,type) %>%
-      do(as.data.frame(do.call(rbind,
-                               lapply(summary(rq(alfa~Year,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
-                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="alpha")
-
-rq1
-
-rqm <-group_by(mMdl,type) %>%
-      do(as.data.frame(do.call(rbind,
-                               lapply(summary(rq(rate~Year,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
-                       ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="lambda")
-
-rqm <- rbind(rq1,rqm)
-
-# Select Other MaxPatch
-#
-#
-mMdl <- ungroup(BCIMdl) %>%  filter(model=="PowExp",type==3 | type==4) %>% mutate(typeAb=namTypeAb[type],type=namType[type])
-#mMdl <- ungroup(BCIMdl) %>%  filter(type==3 | type==4)
-# Plot Exponential rate - lambda of Other MaxPatch or spanning 
-#
-g <-ggplot(mMdl,aes(x=Year,y=rate,colour=as.factor(type))) + geom_point() +  theme_bw() + ylab(bquote(lambda)) + xlab("Year") + scale_y_log10()+guides(colour=FALSE)
-
-g + stat_quantile(quantiles = 0.5) #+ coord_cartesian(ylim=c(-0.02,0.32))
-
-ggsave("figs/discRateOther_BCI.png", width=7,height=4,units="in",dpi=600)
-
-
-rq1 <-group_by(mMdl,type) %>%
+rq1 <-mMdl %>%
       do(as.data.frame(do.call(rbind,
                                lapply(summary(rq(rate~Year,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
                        ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="lambda")
 
 
-rqm <-rbind(rqm,rq1)
-
-rq1 <-group_by(mMdl,type) %>%
+rqm <-mMdl %>%
       do(as.data.frame(do.call(rbind,
                                lapply(summary(rq(alfa~Year,data=.,tau=c(.25, .5, .75)),se="boot"),coef))
                        ,row.names= NULL)) %>% mutate(Tau=rep(c(.25, .5, .75),each=2),param="alpha")
@@ -192,12 +162,47 @@ rq1 <-group_by(mMdl,type) %>%
 rqm <-rbind(rqm,rq1)
 
 rqm$slope<-c(F,T)
-names(rqm)[5]<-"pvalue"
-rqm <- filter(rqm, slope==T ) %>% select(type,param,Tau,Value:pvalue)
+names(rqm)[4]<-"pvalue"
+rqm <- filter(rqm, slope==T ) %>% dplyr::select(param,Tau,Value:pvalue)
 
 require(pander)
-pandoc.table(rqm,round=2)
+pandoc.table(rqm,round=4)
+
+#
+#
+#
+
+names(BCIhsize)
+
+tClusters <- BCIhsize %>% mutate( MaxClusterProp=Smax/(1000*500),MaxClusterSp=Smax/SmaxTotal,Mean_MaxClusterProp=mean(MaxClusterProp), Delta_MaxCluster=MaxClusterProp-Mean_MaxClusterProp,Mean_MaxClusterSp=mean(MaxClusterSp), Delta_MaxClusterSp=MaxClusterSp-Mean_MaxClusterSp)
+
+vClusters <- tClusters %>% summarise(varDelta_MaxCluster=var(Delta_MaxCluster),varDelta_MaxClusterSp=var(Delta_MaxClusterSp))
+
+descdist(tClusters$Delta_MaxClusterSp, discrete=FALSE, boot=500)
+descdist(tClusters$Delta_MaxCluster, discrete=FALSE, boot=500)
+
 ```
 
-All slopes are non-significative
+## Skewness  
 
+Delta_MaxClusterSp
+
+summary statistics
+------
+min:  -0.04008   max:  0.03381 
+median:  0.02496 
+mean:  0.000000000000000001983 
+estimated sd:  0.03739 
+estimated skewness:  -0.3557 
+estimated kurtosis:  0.2252 
+
+Delta_MaxCluster
+
+summary statistics
+------
+min:  -0.00001343   max:  0.00001657 
+median:  -0.000003429 
+mean:  0.000000000000000000003872 
+estimated sd:  0.00001118 
+estimated skewness:  0.517 
+estimated kurtosis:  1.84 
