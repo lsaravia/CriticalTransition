@@ -109,28 +109,8 @@ Metacomm.  Metacomm.  Mean           $m$  $\rho_c^\infty$  SE$\rho_c$
    320        U          26.66    0.0100       0.00640      0.00000
 ---------------------------------------------------------------------
 
-Table: Critical points $\rho_c^\infty$ for infinite lattices. Where *Mean Dist.* is the mean dispersal distance,  $m$ is the migration parameter, and SE $p_c$ the standard error of the critical point.  
+Table: Critical points $\rho_c^\infty$ for infinite lattices. Where *Mean Distance* is the mean dispersal distance,  $m$ is the migration parameter, and SE $p_c$ the standard error of the critical point.  
 
-\newpage
-
------------------------------------------------------------
- Metacomm.   Variable     Delta          Delta    Relative 
- Type                   $\rho_c^\infty$ Variable Variation
----------- ------------ --------------- -------- ----------
-    L       Dispersal      0.05            0.75    0.07    
-
-    U       Dispersal      0.07            0.75    0.09    
-
-    L        MetaNsp       0.42            0.95    0.44    
-
-    U        MetaNsp       0.07            0.95    0.07    
-
-    L          $m$         0.96            0.99    0.97    
-
-    U          $m$         0.96            0.99    0.97    
------------------------------------------------------------
-
-Table: Relative variation of the critical point for infinite lattices $\rho_c^\infty$. The parameters are mean dispersal distance (Dispersal), metacommunity number of species (MetaNsp), and migration ($m$). See methods for details about simulations and table 1 for the ranges of parameters. We used metacommunities with two different species abundance distributions (SAD): *L* logseries SAD; and *U* uniform SAD.
 
 \newpage
 
@@ -183,37 +163,21 @@ Table: Proportion of best models for patch size distributions from simulated neu
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/AlfaVsRho_T20000_64_512_meta.png}
-\caption{Power law exponent $\alpha$ for patch size distributions as a function of the intensity of competition $\rho$. We show the exponents of the two models selected by the Akaike criterion: the power law (Pow) and a power law with exponential cutoff. The patch size distribution corresponds to the species that has the largest patch or the species that percolate and form a spanning cluster. We made 30 simulations for each $\rho$ and metacommunity type. Metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD. The size of the grid was 512*512 sites and the other parameters used were migration=0.0001, dispersal distance=26.66.  The critical point $\rho_c$ is 0.00029 for Logseries and 0.00026 for uniform metacommunities.}
+\caption{Power law exponent $\alpha$ for patch size distributions as a function of the intensity of competition $\rho$. We show the exponents of the two models selected by the Akaike criterion: the power law (Pow) and a power law with exponential cutoff. The continuous lines unite the medians for each $\rho$. The patch size distribution corresponds to the species that has the largest patch or the species that percolate and form a spanning cluster. We made 30 simulations for each $\rho$ and metacommunity type. Metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD. The size of the grid was 512*512 sites and the other parameters used were migration=0.0001, dispersal distance=26.66.  The critical point $\rho_c$ is 0.00029 for Logseries and 0.00026 for uniform metacommunities.}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/ExpRateVsRho_T20000_64_512_meta.png}
-\caption{Exponential decay rate of the Power law with exponential cutoff model for patch size distributions as a function of the intensity of competition $\rho$. We fitted a power law with exponential cutoff to patch size distribution of the species that has the biggest patch or the species that percolate and form a spanning cluster. We made 30 simulations for each $\rho$ and metacommunity type. Metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD. The size of the grid was 512*512 sites and the other parameters used were migration=0.0001, dispersal distance=26.66.  The critical point $\rho_c$ is 0.00029 for Logseries and 0.00026 for uniform metacommunities.}
+\caption{Exponential decay rate of the Power law with exponential cutoff model for patch size distributions as a function of the intensity of competition $\rho$. The continuous line unites the medians for each $\rho$. We fitted a power law with exponential cutoff to patch size distribution of the species that has the biggest patch or the species that percolate and form a spanning cluster. We made 30 simulations for each $\rho$ and metacommunity type. Metacommunities have 64 species and two different species abundance distributions (SAD): *L*, logseries SAD; and *U*, uniform SAD. The size of the grid was 512*512 sites and the other parameters used were migration=0.0001, dispersal distance=26.66.  The critical point $\rho_c$ is 0.00029 for Logseries and 0.00026 for uniform metacommunities.}
 \end{figure}
 
-
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=6.5in]{figs/VarDeltaTSmaxvsCP_T20000_320_256_meta.png}
-\caption{Variance of temporal fluctuations of the largest patch species relative to the total area. We simulated communities in the same time span than the simulations to determine the critical point---typically around 20000 time steps---we take the last 5000 and measure the patch sizes each 100 time steps. The communities that did not have a spanning patch were classified as "Before" the critical point, whit a range of $\rho: 0 - 0.0004$. The communities that present a spanning patch in all the times are measured as "After" the critical point, with $\rho: 0.0004 - 1$. The communities where the spanning patch appears and disappears were classified as "Near" the critical point, with  $\rho: 0.0002 - 0.0004$. 
-We made 10 simulations for each $\rho$ and two metacommunity types: "Logseries" species abundance distribution (SAD) and "Uniform" SAD. Metacommunities have 320 species, the size of the grid was 256*256 sites, migration from metacommunity was 0.0001, dispersal distance=26.66.}  
-\end{figure}
 
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/VarDeltaTRSmaxvsCP_T20000_320_256_meta.png}
-\caption{Variance of temporal fluctuations of the largest patch species relative to the total abundance of the same species. We simulated communities in the same time span than the simulations to determine the critical point---typically around 20000 time steps---we take the last 5000 and measure the patch sizes each 100 time steps. The communities that did not have a spanning patch were classified as "Before" the critical point, whit a range of $\rho: 0 - 0.0004$. The communities that present a spanning patch in all the times are measured as "After" the critical point, with $\rho: 0.0004 - 1$. The communities where the spanning patch appears and disappears were classified as "Near" the critical point, with  $\rho: 0.0002 - 0.0004$. 
-We made 10 simulations for each $\rho$ and two metacommunity types: "Logseries" species abundance distribution (SAD) and "Uniform" SAD. Metacommunities have 320 species, the size of the grid was 256*256 sites, migration from metacommunity was 0.0001, dispersal distance=26.66.}  
-\end{figure}
-
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=6.5in]{figs/SkewDeltaTSmaxvsCP_T20000_320_256_meta.png}
-\caption{Skewness of the temporal fluctuations of the largest patch species relative to the total area. We simulated communities in the same time span than the simulations to determine the critical point---typically around 20000 time steps---we take the last 5000 and measure the patch sizes each 100 time steps. The communities that did not have a spanning patch were classified as "Before" the critical point, whit a range of $\rho: 0 - 0.0004$. The communities that present a spanning patch in all the times are measured as "After" the critical point, with $\rho: 0.0004 - 1$. The communities where the spanning patch appears and disappears were classified as "Near" the critical point, with  $\rho: 0.0002 - 0.0004$. 
+\caption{Variance of temporal fluctuations of the largest patch species relative to the total abundance of the same species  $\Delta RS_{max}$. We simulated communities in the same time span than the simulations to determine the critical point---typically around 20000 time steps---we take the last 5000 and measure the patch sizes each 100 time steps. The communities that did not have a spanning patch were classified as "Before" the critical point, with a range of $\rho: 0 - 0.0004$. The communities that present a spanning patch in all the times are measured as "After" the critical point, with $\rho: 0.0004 - 1$. The communities where the spanning patch appears and disappears were classified as "Near" the critical point, with  $\rho: 0.0002 - 0.0004$. 
 We made 10 simulations for each $\rho$ and two metacommunity types: "Logseries" species abundance distribution (SAD) and "Uniform" SAD. Metacommunities have 320 species, the size of the grid was 256*256 sites, migration from metacommunity was 0.0001, dispersal distance=26.66.}  
 \end{figure}
 
@@ -225,3 +189,16 @@ We made 10 simulations for each $\rho$ and two metacommunity types: "Logseries" 
 We made 10 simulations for each $\rho$ and two metacommunity types: "Logseries" species abundance distribution (SAD) and "Uniform" SAD. Metacommunities have 320 species, the size of the grid was 256*256 sites, migration from metacommunity was 0.0001, dispersal distance=26.66.}  
 \end{figure}
 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=6.5in]{figs/discAlfaYear_BCI.png}
+\caption{Power law exponent $\alpha$ for patch size distributions of the Barro Colorado Island forest plot as a function of the census year. The continuous line is a median regression (Slope: -0.0375, SE: 0.0145, t-value: -2.583, p-value: 0.049)}  
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=6.5in]{figs/discLamdaYear_BCI.png}
+\caption{Power law exponent $\alpha$ for patch size distributions of the Barro Colorado Island forest plot as a function of the census year. The continuous line is a median regression (Slope: -0.0074, SE: 0.0033, t-value: -2.216, p-value: 0.078)}  
+\end{figure}

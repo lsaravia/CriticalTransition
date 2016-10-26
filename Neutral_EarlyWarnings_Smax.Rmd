@@ -30,7 +30,7 @@ panderOptions('table.style', 'multiline')
 options("scipen"=100, "digits"=6)
 ```
 
-## Plots of Smax - Calculation of Early warnings based on the Max Cluster (Smax)
+## Plots of Smax - Calculation of Early warnings based on the Max Cluster (Smax) - Ensemble Averages  - NOT INCLUDED IN THE PAPER!
 
 ```{r plotSmaxT20000_clu_side_64_meta_m0001, eval=F,echo=F,message=T,warning=T}
 
@@ -123,7 +123,7 @@ rm(kk,k,k1,p,mClusters,tClusters,Clu,rank)
 ```
 
 
-## Plots of Smax - Calculation of Early warnings based on the Max Cluster (Smax)
+## Plots of Smax - Calculation of Early warnings based on the Max Cluster (Smax) - Ensemble averages  - NOT INCLUDED IN THE PAPER!
 
 ```{r plotSmaxT20000_clu_side_64_meta_m1, eval=F,echo=F,message=T,warning=T}
 
@@ -246,7 +246,7 @@ save.image()
 ```10.1038/nature05684
 
 
-# Plot the cluster sizes with fitted functions DA ERROR!!!!
+# Plot the cluster sizes with fitted functions - NOT INCLUDED IN THE PAPER!
  
 ```{r plotFitdisp26_cluAll_side_64_meta30_T5000, eval=F,echo=F,message=T,warning=T}
 source("R/powerlaw/discpowerexp.R")
@@ -360,9 +360,6 @@ boxplot(mm$alfa~mm$MetaType)
 boxplot(mm$alfa~mm$model)
 boxplot(mm$alfa~mm$type)
 boxplot(mm$alfa~mm$ReplacementRate)
-
-require(multcomp)
-summary(glht(am, mcp(model="Tukey")))
 
 #
 # No differences between Metacommunity or type (Spanning or max patch)
@@ -534,10 +531,10 @@ ggplot(tClusters, aes(x=ReplacementRate, y=Delta_MaxCluster)) + geom_point(alpha
 vClusters <- tClusters %>% summarise(varDelta_MaxCluster=var(Delta_MaxCluster),varDelta_MaxClusterSp=var(Delta_MaxClusterSp))
 
 ggplot(vClusters, aes(x=ReplacementRate, y=varDelta_MaxCluster)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10(breaks=c(0.0000,0.0001,0.0002,0.0003,0.0005,0.0010, 0.01)) +   facet_grid(~ MetaType,scales="free_y" ) +xlab(bquote(rho)) +stat_summary(fun.y=median,geom="line",colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab(expression(Variance~of~Delta~S[max]))+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) + coord_cartesian(ylim=c(0,.10))
-ggsave("figs/VarDeltaTSmaxvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/VarDeltaTSmaxvsRepl_T20000_320_256_meta_m.png", width=7,height=4,units="in",dpi=600)
 
 ggplot(vClusters, aes(x=ReplacementRate, y=varDelta_MaxClusterSp)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10(breaks=c(0.0000,0.0001,0.0002,0.0003,0.0005,0.0010, 0.01)) +   facet_grid(~ MetaType,scales="free_y" ) +xlab(bquote(rho)) +stat_summary(fun.y=median,geom="line",colour=colp[1]) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6]) + ylab(expression(Variance~of~Delta~RS[max]))+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) + coord_cartesian(ylim=c(0,.10))
-ggsave("figs/VarDeltaTSmaxSpvsRepl_T20000_320_256_meta_m.png", width=6,height=6,units="in",dpi=600)
+ggsave("figs/VarDeltaTSmaxSpvsRepl_T20000_320_256_meta_m.png", width=7,height=4,units="in",dpi=600)
 
 
 # Skewness of fluctuations

@@ -6,9 +6,9 @@ Markdown version of the manuscript and R source code for the data analysis.
 
 **ctnhm.bib** the bibliography
 
-**ctnhm.pdf** the pdf version without figures
+**ctnhm.pdf** the pdf version including figures
 
-**ctnhm_figures.md** Manuscript figures
+**ctnhm_figures.md** Manuscript figures (Old not updated)
 
 **ctnhm_appendices.md** Apendices
 

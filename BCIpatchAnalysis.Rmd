@@ -112,12 +112,6 @@ namTypeAb <- c("Spanning/+Abundant","Spanning/+Abundant","Other Species","Other 
 mc <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 
-# Proportion of best models by model only
-#
-group_by(BCIMdl,model) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n))
-mMdl <- group_by(BCIMdl,model) %>% filter(DeltaAIC==0)  %>% summarise(n=n()) %>% ungroup() %>% mutate(Frequency=n/sum(n),type=namType[type])
-mMdl
-
 # Max Cluster Size proportion
 ungroup(BCIMdl) %>% filter(DeltaAIC==0) %>% mutate(maxPatch = ClusterSize/(1000*500)) %>% summarise(maxPatchMean=mean(maxPatch))
 
@@ -166,10 +160,10 @@ names(rqm)[4]<-"pvalue"
 rqm <- filter(rqm, slope==T ) %>% dplyr::select(param,Tau,Value:pvalue)
 
 require(pander)
-pandoc.table(rqm,round=4)
+pandoc.table(filter(rqm,Tau==0.5),round=4)
 
 #
-#
+# BCI Smax and RSmax means and fluctuations
 #
 
 names(BCIhsize)
@@ -177,7 +171,7 @@ names(BCIhsize)
 tClusters <- BCIhsize %>% mutate( MaxClusterProp=Smax/(1000*500),MaxClusterSp=Smax/SmaxTotal,Mean_MaxClusterProp=mean(MaxClusterProp), Delta_MaxCluster=MaxClusterProp-Mean_MaxClusterProp,Mean_MaxClusterSp=mean(MaxClusterSp), Delta_MaxClusterSp=MaxClusterSp-Mean_MaxClusterSp)
 
 vClusters <- tClusters %>% summarise(varDelta_MaxCluster=var(Delta_MaxCluster),varDelta_MaxClusterSp=var(Delta_MaxClusterSp))
-
+require(fitdistrplus)
 descdist(tClusters$Delta_MaxClusterSp, discrete=FALSE, boot=500)
 descdist(tClusters$Delta_MaxCluster, discrete=FALSE, boot=500)
 
