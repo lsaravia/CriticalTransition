@@ -493,7 +493,7 @@ The divergence of characteristic times (in our case the fire lifetime) at a crit
 
 --------------
 
-@Sole2002a
+@Sole2004
 
 This occurs at the percolation value D ∗ ≈ 0.41 (i.e. when the proportion of avail- able sites is 1 − D ∗ ≈ 0.59) where it can be shown that the largest available patch cannot longer be connected and splits into many sub-patches. The same effect has been found in our system. In Fig. 5(a), we show the biodiversity decay linked to the presence of a percolation phenomenon in the spatially-explicit landscape. As we can see, there is a steady decay in the number of species present as D increases, with a rapid decay as D ∗ is approached. A different view of the decay can be obtained by plotting the Shannon entropy (Fig. 5(c)). We can see that it first increases as the best colonizers become less and less abundant (and the species-abundance distribution becomes more uniform). At D ∗ the effective loss of diversity reduces the value of the entropy which drops rapidly. As it was shown by the MF model, the average colonization rate also decreases (Fig. 5(b)). As D ∗ is approached, the average colonization rate goes down.
 

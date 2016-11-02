@@ -4,7 +4,7 @@ OPTS= -H margins.sty --bibliography ctnhm.bib --csl=ecology.csl
 %.pdf: %.md 
 	pandoc  -H ctnhm_figures.sty -V geometry:margin=1.2cm  --latex-engine=xelatex $^ -o $@
 
-all: ctnhm.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf
+all: ctnhm.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf 
 
 
 SomeResults.pdf: SomeResults.md
@@ -16,7 +16,11 @@ SomeResults.pdf: SomeResults.md
 ctnhm.pdf: ctnhm.md 
 	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" ctnhm.bib
 	pandoc $< -o $@ $(OPTS)
-	pdftk ctnhm.pdf ctnhm_figures.pdf output ctnhm_figs.pdf
+	evince ctnhm.pdf		
+
+ctnhm.tex: ctnhm.md 
+	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" ctnhm.bib
+	pandoc $< -o $@ $(OPTS)
 	evince ctnhm.pdf		
 
 ctnhm.docx: ctnhm.md 
