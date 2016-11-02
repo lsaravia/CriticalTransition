@@ -34,6 +34,8 @@ I usually run Rmd files chunk by chunk because there are long simulations, and s
 
 R/Neutral_fun.r: collection of functions used for the analysis
 
+R/BCI_fun.r: collection of functions used for the analysis of BCI data
+
 R/powerlaw: code to fit powerlaws from <http://tuvalu.santafe.edu/~aaronc/powerlaws/> (by Cosma Shalizi)
 
 
