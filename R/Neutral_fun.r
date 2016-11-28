@@ -3147,3 +3147,263 @@ gg_color_hue <- function(n) {
   hues = seq(15, 375, length = n + 1)
   hcl(h = hues, l = 65, c = 100)[1:n]
 }
+
+
+
+
+# Simulates and saves snapshots of the model each *inter* time intervals up to *time*
+# The function has parameters for birthRate and deathRate. 
+#
+# The difference with "simul_NeutralSpatPatt" function is that adds 
+#   lambda=birth/death to the name of the parmeter and output files 
+#
+# modType : 1=Non saturated neutral model, 2=Neutral saturated (zero-sum) model, 
+#    3=Hierarchical non saturated, 4=Hierarchical saturated.
+#
+# sedIni: 0=No initial seed
+#         1=1 individual of each species in the center of the lattice
+#         2=Filled lattice with metacommunity frequency
+#
+# 
+# 
+simul_NeutralSpatPatB <- function(nsp,side,disp,migr,repl,clus="S",time=1000,inter=10,init=1,meta="L",delo=F,sim=T,sedIni=0,modType=4,death=0.2,birth=1,colPal=0,savSed="S") {
+  if(!exists("neuBin")) stop("Variable neuBin not set (neutral binary)")
+  if(!require(untb))  stop("Untb package not installed")
+  require(ggplot2)
+  require(dplyr)
+  
+  # Parameter for dynamic percolation 
+  lambda=round(birth/death,4)                  # lambda critical = 1.6488
+  
+  for(i in 1:length(repl)) {
+    
+    if(toupper(meta)=="L") {
+      sadName <- "Logseries"
+      prob <- genFisherSAD(nsp,side)
+      neuParm <- paste0("fishP",nsp,"_",side,"R", repl[i],"L",lambda)
+      bname <- paste0("neuFish",nsp,"_",side,"R", repl[i],"L",lambda)
+    } else {
+      sadName <- "Uniform"
+      prob <- rep(1/nsp,nsp)  
+      neuParm <- paste0("unifP",nsp,"_",side,"R", repl[i],"L",lambda)
+      bname <- paste0("neuUnif",nsp,"_",side,"R", repl[i],"L",lambda)
+    }
+    pname <- paste0("pomacR",repl[i],".lin")
+    
+    if(sim) {
+      genNeutralParms(neuParm,side,prob,birth,death,disp,migr,repl[i])
+      
+      
+      if(sedIni==1){
+        genInitialSed(paste0(neuParm,".sed"),nsp,side,0)
+      } else {
+        genInitialSed(paste0(neuParm,".sed"),nsp,side,prob)
+      }
+      
+      # Delete old simulations
+      if(delo){
+        system(paste0("rm ",bname,"m*.txt")) # MultiFractal mf
+        system(paste0("rm ",bname,"D*.txt")) # Density
+        system(paste0("rm ",bname,"C*.txt")) # Clusters
+      }
+      system(paste0("rm ",bname,"-*.sed"))
+      
+      
+      par <- read.table("sim.par",quote="",stringsAsFactors=F)
+      # Change base name
+      par[par$V1=="nEvals",]$V2 <- time
+      par[par$V1=="inter",]$V2 <- inter # interval to measure Density and Diversity
+      par[par$V1=="init",]$V2 <- init # Firs time of measurement = interval
+      par[par$V1=="modType",]$V2 <- modType # Hierarchical saturated
+      par[par$V1=="sa",]$V2 <- savSed # Save a snapshot of the model
+      par[par$V1=="baseName",]$V2 <- bname 
+      par[par$V1=="mfDim",]$V2 <- "N"
+      par[par$V1=="minBox",]$V2 <- 2
+      par[par$V1=="pomac",]$V2 <- 0 # 0:one set of parms 
+      # 1:several simulations with pomac.lin parameters 
+      
+      par[par$V1=="pomacFile",]$V2 <- pname # 0:one set of parms 
+      par[par$V1=="minProp",]$V2 <- 0
+      par[par$V1=="clusters",]$V2 <- clus       # Calculate max cluster size
+      
+      
+      parfname <- paste0("sim",nsp,"_",side,"R", repl[i],".par")
+      write.table(par, parfname, sep="\t",row.names=F,col.names=F,quote=F)
+      
+      s <- system("uname -a",intern=T)
+      
+      if(sedIni){
+        if(grepl("i686",s)) {
+          system(paste(neuBin,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+        } else {
+          system(paste(neuBin64,parfname,paste0(neuParm,".inp"),paste0(neuParm,".sed")))
+        }
+        
+      } else {
+        if(grepl("i686",s)) {
+          system(paste(neuBin,parfname,paste0(neuParm,".inp")))
+        } else {
+          system(paste(neuBin64,parfname,paste0(neuParm,".inp")))
+        }
+      }
+      
+      
+      #fname <- paste0("neuFish",nsp,"Density.txt")
+      #sad1 <- meltDensityOut_NT(fname,nsp)
+      
+    } else {
+      den <-readWideDensityOut(bname)
+      den <-filter(den,Time>=init)
+      
+      
+      # read cluster statistics to know if there are a spanning species
+      # 
+      clu <-readClusterOut(bname)
+      clu<- filter(clu,Time>=init)
+      spanSp <- clu$SpanningSpecies
+      clusSp <- clu$MaxClusterSize
+      
+      if(length(colPal)==1)
+        mc <- c("#b35806","#e08214","#fdb863","#fee0b6","#f7f7f7","#d8daeb","#b2abd2","#8073ac","#542788")
+      else
+        mc <- colPal
+      
+      if(init>1)
+        tra<-seq(init,time,by=inter)
+      else {
+        if(inter==1)
+          tra<-seq(1,time,by=inter)
+        else
+          tra<-seq(0,time,by=inter); tra[1]<-1 
+      }
+      for(t in 1:length(tra)) {
+        fname <- paste0(bname,"-",formatC(tra[t],width=4,flag=0),".sed")
+        #spa <- read_sed(fname)
+        spa <-read_sed2xy(fname)
+        sp1 <-group_by(spa,v) %>% summarize(n=n())
+        mc1 <-colorRampPalette(mc)(nrow(sp1))
+        if(spanSp[t]>0){
+          #mc1[which(sp1$v==spanSp[t])]<- "#000000"     
+          mc1[which(sp1$v==spanSp[t])]<- "#228B22"    # Spanning species
+          #mc1[which(sp1$v!=spanSp[t])]<- "#228B22"    # Not spanning Forest green
+        }
+        Smax <- clusSp[t]/(side*side)
+        require(grid)
+        g <- ggplot(spa, aes(x, y, fill = factor(v))) + geom_raster(hjust = 0, vjust = 0) + 
+          theme_bw() + coord_equal() 
+        g <- g + scale_fill_manual(guide=F,values=mc) +#gradientn(colours=mc,guide=F) + #guide="colourbar",name="Species no."
+          scale_x_continuous(expand=c(.01,.01),breaks=NULL) + 
+          scale_y_continuous(expand=c(.01,.01),breaks=NULL) +  
+          labs(x=NULL, y=NULL) +theme(panel.border = element_blank()) +
+          annotate("text",x=20,y=-15,size=4,label=paste0("Time: ",tra[t])) +
+          annotate("text",x=80,y=-15,size=4,label=paste0("Dens: ",round(den$Tot.Dens[t],2)))+
+          annotate("text",x=140,y=-15,size=4,label=paste0("Smax: ",round(Smax,2))) +
+          annotate("text",x=200,y=-15,size=4,label=paste0("Smax prop: ",round(Smax/den$Tot.Dens[t],2))) +
+          theme(plot.margin=unit(c(.5,.1,1,.1),"cm"))
+        print(g)
+        
+      }
+    }
+  }
+}
+
+# Plot the proportion of Smax=Smax/Total density vs Density
+#
+# timeStat: time to reach a stationary state
+# 
+plot_NeutralSmaxDens <- function(nsp,side,disp,migr,repl,meta="L",death=0.2,birth=1,colPal=0,timeStat=50) {
+  require(ggplot2)
+  require(dplyr)
+  
+  # Parameter for dynamic percolation 
+  clu <- data.frame()
+  
+  for(i in 1:length(death)){
+    
+    lambda=round(birth/death[i],4)                  # lambda critical = 1.6488
+  
+    if(toupper(meta)=="L") {
+      bname <- paste0("neuFish",nsp,"_",side,"R", repl,"L",lambda)
+    } else {
+      bname <- paste0("neuUnif",nsp,"_",side,"R", repl,"L",lambda)
+    }
+   
+    # read cluster statistics to know if there are a spanning species
+    # 
+    cl <-readClusterOut(bname) %>% filter(Time>=timeStat)
+
+    cl$Smax <- cl$MaxClusterSize/(side*side)
+    cl$Smax_prop <- cl$MaxClusterSize/cl$TotalSpecies
+    cl$Dens <- cl$TotalSpecies/(side*side)
+    clu  <- rbind(clu,cl)
+  }
+  if(colPal==0) colPal<-"#228B22"
+  g <-ggplot(clu,aes(Dens,Smax_prop)) + geom_point(color=colPal) + theme_bw() + xlab("Densidad") + ylab("Parche máximo") + 
+    coord_cartesian(xlim=c(0.3,0.8))
+#  g <-ggplot(clu,aes(TotalSpecies,Smax_prop)) + geom_point(color="#228B22") + theme_bw()
+  
+  print(g)
+  
+}
+
+
+plot_NeutralSmaxCluster <- function(nsp,side,disp,migr,repl,time=10,inter=1,init=1,meta="L",death=0.2,birth=1,colPal=0) {
+  require(ggplot2)
+  require(dplyr)
+  require(raster)
+  
+  # Parameter for dynamic percolation 
+  lambda=round(birth/death,4)                  # lambda critical = 1.6488
+  
+   
+  if(toupper(meta)=="L") {
+    bname <- paste0("neuFish",nsp,"_",side,"R", repl,"L",lambda)
+  } else {
+    bname <- paste0("neuUnif",nsp,"_",side,"R", repl,"L",lambda)
+  }
+ 
+  if(length(colPal)==1)
+    mc <- c("#b35806","#e08214","#fdb863","#fee0b6","#f7f7f7","#d8daeb","#b2abd2","#8073ac","#542788")
+  else
+    mc <- colPal
+
+  if(init>1)
+    tra<-seq(init,time,by=inter)
+  else {
+    if(inter==1)
+      tra<-seq(1,time,by=inter)
+    else
+      tra<-seq(0,time,by=inter); tra[1]<-1 
+  }
+  for(t in 1:length(tra)) {
+    fname <- paste0(bname,"-",formatC(tra[t],width=4,flag=0),".sed")
+    spa <- read_sed(fname)
+    r <- raster(spa,xmn=1,xmx=side,ymn=1,ymx=side)
+    r1 <-clump(r,directions=4)
+  #    plot(r1, axes=FALSE,box=FALSE,legend=FALSE)
+    p = rasterToPoints(r1); spa = data.frame(p)
+    colnames(spa) = c("x", "y", "v")
+    #spa <-read_sed2xy(fname)
+    sp1 <-group_by(spa,v) %>% summarize(n=n()) %>% arrange(desc(n))
+    # mc1 <-colorRampPalette(mc)(nrow(sp1))
+    # mc1[which(sp1$v==1)]<- "#228B22"    # Spanning species
+    #mc1[which(sp1$v!=spanSp[t])]<- "#228B22"    # Not spanning Forest green
+
+    Smax <- sp1$n[1]/(side*side)
+    Dens <- sum(sp1$n)/(side*side)
+    spa <- spa %>% mutate(v=ifelse(v==sp1$v[1],1,2))
+    require(grid)
+    g <- ggplot(spa, aes(x, y, fill = factor(v))) + geom_raster(hjust = 0, vjust = 0) + 
+      theme_bw() + coord_equal() 
+    g <- g + scale_fill_manual(guide=F,values=mc) +#gradientn(colours=mc,guide=F) + #guide="colourbar",name="Species no."
+      scale_x_continuous(expand=c(.01,.01),breaks=NULL) + 
+      scale_y_continuous(expand=c(.01,.01),breaks=NULL) +  
+      labs(x=NULL, y=NULL) +theme(panel.border = element_blank()) +
+      annotate("text",x=20,y=-15,size=4,label=paste0("Time: ",tra[t])) +
+      annotate("text",x=80,y=-15,size=4,label=paste0("Dens: ",round(Dens,2)))+
+      annotate("text",x=140,y=-15,size=4,label=paste0("Smax: ",round(Smax,2))) +
+      annotate("text",x=200,y=-15,size=4,label=paste0("Smax prop: ",round(Smax/Dens,2))) +
+      theme(plot.margin=unit(c(.5,.1,1,.1),"cm"))
+    print(g)
+  }
+}

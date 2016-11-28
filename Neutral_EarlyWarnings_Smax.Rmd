@@ -243,7 +243,7 @@ rm(cn,cl,Mdl,p,mm,mMdl)
 
 save.image()
 
-```10.1038/nature05684
+```
 
 
 # Plot the cluster sizes with fitted functions - NOT INCLUDED IN THE PAPER!
@@ -384,7 +384,7 @@ ggsave("figs/AlfaVsRho_T20000_64_512_meta.png", width=7,height=4,units="in",dpi=
 
 
 
-# Plot Exponential decay rate of PowExp model10.1038/nature05684
+# Plot Exponential decay rate of PowExp model
 #
 mMdl <- filter(Models,model=="PowExp" ,type==1 | type==2) %>%  mutate(typeAb=namTypeAb[type],type=namType[type])
 
