@@ -1,30 +1,23 @@
 
 #  Biodiversity collapse and early warning indicators in a spatial phase transition between neutral and niche communities
 
-**Leonardo A. Saravia** ^1^ ^2^, **Fernando R. Momo** ^1^ 
+*Short title:* A spatial phase transition between neutral and niche communities
 
-1. Instituto de Ciencias 
+*keywords:* Continuous critical transitions; Percolation; Neutral-niche communities; spatial stochastic models; Biodiversity collapse 
 
-	Universidad Nacional de General Sarmiento
+*Online supplementary material* : one pdf file including 1 Text, 3 Tables, and 9 figures. 
 
-	J.M. Gutierrez 1159 (1613), Los Polvorines
+*Manuscript type*: E-Article
 
-	Buenos Aires, Argentina.
 
-2. E-mail: <lsaravia@ungs.edu.ar>
+
+\newpage
 
 
 ## Abstract
 
 The dynamics of ecological communities can be described by two contrasting models: the first assumes that individuals of all species are identical and do not have interactions. The second assumes that species are different, adapted to particular habitat conditions, and have strong interactions. It is known that a critical transition exist between these two states, but the spatial aspect of this transition has not been studied. Here we study the simplest model of neutral-niche communities in a spatially explicit way using a stochastic cellular automata. The neutral model follows the Hubbell's original formulation and niche dynamics is represented as a competitive hierarchy. The competition intensity is defined as a parameter that modulates the transition between these extremes. We use the theory of percolation to study the geometric properties of species patches. The transition is signed by the apparition of a large patch that connects the whole area, the properties of this patch can be used as early warning signals: the proportion of the largest patch with respect to the total area covered by the species, the variance of the size fluctuations and the skewness of the fluctuations distribution. These three indices can be combined to show that a critical transition is approaching. The model shows that at the critical point there is a sudden fall of species diversity but the richness experience a gentle decline with increasing competitive intensity. The critical point occurs at a very low value of competitive intensity and the rate of migration from the metacommunity greatly influences the position of the critical point. As a practical an example we apply the new early warnings to the Barro Colorado Tropical forest, which as expected, appear to be far from a critical transition. Low values of competitive intensity were also reported for different high diversity real communities suggesting the possibility that these kind of communities are located before the critical point. A small increase of competitive interactions could bring them to the other side where diversity is much lower. This transition could happen before habitat destruction or degradation affect the community in response to changes in environmental conditions like the ones produced by climate change or exotic species invasions. Thus this new early warnings indicators could be used to monitor high diversity ecosystems that are yet relatively pristine. 
 
-*Short title:* A spatial phase transition between neutral and niche communities
-
-*keywords:* Continuous critical transitions; Percolation; Neutral-niche communities; spatial stochastic models; Biodiversity collapse 
-
-
-
-\newpage
 
 ## Introduction
 
@@ -55,38 +48,23 @@ First, we define the spatial explicit neutral-hierarchical model, then we explai
 
 This model represents a continuum between hierarchical and neutral model in the same spirit as @Gravel2006, and others [@Chisholm2010;@Zhou2008]. The model is a stochastic cellular automata (CA) or also called an interactive particle system [@Durrett1994a]. In these kind of models space is discretized into a grid and only one individual can occupy a particular position. Each position represents an area fixed by the investigator to mimic the real system. Time is continuous so the update of the model is asynchronous. Sites are chosen at random to be updated and to perform one complete time interval $J$ sites have to be updated, where $J$ is the size of the grid [@Durrett1994a]. The units of the grid are arbitrary but to use parameters fitted from field studies we chose a side of 1 meter.  
 
-We use periodic boundary conditions, which makes the landscape a torus. It means that sites on the top edge of the grid are neighbors of those on the bottom edge, and sites on the right edge are neighbors of those on the left. With this choice we avoid edge effects, this is equivalent to think that the grid is embedded in a large community. The size of the community is given by *J = dimX* x *dimY*, where *dimX* and *dimY* are the dimensions of the grid. Thus *J* is the maximum number of individuals in the simulated area. As in a classical neutral model there is a metacommunity i.e. a regional species pool assumed very large and invariant in ecological time scales [@Hubbell2001]. All individuals have the same parameters, unless they should belong to different species [@Hubbell2001], and each species is assigned with a number. There are only two possible differences between species: 
-
-* They may have a different frequency $X_i$ in the metacommunity and also different abundances in the local community.
-
-* Hierarchical competition: species with lower numbers has a probability to replace species with higher numbers as in [@Tilman1994]. Thus a species with number 1 have a probability to replace species with number 2 and greater. The species with number 2 can replace species starting from 3. The probability of replacement ($\rho$) is a parameter, when it is 0 there is no replacement and the model behaves like a neutral model without competitive hierarchy.  
+We use periodic boundary conditions, which makes the landscape a torus. It means that sites on the top edge of the grid are neighbors of those on the bottom edge, and sites on the right edge are neighbors of those on the left. With this choice we avoid edge effects, this is equivalent to think that the grid is embedded in a large community. The size of the community is given by *J = dimX* x *dimY*, where *dimX* and *dimY* are the dimensions of the grid. Thus *J* is the maximum number of individuals in the simulated area. As in a classical neutral model there is a metacommunity i.e. a regional species pool assumed very large and invariant in ecological time scales [@Hubbell2001]. All individuals have the same parameters, unless they should belong to different species [@Hubbell2001], and each species is assigned with a number. There are only two possible differences between species: (1) They may have a different frequency $X_i$ in the metacommunity and also different abundances in the local community. (2) Hierarchical competition: species with lower numbers has a probability to replace species with higher numbers as in [@Tilman1994]. Thus a species with number 1 have a probability to replace species with number 2 and greater; the species with number 2 can replace species starting from 3 and so on. The probability of replacement ($\rho$) is a parameter, when it is 0 there is no replacement and the model behaves like a neutral model without competitive hierarchy.  
 
 The colonization-competition and other possible trade-offs are not explicitly included in the model. But a colonization-competition trade-off can be established if species numbering is arranged in inverse order to its frequency $X_i$ in the metacommunity. Hence the most competitive species (with number 1) will have the lowest migration rate and the less competitive will have the highest migration rate.  
 
-There are four processes included in the model: death, local dispersal, migration, and competition, after setting initial conditions the following events can happen:
+There are four processes included in the model: death, local dispersal, migration, and competition, after setting initial conditions the following events can happen: (1) With probability *m* an individual of a species *i* can migrate from the metacommunity at a rate proportional to its frequency $X_i$ in the metacommunity. (2) When the grid is not full, individuals give birth with rate 1 to a new individual that disperses to the neighborhood with a dispersal kernel, here we use an inverse power kernel [@Marco2011]:
 
-(1) With probability *m* an individual of a species *i* can migrate from the metacommunity at a rate proportional to its frequency $X_i$ in the metacommunity.
+ $d(x) =  \frac{\alpha -1}{x_{min}} \left(\frac{x}{x_{min}} \right)^{-\alpha}$ with $mean =\frac{\alpha-1}{\alpha-2}x_{min}$ where $\alpha > 1$ and $x \ge x_{min}$. 
 
-(2) When the grid is not full, individuals give birth with rate 1 to a new individual that disperses to the neighborhood with a dispersal kernel, here we use an inverse power kernel [@Marco2011]:
+where $d(x)$ is the probability that an individual disperse a distance $x$ from the parent. In all cases we used $x_{min} = 1$. (3) Individuals die at a rate $\mu$. (4) When an individual dies, it is replaced by a migrant from metacommunity with probability $m$ and with probability $1-m$ by an individual from the neighborhood. The neighborhood is established using the dispersal kernel with average distance $d$. Once the grid is full it stays full, because when an individual dies it is immediately replaced by another. This is called the zero-sum assumption in neutral models. (5) If the individual does not die it can be replaced by an individual from the metacommunity or neighborhood as in (4), but an individual of species with number $k$ can replace and individual of a species $k+1$ with probability $\rho$. Thus a hierarchical ordering of species is established. When this probability is zero, the model behavior becomes neutral.
 
- 	$d(x) =  \frac{\alpha -1}{x_{min}} \left(\frac{x}{x_{min}} \right)^{-\alpha}$ with $mean =\frac{\alpha-1}{\alpha-2}x_{min}$ where $\alpha > 1$ and $x \ge x_{min}$. 
-
-	where $d(x)$ is the probability that an individual disperse a distance $x$ from the parent. In all cases we used $x_{min} = 1$.
-
-
-(3) Individuals die at a rate $\mu$
-
-(4) When an individual dies, it is replaced by a migrant from metacommunity with probability $m$ and with probability $1-m$ by an individual from the neighborhood. The neighborhood is established using the dispersal kernel with average distance $d$. Once the grid is full it stays full, because when an individual dies it is immediately replaced by another. This is called the zero-sum assumption in neutral models. 
-
-(5) If the individual does not die it can be replaced by an individual from the metacommunity or neighborhood as in (4), but an individual of species with number $k$ can replace and individual of a species $k+1$ with probability $\rho$. Thus a hierarchical ordering of species is established. When this probability is zero, the model behavior becomes neutral.
-
-The model was developed using the C++ programing language and its source code is available at <https://github/lasaravia/neutral> and figshare <http://dx.doi.org/10.6084/m9.figshare.969692>. 
+The model was developed using the C++ programing language and its source code is available at (links are available from the journal office) and figshare (links are available from the journal office). 
 
 ## Percolation and simulations
 
 To characterize our model in terms of percolation theory, we need to define an order parameter that depends on an external control or tuning parameter that can be continuously varied. Thus, we defined as tuning parameter the replacement probability $\rho$, and the order parameter as the probability that a patch of one species connects the landscape, this is called the spanning cluster probability $SC_p$.
 
-In our model, percolation is produced when there is at least one patch of one species that spans from one edge of the system to the opposite edge. We calculated the patches for all species using a modified Hoshen–Kopelman cluster labeling algorithm [@Hoshen1976] with a neighborhood defined by the four nearest sites (Von Neumann neighborhood) available at github <https://github.com/lsaravia/Clusters>. The percolation point is defined as the  value of the tuning parameter $\rho$ at which $SC_p$ is 0.5. We used one snapshot of the spatial pattern to make our results more compatible with field studies, hence we measure the patch size distributions after the model reach a steady state between 5000 and 30000 time intervals (as defined above).
+In our model, percolation is produced when there is at least one patch of one species that spans from one edge of the system to the opposite edge. We calculated the patches for all species using a modified Hoshen–Kopelman cluster labeling algorithm [@Hoshen1976] with a neighborhood defined by the four nearest sites (Von Neumann neighborhood) available at github (links are available from the journal office). The percolation point is defined as the  value of the tuning parameter $\rho$ at which $SC_p$ is 0.5. We used one snapshot of the spatial pattern to make our results more compatible with field studies, hence we measure the patch size distributions after the model reach a steady state between 5000 and 30000 time intervals (as defined above).
 
 The size of the lattice affects the value of the critical point $\rho_c$ at which the transition occurs; in small lattices $SC_p$ is non-zero for values of $\rho$ below the $\rho_c$, because patches that connect the entire lattice appear only by chance. Therefore, in order to obtain an asymptotic estimate for $\rho_c$ we performed a finite size scaling analysis. For this, we run simulations for different lattice sizes (Side = 128, 192, 256) and obtained asymptotic values by regressing $\rho_c$ against $1/Side^2$, the intercept becomes an estimate for a lattice of infinite size ($\rho_c^\infty$)[@Stauffer1994; @Sornette2013]. 
 
@@ -96,7 +74,7 @@ The parameters used were compatible with published results in tropical forest bu
 
 The parameter $\rho$ is varied across all the range between 0 and 1 to determine the critical point, in the region where we suspect the $\rho_c$ will be located (near 0) the steps were very small (0.0001) and greater (0.1) in the region were we don't expect the $\rho_c$. To calculate the value of $\rho_c$ at which $SC_p=0.5$ we interpolate linearly from the  four values of $\rho$ that have the nearest values of $SC_p$ to 0.5.
 
-All simulations started with a lattice filled with individuals with the same abundance distribution as the metacommunity. For each parameter combination we performed 50 simulations. Thus, we calculate the $SC_p$ as the number of times we observed a spanning cluster divided by the number of simulations. The analysis of the model output were done in the R statistical statistical language [@RCoreTeam2015] and the scripts are available at github <https://github.com/lsaravia/CriticalTransition> and figshare <http://dx.doi.org/10.6084/m9.figshare.2007537>.
+All simulations started with a lattice filled with individuals with the same abundance distribution as the metacommunity. For each parameter combination we performed 50 simulations. Thus, we calculate the $SC_p$ as the number of times we observed a spanning cluster divided by the number of simulations. The analysis of the model output were done in the R statistical statistical language [@RCoreTeam2015] and the scripts are available at github (links are available from the journal office) and figshare (links are available from the journal office).
 
 We estimated the critical point in wide range of parameters to test that the transition is not confined to a small region in the parameter space. Besides, we also analyze changes in the critical point to give us an idea of the sensitivity of the simulated communities to changes in the intensity of competition. This could be used to compare the predictions of the model with the behavior of real communities where a change in the  competitive intensity was documented. We analyzed the critical point for infinite lattices ($\rho_c^\infty$) varying three parameters of the model, one at a time: the migration $m$, the dispersal distance and the number of species in the metacommunity, the parameter $\mu$ was fixed at 0.2. To change the dispersal distance we vary the power exponent of the dispersal kernel $\alpha$ (Table 1). We used as a baseline the parameters listed in the first row of table 1, so if we vary $m$, the other parameters are fixed at $\alpha=2.04$ and the metacommunity number of species to 320. 
 
@@ -129,7 +107,7 @@ For spatial systems with patch structures another early warning indicator of the
 
 We measured the patch size distribution from simulations in a range of $\rho$ from neutral to niche communities, using a smaller set than the ones we used to estimate the critical point: $\rho$={0.0000, 0.0001,0.0002, 0.0003, 0.0005, 0.0010, 0.01}, the other parameters were from the first row of table 1 and a *Side* of 512 sites. We made 30 simulations run up to time 15000-20000 and then we collected the patch sizes of all species. In some simulations the spanning cluster occupies a great proportion of the landscape in consequence very few patches remain to estimate a distribution. We only fitted a model when there are at least 20 patches and 5 different patch sizes. 
 
-We fitted the mentioned discrete distributions using maximum likelihood methods [@Clauset2009]. After that we calculated the Akaike information criteria corrected for small samples ($AIC_c$), to select the best model [@Burnham2002; @Burnham2011]. All the analysis were made using the R statistical language [@RCoreTeam2015]. The fitting was made using code provided by Cosma R. Shalizi for the power law with exponential cutoff and the package poweRlaw for the other distributions [@Gillespie2015]. The complete source code for statistical analysis, and the outputs of the model are available at github <https://github.com/lsaravia/CriticalTransition> and figshare <http://dx.doi.org/10.6084/m9.figshare.2007537>.
+We fitted the mentioned discrete distributions using maximum likelihood methods [@Clauset2009]. After that we calculated the Akaike information criteria corrected for small samples ($AIC_c$), to select the best model [@Burnham2002; @Burnham2011]. All the analysis were made using the R statistical language [@RCoreTeam2015]. The fitting was made using code provided by Cosma R. Shalizi for the power law with exponential cutoff and the package poweRlaw for the other distributions [@Gillespie2015]. The complete source code for statistical analysis, and the outputs of the model are available at github (links are available from the journal office) and figshare (links are available from the journal office).
 
 ## Application of early warnings to BCI forest data
 
@@ -197,8 +175,7 @@ The novelty of this critical transition is that it occurs before that produced b
 
 # Acknowledgments
 
-We are grateful to the National University of General Sarmiento for financial support, and to Graeme Ruxton for their English revision. This work was partially supported by a grant from CONICET (PIO 144-20140100035-CO). We thank Jordi Bascompte, Juan Bonachela and Karina Laneri for their comments and discussions on earlier versions of the manuscript.
-The BCI forest dynamics research project was made possible by National Science Foundation grants to Stephen P. Hubbell: DEB-0640386, DEB-0425651, DEB-0346488, DEB-0129874, DEB-00753102, DEB-9909347, DEB-9615226, DEB- 9615226, DEB-9405933, DEB-9221033, DEB-9100058, DEB- 8906869, DEB-8605042, DEB-8206992, DEB-7922197, support from the Center for Tropical Forest Science, the Smithsonian Tropical Research Institute, the John D. and Catherine T. MacArthur Foundation, the Mellon Foundation, the Celera Foundation, and numerous private individuals, and through the hard work of over 100 people from 10 countries over the past two decades. The plot project is part of the Center for Tropical Forest Science, a global network of large-scale demographic tree plots.
+
 
 
 # References

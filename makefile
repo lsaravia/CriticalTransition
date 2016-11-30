@@ -1,10 +1,10 @@
-OPTS= -H margins.sty --bibliography ctnhm.bib --csl=ecology.csl 
+OPTS= -H margins.sty --bibliography ctnhm.bib --csl=the-american-naturalist.csl 
 
 
 %.pdf: %.md 
 	pandoc  -H ctnhm_figures.sty -V geometry:margin=1.2cm  --latex-engine=xelatex $^ -o $@
 
-all: ctnhm.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf 
+all: ctnhm_AmNat.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf 
 
 
 SomeResults.pdf: SomeResults.md
@@ -27,9 +27,10 @@ ctnhm.docx: ctnhm.md
 	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" ctnhm.bib
 	pandoc $< -o $@ $(OPTS)
 			
-ctnhm_figures.pdf: ctnhm_figures.md
-	pandoc -H ctnhm_figures.sty ctnhm_figures.md -o ctnhm_figures.pdf 
-	evince ctnhm_figures.pdf		
+ctnhm_AmNat.pdf: ctnhm_AmNat.md
+	cp "/home/leonardo/BibTeX/Manuscritos-Critical Transition.bib" ctnhm.bib
+	pandoc $< -o $@ $(OPTS)
+	evince $@ 		
 
 ctnhm_appendices.pdf: ctnhm_appendices.md
 	pandoc -H ctnhm_appendices.sty ctnhm_appendices.md -o ctnhm_appendices.pdf 
