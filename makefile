@@ -1,10 +1,10 @@
-OPTS= -H margins.sty --bibliography ctnhm.bib --csl=the-american-naturalist.csl 
+OPTS= -H margins.sty --bibliography ctnhm.bib --csl=oikos.csl 
 
 
 %.pdf: %.md 
 	pandoc  -H ctnhm_figures.sty -V geometry:margin=1.2cm  --latex-engine=xelatex $^ -o $@
 
-all: ctnhm_AmNat.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf 
+all: ctnhm.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf 
 
 
 SomeResults.pdf: SomeResults.md
