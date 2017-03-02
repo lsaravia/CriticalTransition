@@ -82,13 +82,16 @@ mean_power_opt <-function(alfa,x=1) abs(((alfa-1)/(alfa-2)*x)-m_DD)
 # Calculate m from dispersal distance and side from [@Chisholm2009c] eqn 2
 # requires that side > 5*meanDispersal
 #
-m_from_dispersalDistance <-function(meanDispersal,side) side*4*meanDispersal/(side*side*pi)
-
+#  
+m_from_dispersalDistance <-function(meanDispersal,side,P){ 
+  m <-P*meanDispersal/(side*side*pi)
+  return(data.frame(ColonizationRate=m,DispersalDistance=meanDispersal,side))
+}
 
 # Calculate theta and I from spatially implicit neutral theory parameters from dispersal distance and m [@@Etienne2011]
 # side == 128 
 #
-theta_from_dispMigration<-function(D,m,side=256){
+theta_from_dispMigration<-function(D,m,side=128){
   at<-2.401
   xt<-0.136
   yt <-1.852
@@ -99,7 +102,8 @@ theta_from_dispMigration<-function(D,m,side=256){
   theta<- at*m^(xt)*D^(yt)
   I    <- ai*m^(xi)*D^(yi)
   J<-side*side
-  return(data.frame(ColonizationRate=m,DispersalDistance=D,Theta=theta,I=I))
+  mimplicit = I/(I+J-1)
+  return(data.frame(ColonizationRate=m,DispersalDistance=D,Theta=theta,I=I,mimplicit=mimplicit))
 }
 
 

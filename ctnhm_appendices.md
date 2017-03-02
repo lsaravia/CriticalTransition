@@ -1,18 +1,5 @@
 # Appendices 
 
-## Appendix 1: Barro colorado Island forest plot discretization procedure
-
-To analyze the patch distribution of BCI plot we first have to discretized the positions of the trees to fit them in a lattice. In each position only one individual of a particular species can be present, this is the same assumption that we made for the model that we use in the paper above. 
-
-We have to choose a length scale to make the discretization, if we intend to fit all the individuals of all species in a different site the scale should be around 0.10 m for this plot, as the plot has 1000m x 500 m, that would result in an big lattice of 10000x5000 sites with a great proportion of empty places. This will result in a majority of isolated sites with almost no patches. If we use a bigger scale e.g. of 0.5 m, more than 1 individual of possibly different species get in some of the sites, in these cases we have to decide which one will occupy the site. We establish that the one with greater dbh, no matter the species, will be the one that occupies the site, thus we are favoring the more mature individuals.
-
-In this process we have to find the scale that give us the maximal occupation of the lattice without loosing the species structure of the community. Then the criteria to stop enlarging the scale is that the species abundance distribution (SAD) of the discretized lattice has not to be statistically different from the original SAD. To test this we use the Anderson-Darling statistic with a randomization procedure using the R package kSamples [1], this statistic has been proved powerful to detect different kinds of communities [2]. Using this procedure we obtained a scale of 1 m, thus we used a lattice of 1000x500 sites. 
-
-1. Scholz F, Zhu A (2015) kSamples: K-Sample Rank Tests and their Combinations. Available: http://cran.r-project.org/package=kSamples.
-
-1. Saravia LA (2015) A new method to analyse species abundances in space using generalized dimensions. Methods Ecol Evol 6: 1298–1310. Available: http://doi.wiley.com/10.1111/2041-210X.12417.
-
-
 ## Appendix Tables 
 
 ----------------------------------------
@@ -38,7 +25,8 @@ In this process we have to find the scale that give us the maximal occupation of
    0.0001   2.02 (53.3)    1083.0  626.1
 ----------------------------------------
 
-Table: Equivalence of spatially explicit parameters $m$ and $\alpha$ (Mean dispersal distance) with spatially implicit neutral parameters $\theta$ and $I$.  
+Table: Equivalence of spatially explicit parameters $m$ and $\alpha$ (Mean dispersal distance) with spatially implicit neutral parameters $\theta$ and $I$.  We used the formulas 1a & 1b from Etienne & Rosindell (2011) that assume a fat tailed dispersal kernel and $128^2$ individuals. The range of $\theta$ and $I$ obtained is similar to the one of Etienne & Rosindell (2011) paper.
+
 
 \newpage
 
@@ -193,12 +181,12 @@ We made 10 simulations for each $\rho$ and two metacommunity types: "Logseries" 
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/discAlfaYear_BCI.png}
-\caption{Power law exponent $\alpha$ for patch size distributions of the Barro Colorado Island forest plot as a function of the census year. The continuous line is a median regression (Slope: -0.0375, SE: 0.0145, t-value: -2.583, p-value: 0.049)}  
+\caption{Power law exponent $\alpha$ for patch size distributions of the Barro Colorado Island forest plot as a function of the census year. The model fitted was a power law with exponential cutoff. The continuous line is a median regression (Slope: -0.0375, SE: 0.0145, t-value: -2.583, p-value: 0.049)}  
 \end{figure}
 
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=6.5in]{figs/discLamdaYear_BCI.png}
-\caption{Power law exponent $\alpha$ for patch size distributions of the Barro Colorado Island forest plot as a function of the census year. The continuous line is a median regression (Slope: -0.0074, SE: 0.0033, t-value: -2.216, p-value: 0.078)}  
+\caption{Exponential decay rate $\lambda$ for patch size distributions of the Barro Colorado Island forest plot as a function of the census year. The model fitted was a power law with exponential cutoff. The continuous line is a median regression (Slope: -0.0074, SE: 0.0033, t-value: -2.216, p-value: 0.078)}  
 \end{figure}

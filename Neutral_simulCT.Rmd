@@ -801,10 +801,20 @@ ggsave("figs/RichvsRepl_T20000_64_256_meta_m_lin.png", width=6,height=6,units="i
 
 ```{r calcThetaI, eval=F,echo=F,message=T,warning=T}
 
-alfa <- 2.081069
-d <- round(mean_power(alfa),2)
-m_from_dispersalDistance(mean_power(alfa),side)
+# From the paper of F. May Moving beyond abundance distributions: neutral theory and spatial patterns in a tropical forest
+#
+side <- 2236
+m_from_dispersalDistance(10,side,3000)
+m_from_dispersalDistance(100,side,3000)
 
+
+alfa <- 2.081069
+side<- 256
+d <- round(mean_power(alfa),2)
+m_from_dispersalDistance(d,side,side*4)
+
+
+# Using the formula From the paper of Etienne 2011
 m   <-0.01
 neutral_ThetaI <-theta_from_dispMigration(d,m)
 m   <-0.001
@@ -1128,10 +1138,25 @@ save.image()
 ```
 
 
-## Calculation of the Suvival Time of the most abundant species (Species=1) and density for side=512 time=5000 uniform metacomunity   (NOT DONE)
+# Calculate the probability of the species spanning number
 
-Survival of 1 = P(t) ~ t ^-delta
-Number of 1 = N(t) ~ t^theta
+```{r spanningSpecies_clust_Side_64_meta_Time, eval=F,echo=F,message=T,warning=T}
 
-To do this the model should be non saturated !!!!!!!!!!!!!!!
+require(ggplot2)
+#
+# Spannig species number vs rho across ColonizationRate 
+#
+nsp <- 320
+alfa <-round(2.03897,5)
+tClusters <- Clusters %>% filter(SpanningSpecies>=1,MetaNsp==nsp,DispersalDistance==alfa,Side==256) %>% mutate(MetaType=factor(MetaType,labels=c("Logseries","Uniform"))) 
+k<-filter(rhoCritSide,MetaNsp==nsp,DispersalDistance==26.66,Side==256)
+k$MetaType <- factor(k$MetaType,labels=c("Logseries","Uniform"))
 
+#
+# Spanning vs rho
+#
+ggplot(tClusters, aes(x=ReplacementRate, y=SpanningSpecies)) + geom_point(alpha=.1) + theme_bw() + scale_x_log10() + stat_summary(fun.y=median,geom="line",colour=colp[1])+ facet_grid(ColonizationRate ~ MetaType,scales="free_y" )+xlab(bquote(rho)) + geom_vline(aes(xintercept=pcrit),k,colour=colp[6])
+
+#ggsave("figs/HvsRepl_T20000_64_256_meta_m.png", width=6,height=6,units="in",dpi=600)
+
+```

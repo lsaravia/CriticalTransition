@@ -580,3 +580,26 @@ binned abundance distributions are largely uninformative unless the visual fit i
 @Kefi2013 Early warning signals also precede non-catastrophic transitions
 
 Due to statistical limitations, a trend in a single indicator is likely to be insufficient to determine the proximity to a transition in real ecosystems (Biggs et  al. 2009). Therefore combining several indicators to confidently detect an approach- ing transition (Guttal and Jayaprakash 2009, Drake and Griffen 2010, Dakos et al. 2011), or using both time series and spatial information if available (Rietkerk et  al. 2004, Kéfi et  al. 2007, 2011) can be a promising way forward. Also combining early warning signals with predictions of mechanistic models may be helpful (Lenton 2011).
+
+-----------------
+@Aschehoug2015 Diversity Increases Indirect Interactions, Attenuates the Intensity of Competition, and Promotes Coexistence
+
+In a field experiment, we found that competition among native perennial plants in multispecies assemblages was far weaker than competition between those same species in pairwise arrangements and that indirect interactions appeared to weaken direct competitive effects
+
+-----------------
+@McGill2010a Towards a unification of unified theories of biodiversity
+
+Presumably if we can find the minimally sufficient set of rules such that the in papyro or in silico analyses match the in situ (field-based real world) analyses to accurately reproduce the macroecological patterns of biodiversity, we will have achieved a useful description of rules governing nature. This is the central goal of this paper.
+
+
+-----------------
+@Grilli2017 Feasibility and coexistence of large ecological communities
+
+We obtain that the mean of interaction strengths sets the behaviour of feasibility with the number of species. If the mean is negative (for example, in case of competition or predation with limited efficiency), the larger the system is, the smaller is the set of conditions leading to coexistence, while for positive mean (for example, in the case of mutualism) the converse is true.
+
+Here we have shown that the fraction of conditions compatible with coexistence is mainly determined by the number and the mean strength of interactions. In terms of network properties, the relevant quantity is the connectance, with other properties (for example, nestedness or degree distribution) having minimal effects. In particular, once the connectance and mean interaction strength are fixed, the matrices built using empirical mutualistic networks have feasibility domains very similar to that expected for the random case, as was also observed previously
+in a similar contex.
+
+The major role is played by corse-grained statistical properties of the interactions, such as connectance or the mean and variance of the interaction strengths.
+
+Consistently with earlier results 7,8 , this fact establishes a relationship between niche overlap and the range of conditions that lead to coexistence: greater niche overlap means a more restricted parameter range allowing for coexistence, irrespective of the details of the interactions.
