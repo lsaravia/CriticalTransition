@@ -2,31 +2,30 @@
 
 ## Appendix Tables 
 
-----------------------------------------
-               $\alpha$
-  $m$      (mean dist.)  $\theta$    $I$  
---------- ------------- ---------  -----
-    0.01    2.08 (13.3)     155.7  121.1
+-----------------------------------------------------
+ Spatial     $\alpha$                     Non-spatial
+  $m$      (mean dist.)   $\theta$    $I$     $m$ 
+--------- -------------- ---------  ----- -----------
+   0.01     2.08 (13.3)    155.7    121.1   0.0073   
 
-   0.001    2.08 (13.3)     113.8  97.3
+  0.001     2.08 (13.3)    113.8    97.34   0.0059   
 
-   0.0001   2.08 (13.3)     83.2   78.2
+  0.0001    2.08 (13.3)    83.21    78.22   0.0048   
 
-    0.01    2.04 (26.6)     561.2  342.5
+   0.01     2.04 (26.6)    561.2    342.5   0.0205   
 
-   0.001    2.04 (26.6)     410.3  275.2
+  0.001     2.04 (26.6)    410.3    275.2   0.0165   
 
-   0.0001   2.04 (26.6)     300.0  221.1
+  0.0001    2.04 (26.6)     300     221.1   0.0133   
 
-    0.01    2.02 (53.3)    2026.0  969.7
+   0.01     2.02 (53.3)    2026     969.7   0.0559   
 
-   0.001    2.02 (53.3)    1482.0  779.2
+  0.001     2.02 (53.3)    1482     779.2   0.0454   
 
-   0.0001   2.02 (53.3)    1083.0  626.1
-----------------------------------------
+  0.0001    2.02 (53.3)    1083     626.1   0.0368   
+----------------------------------------------------
 
-Table: Equivalence of spatially explicit parameters $m$ and $\alpha$ (Mean dispersal distance) with spatially implicit neutral parameters $\theta$ and $I$.  We used the formulas 1a & 1b from Etienne & Rosindell (2011) that assume a fat tailed dispersal kernel and $128^2$ individuals. The range of $\theta$ and $I$ obtained is similar to the one of Etienne & Rosindell (2011) paper.
-
+Table: Equivalence of spatially explicit parameters $m$ and $\alpha$ (Mean dispersal distance) with spatially implicit neutral parameters $\theta$, $I$ and  non-spatial $m$.  We used the formulas 1a & 1b from Etienne & Rosindell (2011) that assume a fat tailed dispersal kernel and $128^2$ individuals. 
 
 \newpage
 

@@ -563,13 +563,12 @@ rm(ssClusters,sClusters,tClusters,vClusters)
 # 
 vClusters <- TS1  %>% group_by(MetaNsp,Side,MetaType,ColonizationRate,DispersalDistance,ReplacementRate,posCP,Rep) %>% mutate( Mean_MaxClusterProp=mean(MaxClusterProp), Delta_MaxCluster=MaxClusterProp-Mean_MaxClusterProp,Mean_MaxClusterSpProp=mean(MaxClusterSpProp), Delta_MaxClusterSp=MaxClusterSpProp-Mean_MaxClusterSpProp) %>% summarise(varDelta_MaxCluster=var(Delta_MaxCluster),varDelta_MaxClusterSp=var(Delta_MaxClusterSp)) %>% ungroup() %>% mutate(posCP=factor(posCP,levels=c("Before","Near","After")))
 
-
-ggplot(vClusters, aes(x=posCP, y=varDelta_MaxCluster,colour=posCP)) + geom_boxplot() + geom_jitter(width=0.2)+ theme_bw() + facet_grid(~ MetaType) + ylab(expression(Variance~of~Delta~S[max]))+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) + scale_color_manual(values=colp,guide=FALSE) + xlab("")
-
-ggsave("figs/VarDeltaTSmaxvsCP_T20000_320_256_meta.png",  width=7,height=4,units="in",dpi=600)
+# Save to variable to graph in one panes with cowplot
+#
+p1 <-ggplot(vClusters, aes(x=posCP, y=varDelta_MaxCluster,colour=posCP)) + geom_boxplot() + geom_jitter(width=0.2)+ theme_bw() + facet_grid(~ MetaType) + ylab(expression(Variance~of~Delta~S[max]))+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) + scale_color_manual(values=colp,guide=FALSE) + xlab("")
+# ggsave("figs/VarDeltaTSmaxvsCP_T20000_320_256_meta.png",  width=7,height=4,units="in",dpi=600)
 
 ggplot(vClusters, aes(x=posCP, y=varDelta_MaxClusterSp,colour=posCP)) + geom_boxplot() + geom_jitter(width=0.2)+ theme_bw() + facet_grid(~ MetaType) + ylab(expression(Variance~of~Delta~RS[max]))+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) + scale_color_manual(values=colp,guide=FALSE) + xlab("")
-
 ggsave("figs/VarDeltaTRSmaxvsCP_T20000_320_256_meta.png",  width=7,height=4,units="in",dpi=600)
 
 
@@ -578,13 +577,21 @@ ggsave("figs/VarDeltaTRSmaxvsCP_T20000_320_256_meta.png",  width=7,height=4,unit
 #
 tClusters <- TS1  %>% group_by(MetaNsp,Side,MetaType,ColonizationRate,DispersalDistance,ReplacementRate,posCP,Rep) %>% mutate( Mean_MaxClusterProp=mean(MaxClusterProp), Delta_MaxCluster=MaxClusterProp-Mean_MaxClusterProp,Mean_MaxClusterSpProp=mean(MaxClusterSpProp), Delta_MaxClusterSp=MaxClusterSpProp-Mean_MaxClusterSpProp)
 
+
+#
+# Skewness estimation
 #
 require(fitdistrplus)
 sClusters <- tClusters %>% do(abs_skewness=(descdist(.$Delta_MaxCluster, discrete=FALSE, boot=500))$skewness)
 sClusters <- sClusters %>% mutate(abs_skewness=as.numeric(abs_skewness),posCP=factor(posCP,levels=c("Before","Near","After")))
 
-ggplot(sClusters, aes(x=posCP, y=abs_skewness,colour=posCP)) + geom_boxplot() + geom_jitter(width=0.2)+ theme_bw() + facet_grid(~ MetaType) + ylab(expression(Skewness~of~Delta~S[max]))+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) + scale_color_manual(values=colp,guide=FALSE) + xlab("") +  geom_hline(yintercept = 0,colour="darkgrey")
-ggsave("figs/SkewDeltaTSmaxvsCP_T20000_320_256_meta.png", width=7,height=4,units="in",dpi=600)
+#
+# Skewness of DeltaSmax 
+#
+# Save to variable to graph in one panes with cowplot
+#
+(p2 <- ggplot(sClusters, aes(x=posCP, y=abs_skewness,colour=posCP)) + geom_boxplot() + geom_jitter(width=0.2)+ theme_bw() + facet_grid(~ MetaType) + ylab(expression(Skewness~of~Delta~S[max]))+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) + scale_color_manual(values=colp,guide=FALSE) + xlab("") +  geom_hline(yintercept = 0,colour="darkgrey"))
+# ggsave("figs/SkewDeltaTSmaxvsCP_T20000_320_256_meta.png", width=7,height=4,units="in",dpi=600)
 
 
 #
@@ -596,6 +603,14 @@ sClusters <- sClusters %>% mutate(abs_skewness=as.numeric(abs_skewness),posCP=fa
 ggplot(sClusters, aes(x=posCP, y=abs_skewness,colour=posCP)) + geom_boxplot() + geom_jitter(width=0.2)+ theme_bw() + facet_grid(~ MetaType) + ylab(expression(Skewness~of~Delta~RS[max]))+  theme(axis.text.x=element_text(angle=-30, vjust=0.9,hjust = 0.1)) + scale_color_manual(values=colp,guide=FALSE) + xlab("") +  geom_hline(yintercept = 0,colour="darkgrey")
 ggsave("figs/SkewDeltaTRSmaxvsCP_T20000_320_256_meta.png", width=7,height=4,units="in",dpi=600)
 
+
+#
+# Join Fluctuations and Skewness of  DeltaSmax 
+#
+require(cowplot)
+p3 <- plot_grid(p1, p2, labels=c("A", "B"), ncol = 1, nrow = 2,align='v')
+
+save_plot("figs/VarSkewDeltaTSmaxvsCP_T20000_320_256_meta.png",p3,base_height = 6)
 
 ```
 

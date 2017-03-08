@@ -803,7 +803,7 @@ ggsave("figs/RichvsRepl_T20000_64_256_meta_m_lin.png", width=6,height=6,units="i
 
 # From the paper of F. May Moving beyond abundance distributions: neutral theory and spatial patterns in a tropical forest
 #
-side <- 2236
+side <- 707
 m_from_dispersalDistance(10,side,3000)
 m_from_dispersalDistance(100,side,3000)
 
@@ -838,9 +838,12 @@ neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
 m   <-0.0001
 neutral_ThetaI <- bind_rows(neutral_ThetaI,theta_from_dispMigration(d,m))
 
+neutral_ThetaI
+
+pandoc.table(neutral_ThetaI %>% mutate_if(is.numeric,round,digits=4))
 
 
-```
+<!-- ``` -->
 
 ## OLD --- Simulations to Time=5000 with side=100-512, dispersal=26 migration=0.0001596079 species=16 
 

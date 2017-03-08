@@ -595,6 +595,9 @@ Presumably if we can find the minimally sufficient set of rules such that the in
 -----------------
 @Grilli2017 Feasibility and coexistence of large ecological communities
 
+A particularly interesting feature of random matrices is that the distribution of their eigenvalues (determining local stability) is universal26. This means that local stability depends on just a few, coarse-grained properties of the matrix (that is, the number of species and the first few moments of the distribution of interaction strengths) and not on the finer details (for example, the particular distribution of interaction strengths)
+
+
 We obtain that the mean of interaction strengths sets the behaviour of feasibility with the number of species. If the mean is negative (for example, in case of competition or predation with limited efficiency), the larger the system is, the smaller is the set of conditions leading to coexistence, while for positive mean (for example, in the case of mutualism) the converse is true.
 
 Here we have shown that the fraction of conditions compatible with coexistence is mainly determined by the number and the mean strength of interactions. In terms of network properties, the relevant quantity is the connectance, with other properties (for example, nestedness or degree distribution) having minimal effects. In particular, once the connectance and mean interaction strength are fixed, the matrices built using empirical mutualistic networks have feasibility domains very similar to that expected for the random case, as was also observed previously
