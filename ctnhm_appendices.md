@@ -99,7 +99,7 @@ Metacomm.  Metacomm.  Mean           $m$  $\rho_c^\infty$  SE$\rho_c$
    320        U          26.66    0.0100       0.00640      0.00000
 ---------------------------------------------------------------------
 
-Table: Critical points $\rho_c^\infty$ for infinite lattices. Where the first column is the number of species in the metacommunity, the second  is the species abundance distribution of the metacommunity: *L* logseries and *U* uniform. *Mean Distance* is the mean dispersal distance,  $m$ is the migration parameter, and SE $p_c$ the standard error of the critical point.  
+Table: Critical points $\rho_c^\infty$ for infinite lattices. Where the first column is the number of species in the metacommunity, the second  is the species abundance distribution of the metacommunity: *L* logseries and *U* uniform. *Mean Distance* is the mean dispersal distance,  $m$ is the migration parameter, and SE $p_c$ the standard error of the critical point. If the value is 0.00000 it means that is less than five decimal places.  
 
 
 \newpage
