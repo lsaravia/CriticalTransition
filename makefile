@@ -4,7 +4,7 @@ OPTS= -H margins.sty --bibliography ctnhm.bib --csl=oikos.csl
 %.pdf: %.md 
 	pandoc  -H ctnhm_figures.sty -V geometry:margin=1.2cm  --latex-engine=xelatex $^ -o $@
 
-all: ctnhm.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf ctnhm.docx ctnhm_oikos_changes.pdf
+all: ctnhm.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf ctnhm.docx ctnhm_oikos_changes.pdf 
 
 
 SomeResults.pdf: SomeResults.md
@@ -39,11 +39,12 @@ ctnhm_appendices.pdf: ctnhm_appendices.md
 ctnhm_oikos_changes.pdf: ctnhm.md
 
 	git show 3bf59ed:ctnhm.md > oldms.md 
-	pandoc oldms.md -o oldms.tex $(OPTS)
-	pandoc ctnhm.md -o ctnhm.tex $(OPTS)
-	latexdiff -t CTRADITIONAL oldms.tex ctnhm.tex > ctnhm_oikos_changes.tex
-	pdflatex ctnhm_oikos_changes
-	rm {ctnhm_oikos_changes,oldms,ctnhm}.tex
-	rm oldms.md
+	pandoc oldms.md -o oldms.docx $(OPTS)
+	#pandoc ctnhm.md -o ctnhm.tex $(OPTS)
+	#latexdiff -t TRADITIONAL -f IDENTICAL oldms.tex ctnhm.tex > ctnhm_oikos_changes.tex
+	#pdflatex ctnhm_oikos_changes
+	#rm {ctnhm_oikos_changes,oldms,ctnhm}.tex
+	libreoffice --writer ctnhm.docx
+	rm oldms.*
 
 

@@ -1,5 +1,8 @@
 # Appendices 
 
+Saravia, L.A., Momo, F.R. 2017 Biodiversity collapse and early warning indicators in a spatial phase transition between neutral and niche communities. Oikos.
+
+
 ## Appendix Tables 
 
 -----------------------------------------------------
