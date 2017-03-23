@@ -38,7 +38,14 @@ The most common species in a neutral community should coincide with the most com
 ## Reviewers
 
 Fangliang He,
-Stephen P. Hubbell
+
+Stephen P. Hubbell 
+shubbell@eeb.ucla.edu
+UCLA Ecol & Evolutionary Bio
+
+Samir Suweis
+samir.suweis@pd.infn.it
+ Dipartimento di Fisica e Astronomia
 
 Carlos Martorell 
 martorell@ciencias.unam.mx ,

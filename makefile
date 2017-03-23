@@ -1,10 +1,10 @@
 OPTS= -H margins.sty --bibliography ctnhm.bib --csl=oikos.csl 
 
+all: ctnhm.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf ctnhm.docx oikos_reviews.pdf ctnhm_oikos_changes.docx
+
 
 %.pdf: %.md 
 	pandoc  -H ctnhm_figures.sty -V geometry:margin=1.2cm  --latex-engine=xelatex $^ -o $@
-
-all: ctnhm.pdf ctnhm_appendices.pdf SteadyStatePlots.pdf ctnhm.docx ctnhm_oikos_changes.pdf 
 
 
 SomeResults.pdf: SomeResults.md
@@ -36,7 +36,7 @@ ctnhm_appendices.pdf: ctnhm_appendices.md
 	pandoc -H ctnhm_appendices.sty ctnhm_appendices.md -o ctnhm_appendices.pdf 
 	evince ctnhm_appendices.pdf		
 
-ctnhm_oikos_changes.pdf: ctnhm.md
+ctnhm_oikos_changes.docx: ctnhm.md
 
 	git show 3bf59ed:ctnhm.md > oldms.md 
 	pandoc oldms.md -o oldms.docx $(OPTS)
